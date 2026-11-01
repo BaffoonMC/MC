@@ -57,7 +57,7 @@ final class Cute implements Listener {
         PROPELLER("Propeller Cap", "propeller_cap_f0", null, "Sprint and the propeller spins."),
         BP_HAT("Blood Priest's Hat", "blood_priest_hat", null, "Speed II in Moloch's realm, except while he's being fought."),
         SINNER("Sinner's Halo", "sinners_halo", null, "Too wicked for Heaven, too holy for the furnace. Cosmetic only."),
-        BALLOON("Balloon Bonnet", "balloon_bonnet", null, "Grand opening week, 2026. Cosmetic only."),
+        BALLOON("Balloon Bonnet", "balloon_bonnet", null, "Proof you were here when it all began."),
         LAB_COAT("Lab Coat", "lab_coat", null, "Lab outfit (1 of 3). Full outfit: potions last 50% longer.", EquipmentSlot.CHEST, 3),
         LAB_PANTS("Lab Trousers", "lab_pants", null, "Lab outfit (2 of 3). Full outfit: potions last 50% longer.", EquipmentSlot.LEGS, 2),
         LAB_SHOES("Lab Shoes", "lab_shoes", null, "Lab outfit (3 of 3). Full outfit: potions last 50% longer.", EquipmentSlot.FEET, 1);
