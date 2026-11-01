@@ -54,6 +54,57 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
 
     private static List<ItemStack> one(ItemStack it) { return List.of(it); }
 
+    /** Console only: writes every item in the registry to plugins/Soulbound/items.json (name, lore, colours, model) for the wiki. */
+    private String dumpItems() {
+        var plain = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText();
+        com.google.gson.JsonArray out = new com.google.gson.JsonArray();
+        for (Map.Entry<String, Item> e : items().entrySet()) {
+            if (!e.getValue().inMenu()) continue;
+            List<ItemStack> made;
+            try { made = e.getValue().make().get(); } catch (Throwable ex) { plugin.getLogger().warning("dump " + e.getKey() + ": " + ex); continue; }
+            if (made.isEmpty()) continue;
+            ItemStack it = made.get(0); ItemMeta m = it.getItemMeta();
+            com.google.gson.JsonObject o = new com.google.gson.JsonObject();
+            o.addProperty("id", e.getKey());
+            o.addProperty("category", e.getValue().category());
+            o.addProperty("material", it.getType().getKey().toString());
+            o.addProperty("count", made.size());
+            if (m != null) {
+                Component name = m.hasDisplayName() ? m.displayName() : (m.hasItemName() ? m.itemName() : null);
+                if (name != null) {
+                    o.addProperty("name", plain.serialize(name));
+                    if (name.color() != null) o.addProperty("color", name.color().asHexString());
+                }
+                com.google.gson.JsonArray lore = new com.google.gson.JsonArray();
+                if (m.hasLore()) for (Component l : m.lore()) {
+                    com.google.gson.JsonObject lo = new com.google.gson.JsonObject();
+                    lo.addProperty("text", plain.serialize(l));
+                    var c = l.color() != null ? l.color() : (l.children().isEmpty() ? null : l.children().get(0).color());
+                    if (c != null) lo.addProperty("color", c.asHexString());
+                    lo.addProperty("italic", l.decoration(TextDecoration.ITALIC) == TextDecoration.State.TRUE);
+                    lore.add(lo);
+                }
+                o.add("lore", lore);
+                if (m.hasItemModel()) o.addProperty("model", m.getItemModel().toString());
+                if (m.hasEquippable()) o.addProperty("slot", m.getEquippable().getSlot().name());
+                o.addProperty("maxStack", m.hasMaxStackSize() ? m.getMaxStackSize() : it.getType().getMaxStackSize());
+                if (m.hasEnchants()) o.addProperty("enchanted", true);
+                if (m instanceof org.bukkit.inventory.meta.PotionMeta pm && pm.hasColor()) o.addProperty("potionColor", String.format("#%06x", pm.getColor().asRGB()));
+                if (m.hasAttributeModifiers()) {
+                    com.google.gson.JsonArray at = new com.google.gson.JsonArray();
+                    m.getAttributeModifiers().forEach((attr, mod) -> at.add(attr.getKey().getKey() + " " + mod.getOperation().name() + " " + mod.getAmount()));
+                    o.add("attributes", at);
+                }
+            }
+            out.add(o);
+        }
+        java.io.File f = new java.io.File(plugin.getDataFolder(), "items.json");
+        try { plugin.getDataFolder().mkdirs(); java.nio.file.Files.writeString(f.toPath(), new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(out)); }
+        catch (java.io.IOException ex) { return "Couldn't write items.json: " + ex.getMessage(); }
+        return "Dumped " + out.size() + " items to " + f.getPath();
+    }
+
+
     Map<String, Item> items() {
         if (items != null) return items;
         Soulbound p = plugin;
@@ -276,6 +327,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
         switch (sub) {
             case "help" -> help(s, a.length > 1 ? a[1].toLowerCase(Locale.ROOT) : null);
             case "items" -> { if (s instanceof Player p) openMenu(p); else s.sendMessage("Players only."); }
+            case "dumpitems" -> { if (s instanceof Player) s.sendMessage("Console only."); else s.sendMessage(dumpItems()); }
             case "give" -> {
                 if (a.length < 2) { help(s, "give"); return true; }
                 Player t = Bukkit.getPlayerExact(a[1]);

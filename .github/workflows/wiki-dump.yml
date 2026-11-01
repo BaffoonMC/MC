@@ -1,0 +1,32 @@
+name: wiki-dump
+on:
+  push:
+    branches: [main]
+    paths: ['src/**', 'tools/**', '.github/workflows/wiki-dump.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '25' }
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew && ./gradlew build --no-daemon -q
+      - name: Paper server with the plugin
+        run: |
+          mkdir -p srv/plugins && cp build/libs/*.jar srv/plugins/
+          URL=$(curl -sS -A "baffoonmc-ci" https://fill.papermc.io/v3/projects/paper/versions/26.3/builds/latest | python3 -c 'import json,sys; print(json.load(sys.stdin)["downloads"]["server:default"]["url"])')
+          curl -sS -L -A "baffoonmc-ci" -o srv/server.jar "$URL"
+          echo eula=true > srv/eula.txt
+          printf 'online-mode=false\nlevel-type=minecraft\\:flat\n' > srv/server.properties
+      - run: cd srv && timeout 900 python3 ../tools/dump.py
+      - name: Publish items.json to the wiki-data branch
+        run: |
+          cp srv/plugins/Soulbound/items.json /tmp/items.json
+          git config user.name Claude && git config user.email noreply@anthropic.com
+          git fetch -q origin wiki-data || true
+          git checkout -q --orphan wiki-data-new && git rm -rqf . && cp /tmp/items.json items.json
+          git add items.json && git commit -qm "items.json for the wiki [skip ci]" && git push -f origin HEAD:wiki-data
