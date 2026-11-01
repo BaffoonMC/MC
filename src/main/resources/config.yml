@@ -1,0 +1,661 @@
+# Soulbound: capturing players with a lead.
+
+leash:
+  # The capture leash: crafted from 8 iron chains around a lead.
+  name: "Cultist's Shackles"
+  lore:
+    - "Bind the weak."
+  # true: only the capture leash can capture people (plain leads can't).
+  require-special: true
+  # The capture leash wears down by one use each time a capture ends, win or lose.
+  consume-on-capture: true
+  # How many captures a leash lasts.
+  uses: 5
+capture:
+  # A player at or below this much health can be captured. 6 = 3 hearts.
+  max-health: 6.0
+  # How long a capture lasts before the lead gives way, in seconds.
+  duration-seconds: 180
+  # The captor must keep the leash on them (anywhere in their inventory), or the captive goes free.
+  require-holding-lead: true
+  # Damage the captor can take (from anyone) before the lead breaks. 6 = 3 hearts.
+  captor-break-damage: 6.0
+  # Sneak presses the captive needs to struggle free.
+  struggle-presses: 30
+  # Only this many tugs a second count (an autoclicker gains nothing), and progress drains this fast when they stop.
+  struggle-max-per-second: 4
+  struggle-decay-per-second: 1.5
+  # Harder to struggle free when hooded, and when carried (multiplies struggle-presses).
+  struggle-hooded-multiplier: 1.5
+  struggle-carried-multiplier: 1.25
+  # Freshly bound captives can't struggle at all for this long, in seconds.
+  struggle-delay-seconds: 25
+  # The captive can wander this far before being pulled back, in blocks.
+  slack: 4.0
+  # Beyond this distance the captive is snapped to the captor.
+  snap-distance: 9.0
+  # After being freed, a player can't be captured again for this long, in seconds.
+  immunity-seconds: 180
+  # Slow the captor down while dragging someone.
+  captor-slowness: true
+  # Announce captures and escapes in chat to everyone.
+  broadcast: true
+  # The only commands a captive can use (everything else is blocked, so no /home or /spawn escapes).
+  captive-allowed-commands: [msg, tell, w, r, reply, me, report, helpop, rules, list, ping, moloch]
+  # Carrying a captive (sneak + right-click them): their body lies limp across your shoulders, a fireman's carry.
+  # pose: SLEEPING (still, limp), FALL_FLYING (stiff, face down) or SWIMMING (swim strokes).
+  # height/sideways/forward: where the body sits, in blocks from your feet (sideways = out to your left).
+  # turn: how the body is turned against your facing; 90 lies it across your shoulders, 0 or 180 front-to-back.
+  carry:
+    pose: SLEEPING
+    height: 1.42
+    sideways: 0.0
+    forward: -0.12
+    turn: 90
+  # Turns the shackles and the hood to face the right way (only change if they appear backwards).
+  prop-yaw-offset: 180
+
+safety:
+  # No captures at all in these worlds.
+  disabled-worlds: []
+  # No captures within this many blocks of a world's spawn point. 0 to turn off.
+  spawn-safe-radius: 48
+
+logout:
+  # What happens if the captive logs out: "kill" (they die where they stand) or "release".
+  captive: kill
+
+# ---------------------------------------------------------------- Moloch
+
+moloch:
+  # Lose to him (time runs out, or everyone in the hall falls) and every fighter gets Moloch's Curse for this many
+  # minutes (Weakness and Mining Fatigue, like the sacrificed). 0 = no penalty.
+  lose-curse-minutes: 15
+  # Moloch's realm, as the data pack names it.
+  world: "sacrifice:sacrifice"
+  # How many monsters can be around in his realm at once (vanilla is 70). Lower = fewer mobs. -1 = leave it alone.
+  monster-limit: 30
+  # The fire in the summit pit is at this height.
+  pit-y: 125
+  # The temple grounds (plaza and moat): a capture's timer stands still in here.
+  temple-radius: 110
+  # Moloch's drums beat from the fire pit for anyone at the top of the pyramid, louder and quicker the hungrier he is.
+  summit-drums: true
+  summit-radius: 10
+  # No mobs spawn by themselves in or on the pyramid, its plaza or its moat (within temple-radius). Moloch's own summons still come.
+  # In the realm nothing spawns on its own where block light is this or brighter (torches, lanterns...). 0 = off.
+  realm-spawn-light: 8
+  temple-no-natural-spawns: true
+  # ...and nothing spawns on its own within this many blocks of the temple (the realm's centre). 0 = only the temple grounds.
+  no-spawn-radius: 400
+  # The battle arena under the pyramid: where Moloch rises (the top of the dais).
+  arena:
+    x: 0.5
+    y: 62
+    z: 0.5
+    radius: 34
+
+sacrifice:
+  # How long the ritual in the fire pit takes. Hitting the captor hard enough in that time breaks it.
+  ritual-seconds: 10
+  # The same player can't be sacrificed again for this long.
+  # The same two players (either one as captor) can only sacrifice each other once in this many days. 0 = no limit.
+  pair-cooldown-days: 7
+  victim-cooldown-hours: 48
+  # Each player can sacrifice this many people a day.
+  per-captor-per-day: 1
+  # The whole server: this many sacrifices a day.
+  server-per-day: 3
+  # Players with less playtime than this can't sacrifice or be sacrificed.
+  new-player-hours: 5
+  # The captive has to be wearing the Hood before Moloch will take them.
+  require-hood: true
+  # The Skull of Mictlan for sacrificing someone: first (only the first time), every (each sacrifice) or never.
+  skull-reward: first
+  # What the captor gets. %player% is the captor.
+  captor-reward-commands:
+    - "effect give %player% minecraft:strength 600 1"
+    - "effect give %player% minecraft:regeneration 60 1"
+    - "xp add %player% 15 levels"
+
+curse:
+  # Moloch's Curse on the sacrificed: Weakness, Mining Fatigue and Hunger for this many minutes of play.
+  # Hunger's level (1 = Hunger I); 0 leaves it out.
+  hunger-level: 1
+  # While cursed, keepInventory doesn't apply to you: die and you drop everything.
+  drops-items: true
+  minutes: 45
+  # Slowness too, for the first part of it.
+  slowness-minutes: 10
+  # Curses stack, up to this.
+  max-minutes: 180
+
+hunger:
+  # Moloch's Hunger fills from 0 to 100. A full meter books his awakening.
+  per-sacrifice: 40
+  # Each offering point from the data pack adds this much (redstone dust 2, redstone block 18,
+  # enchanted golden apple 100, World Egg 300 points; so at 0.1: 0.2%, 1.8%, 10%, 30%).
+  per-offering-point: 0.1
+  datapack-objective: "sacrifice.offer"
+  # He only rises at one of these times, so everyone can be there. Days in English, 24-hour clock.
+  awakening-slots:
+    - "FRIDAY 20:00"
+    - "SATURDAY 20:00"
+  timezone: "Europe/London"
+  # At least this much warning before he rises.
+  min-notice-hours: 6
+
+  # When his hunger is full he rises this many minutes later (with countdown warnings). Set use-time-slots: true
+  # to book him for the next awakening slot above instead.
+  awaken-delay-minutes: 5
+  use-time-slots: false
+  # The Hunger bar: a boss bar filling towards his awakening. Always shown in his realm; whenever it grows
+  # (a sacrifice or offering) everyone online sees it fill up for a few seconds.
+  bar:
+    enabled: true
+    always-for-everyone: false
+    popup-seconds: 8
+# ---------------------------------------------------------------- portals
+
+# Moloch's realm takes the Nether's place. Keep allow-nether=true in server.properties so portals still work.
+portals:
+  enabled: true
+  # Every Overworld portal leads here: the start of the Sacred Way, facing the temple (yaw 0 = facing south, towards it).
+  # Stand somewhere in the realm and run /moloch setarrival to move it.
+  arrival:
+    x: 0.5
+    y: 61
+    z: -113.5
+    yaw: 0
+  # The Exit Gate, the only way back out, a few steps behind the arrival point. It's built by itself the first time
+  # the plugin starts with the realm loaded. /moloch gate rebuilds it; /moloch gate here moves it to where you stand.
+  gate:
+    x: 0
+    z: -120
+
+boss:
+  # Battle music: war drums and a chanting choir that follow the fight, for everyone within music-radius blocks of
+  # the arena. It plays on the Jukebox/Note Blocks volume slider and silences normal Minecraft music while it's on.
+  music: true
+  music-volume: 1.0
+  music-radius: 96
+  # Moloch is a warden this many times normal size.
+  scale: 3.0
+  # How long players have to bring him down.
+  fight-minutes: 30
+
+  # --- scaling to the crowd (live: recounted every half second from who's fighting in the arena) ---
+  # How much health he effectively has: base + this much per fighter in the hall. 1 fighter = 1500, 5 = 4300, 15 = 11300.
+  # (His real health is always the game's cap of 1024; the scaling works by shrinking the damage he takes.)
+  effective-health-base: 800
+  effective-health-per-fighter: 700
+  # His moves come quicker with bigger crowds (5% per extra fighter, up to 40% faster). Base gap between moves:
+  seconds-between-moves: 7
+  # He chases one fighter for about this long, then turns on someone else (everyone gets a turn).
+  focus-seconds: 10
+  # Cross of Fire (from 75% health down): he leaps back onto his dais, four burning lines mark the floor for
+  # warning-seconds, then four beams cross the hall (a + or an x). Standing in a line kills you - unless a pillar
+  # stands between you and him. Turn instant-kill off to deal 'damage' instead.
+  cross:
+    enabled: true
+    instant-kill: true
+    damage: 40
+    warning-seconds: 3.5
+    beam-width: 5
+    cooldown-seconds: 40
+
+  # --- his normal attacks ---
+  # His punch (the vanilla warden hits for 30, which one-shots most players).
+  melee-damage: 14
+  # His sonic boom is capped at this much damage, and sets players alight.
+  sonic-boom-max-damage: 8
+
+  # --- no bow cheese ---
+  # Arrows, tridents and other projectiles only ever do this share of their damage.
+  projectile-damage: 0.5
+  # The Soulfire Ward: for this long, projectiles burn up and he throws a fireball back at the shooter.
+  # It comes up every so often, and straight away when most of the recent damage is coming from bows.
+  ward-seconds: 8
+  ward-every-seconds: 35
+  # The chain pull: anyone further than this from him can be hooked and dragged in (always, after 10 seconds hanging back).
+  chain-range: 14
+
+  # --- his moves ---
+  # The fire ring: a roar and a smoke warning, then a blast around his feet.
+  fire-ring-damage: 6
+  fire-ring-radius: 8
+  # The bull charge: he marks his line on the floor, then charges down it. If he hits a pillar or wall he topples, stunned.
+  charge-damage: 12
+  stun-seconds: 5
+  # A crash only knocks him down this often (0-1), and never again within the cooldown. Otherwise he shakes it off.
+  stun-chance: 0.35
+  stun-cooldown-seconds: 45
+  # Demons: while he's alive, burning phantoms swoop down from above the hall every so often.
+  demons: false
+  demon-every-seconds: 20
+  # How many can be alive at once (plus one for every two fighters, never more than 12).
+  demon-max: 6
+  stun-damage-multiplier: 2.0
+  # The leap (from 75%): a red ring marks where he'll land, then he slams down.
+  slam-damage: 12
+  slam-radius: 6
+  # The grab: he snatches the nearest player (within reach) up onto his head and squeezes them, then hurls them across
+  # the hall. Everyone else dealing this much damage per fighter while he holds them makes him drop them instead.
+  grab-hold-seconds: 3
+  grab-squeeze-damage: 1.5
+  grab-throw-damage: 2
+  grab-break-damage-per-fighter: 30
+  # Furnace breath (from 75%): a cone of fire that sweeps after its target. Damage every half second inside it.
+  breath-damage: 3
+  breath-range: 14
+
+  # --- the turning points ---
+  # 75%: his champions, piglin brutes in gold armour with golden axes. While any live he takes only this share of damage.
+  champions: 2
+  champions-per-extra-fighter: 0.5
+  champions-max: 8
+  champion-health: 60
+  champion-shield: 0.4
+  # 50%: he screams, giving everyone in the arena Nausea and Weakness (0 turns Weakness off). Fire starts to rain.
+  scream-at: 0.5
+  scream-nausea-seconds: 11
+  scream-weakness-seconds: 6
+  # 25%: he crashes to the floor for a while: he can't be hurt, heals this share of his health, and drains everyone's hunger to zero.
+  collapse-at: 0.25
+  collapse-seconds: 8
+  collapse-heal: 0.15
+  # After the collapse he's in a frenzy: this much faster, with his moves coming quicker.
+  frenzy-speed: 1.3
+
+  # When he dies he shudders, cracks, crashes over onto the floor and bursts apart, spilling this much experience.
+  death-xp: 1500
+  # He roams the whole hall (he's too big to leave it). Only if he somehow ends up this far from the dais is he put back.
+  emergency-return-distance: 70
+  # Moloch never gives players Darkness (the warden's blinding pulse).
+  no-darkness: true
+  # Everyone who dealt at least this much damage is rewarded. %player% is each one.
+  reward-min-damage: 10
+  reward-commands:
+    - "give %player% minecraft:diamond 4"
+    - "xp add %player% 30 levels"
+  # Extra for whoever dealt the most damage.
+  top-damage-commands:
+    - "give %player% minecraft:netherite_ingot 1"
+    - "give %player% minecraft:enchanted_golden_apple 1"
+  # His spoils: the top damage dealer takes Moloch's Horns (cosmetic) and a piece of his Regalia (armour a little better
+  # than netherite); everyone else who fought has this chance at a piece. Wear all four and you grow this much bigger.
+  regalia-drop-chance: 0.35
+  regalia-set-scale: 1.5
+  # If he survives the fight: a blood moon over his realm AND the main world for this long. Monsters that spawn
+  # under it get Strength I and Speed I, and wear full gold armour trimmed in red (it never drops).
+  blood-moon-hours: 1
+  # Hold the main world at midnight for the whole blood moon (and nobody can sleep it away).
+  blood-moon-always-night: true
+  blood-moon-overworld: true
+  # Monsters under the blood moon wear scavenged armour (leather, chainmail, copper, gold, iron, red-trimmed) and the
+  # brawlers carry spears (or swords and axes).
+  blood-moon-gold-armour: true
+  # Witches riding phantoms swoop over players out in the open (the Overworld). Chance every 20 seconds, per player.
+  blood-moon-witch-riders:
+    chance: 0.25
+    max-per-player: 2
+    # They only come for players standing in this much block light or less (0 = only in the dark, like monsters).
+    max-light: 0
+  # Other worlds (by folder name) the blood moon covers too, e.g. [world_nether]
+  blood-moon-worlds: []
+  # Under the blood moon cows, pigs, sheep, chickens, goats, rabbits and horses hunt nearby players.
+  blood-moon-angry-animals: true
+  angry-animal-range: 10
+  # How close (in blocks, body to body) they have to get to bite.
+  angry-animal-reach: 0.8
+  # Damage per bite (chickens and rabbits do half, horses half again more). 3 = one and a half hearts.
+  angry-animal-damage: 3
+  angry-animal-speed: 1.5
+  angry-animal-babies: false
+  # No other wardens: ancient-city shriekers summon nothing. /summon still works for testing.
+  block-other-wardens: true
+
+  # --- optional servant waves before he rises (off) ---
+  waves-enabled: false
+  waves:
+    - "vindicator:4"
+    - "blaze:3,magma_cube:2"
+    - "wither_skeleton:3,piglin_brute:1"
+  wave-names:
+    - "The cult rises"
+    - "Fire from below"
+    - "His honour guard"
+  wave-break-seconds: 6
+  wave-extra-per-player: 0.5
+  phase-2-wave: "vindicator:3"
+  phase-3-wave: "wither_skeleton:2,blaze:2"
+
+# ---------------------------------------------------------------- God
+
+# The ender dragon becomes God: a giant old man with a grey beard in white robes, flying where the dragon flies.
+# (The resource pack makes the dragon invisible, gives it an old man's voice and names it God.)
+# Moloch's biggest blows (the leap slam up close, a charge that hits you, being thrown) crack the edges of your screen
+# (needs the server resource pack). At most one crack every cooldown-seconds; another big hit within stack-seconds
+# cracks it a little further, up to max-stage (1-3). The cracks hold for hold-seconds, then fade.
+# Once Moloch is summoned his hall is sealed: anyone can walk in, nobody walks (or pearls) out until the fight ends.
+# The first stretch of each doorway pulls players into the hall, and attacks from outside the seal do nothing.
+seal:
+  # Once Moloch rises, only those already in his hall may be in it (no walking in, /tpa, pearls or /home). Give
+  # latecomers this many seconds to get in first. Flying and elytra never work in the hall while he's awake.
+  join-grace-seconds: 0
+  enabled: true
+  # Players who die in the hall rise as ghosts (spectators held in the hall). They come back to life where they
+  # float when the fight ends, or can give up with /moloch leave (a clickable button) and go back to their spawn.
+  ghosts: true
+  # Items dropped in the hall during the fight don't burn or despawn until it's over (then the normal 5 minutes).
+  keep-drops: true
+  # If someone has died and nobody living is left in the hall for this long, Moloch wins. 0 = off.
+  all-fallen-seconds: 60
+  # Block all commands for players inside the sealed hall (and ghosts) during the fight. Admins are exempt.
+  block-commands: true
+  # Commands still allowed there (first word, or a longer prefix like "msg"). "moloch" keeps /moloch leave working.
+  allowed-commands:
+    - moloch
+
+screen-crack:
+  enabled: true
+  cooldown-seconds: 8
+  stack-seconds: 25
+  max-stage: 3
+  hold-seconds: 1.5
+# Quantum Humanity: fused at a smithing table (netherite ingot + a Regalia piece + the matching Vestments piece).
+# shell: true adds a bulky 3D power-armour shell riding on the wearer (off by default for the sleek suit); nudge the
+# numbers if it sits too high or low, or faces backwards (0 or 180).
+quantum:
+  shell: false
+  shell-height: -0.675
+  shell-sneak-height: -0.57
+  shell-yaw-offset: 180
+# The Horned Gjermundbu (/moloch gear <player> viking): blow a goat horn while wearing it for the War Cry.
+viking:
+  war-cry-seconds: 60
+  war-cry-cooldown-seconds: 300
+# The Gate of Heaven: every stronghold's End portal room is rebuilt in marble and gold the first time it loads, with God's
+# face carved into the far wall, holy-water fonts and an angel spawner in place of the silverfish. Frames and portal untouched.
+stronghold:
+  gate-of-heaven: true
+  angel-spawner: true
+# Shulkers in the End are Archangels: one hit from their bolt kills (creative and spectator are safe).
+archangels:
+  instant-kill: true
+  # false: the bolt also burns away your totems, so nothing saves you.
+  totems-save: true
+  # Once God has been defeated, Archangels also roam the Heavens as ghasts. Their fireballs smite like the bolts.
+  ghasts:
+    enabled: true
+    # Only out on the Heaven islands, this far (in blocks) from the centre of the End.
+    min-distance-from-centre: 800
+    # At most this many around any one player.
+    max-per-player: 2
+    # Every 5 seconds, the chance one more appears near a player out there (0.2 = roughly one every 25 seconds until the max).
+    chance: 0.2
+    # How far they can spot a player (they need a clear line of sight).
+    sight: 48
+    # Their health (40 = 20 hearts; a normal ghast has 10).
+    health: 40
+    # Damage they take from their own fireball knocked back at them (10 = 5 hearts, so four hits). -1 = vanilla instant kill.
+    returned-fireball-damage: 10
+    # Chance a ghast killed by a player in the End drops a Dried Angel (a dried ghast; soak it to raise a Happy Angel).
+    dried-angel-chance: 0.15
+# God's main island in the End is preserved: nobody without soulbound.island.build (ops have it) can break or place
+# blocks there, and explosions, endermen, fire, pistons and outside liquids can't change it either.
+island:
+  protect: true
+  # How far from the centre of the End the protection reaches.
+  radius: 200
+  # Take the iron cages off the crystal towers so every crystal can be shot from the ground.
+  remove-crystal-cages: true
+  # Players may pour and scoop up water on the island (lava and everything else stays blocked).
+  allow-water: true
+  # When God wakes for a fight, every bucket of water players poured on the island is taken away.
+  clear-water-on-wake: true
+  # Blocks anyone may still mine on the island.
+  breakable: [IRON_BARS]
+# Beds on the outer Heaven islands don't explode: you doze off and God carries you back to his island.
+heaven-beds:
+  carried-home: true
+god:
+  # The angels he calls down on the fifth and sixth days: how many at most, how big, their health and their hit.
+  angels:
+    max: 7
+    scale: 3
+    health: 36
+    damage: 7
+  # God's battle music (organ, choir, bells), on the Jukebox/Note Blocks volume slider, for everyone near the main island.
+  music: true
+  music-volume: 1.0
+  music-radius: 220
+  # The main island: only players this close to the centre of the End hear God speak and see His titles.
+  main-island-radius: 200
+  enabled: true
+  # swim: he swims through the sky face-first, like an elytra glider (Minecraft can hide him for a moment at some angles,
+  # because his body reaches far outside his hitbox). upright: he floats upright like an old man drifting along.
+  pose: swim
+  # Build the Pearly Gates by the End's arrival platform and God's Throne around the exit portal (once per End world).
+  # /moloch heaven rebuilds them.
+  build-heaven: true
+  # The Battle Ring (a level marble arena out to the candles), the throne's plinth and the Peacekeeper's pavilion.
+  battle-ring: true
+  # The Vestments of the Ancient: God's armour. The top fighter always gets a piece, everyone else who fought has this chance.
+  vestments-drop-chance: 0.15
+  # Wear all four: you shrink to this size (and get Haste I).
+  vestments-set-scale: 0.9
+  # The exit portal's bedrock podium becomes a white marble and gold font (End crystals still go on its four gold sockets).
+  holy-font: true
+  # How big he is (1 = player size, up to 16).
+  scale: 9
+  # Hits on his body pass this share of their damage on to the dragon (the dragon's own hitbox still takes full hits).
+  body-hit-damage: 0.5
+  # Where the figure sits relative to the dragon, as shares of his height. Adjust if he looks out of place.
+  flying-offset-back: 0.45
+  flying-offset-down: 0.15
+  standing-offset-down: 0.3
+  # His fight is the Seven Days of Creation. Day 1 he sits on his throne, peaceful and chatty, until someone strikes
+  # him or answers "I've come to challenge you"; each later day starts as his health drops by another seventh.
+  # Smite (a pillar of light, then lightning: move!) runs through every day.
+  smite-damage: 8
+  # Rapture (from the second day): how long the players he lifts keep rising.
+  rapture-seconds: 6
+  # Leave him alone this long and he heals: mid-fight only back to the start of the Day he's on (the Days never go
+  # backwards), and all the way once everyone has left and he's back on his throne. 0 = never heals.
+  heal-after-seconds: 40
+  # How fast: this share of his health per second (0.05 = full in 20 seconds).
+  heal-per-second: 0.05
+  # He scales to the crowd like Moloch: he lasts as if he had this much health, plus more per fighter in the End
+  # (1 player: 1600, 5: 4400, 10: 7900). His damage also grows 15% each day of the week.
+  effective-health-base: 900
+  effective-health-per-fighter: 700
+  # On the seventh day he keeps dozing off for this long (double damage); this much damage wakes him up furious.
+  nap-seconds: 7
+  nap-wake-damage: 30
+  # Judgement (day 5): anyone who sacrificed a player to Moloch within this many days glows red as a SINNER,
+  # is smitten first and takes double smite damage.
+  sinner-days: 7
+  # Nudge him up or down on his throne if he doesn't sit right (in blocks).
+  throne-sit-offset: 0.0
+
+# The Black Filament: a parasite worm worn on the chest (/moloch gear <player> parasite).
+parasite:
+  # Effect levels while it's latched on (0 = none).
+  regeneration: 2
+  hunger: 2
+  # Curse of Binding: it can't be taken off (applies to newly made ones).
+  binding: true
+  # When your hunger bar hits empty, it lets go and drops into your inventory.
+  lets-go-when-starving: true
+  # The Cortex Leech (/moloch gear <player> cortex), worn on the head: Night Vision while worn.
+  cortex-night-vision: true
+
+# Beef Tartare: raw beef + an egg in a crafting grid. Steak is 8 hunger and 12.8 saturation.
+tartare:
+  hunger: 8
+  saturation: 16.0
+
+# Heaven isn't built for bodies: off God's main island (out among the Seven Heavens) everyone floats and the islands
+# resist being dug. A visit is dreamy; living up there is tiring. The main island itself is left alone.
+heaven-air:
+  enabled: true
+  # How far from the centre of the End counts as God's main island (no effects there).
+  main-island-radius: 220
+  slow-falling: true
+  # 0 for none, 1 to 3 (3 is very strong: blocks break about 30 times slower).
+  mining-fatigue-level: 3
+  # Hunger from the thin air, every 2 seconds (4 = one food point). 0 = off.
+  thin-air-exhaustion: 0.0
+  # Wearing the Breath of Eden lifts both effects; set this true to keep Slow Falling on mask wearers.
+  mask-keeps-slow-falling: false
+
+# The Blood Priest (/moloch priest to place him, /moloch priest remove). He sells the abduction tools for gold.
+# Prices are in gold ingots; anything over 64 is asked in gold blocks instead.
+priest:
+  price:
+    hood: 6
+    cudgel: 10
+    shackles: 16
+    tartare: 2
+    # the Blood Priest's Hat, in Blood Emeralds (up to 64). Blood Emeralds: throw a villager head taken with the
+    # Spiked Cultist Axe into the summit fire pit; one a day per player.
+    hat-blood-emeralds: 64
+    # the Spiked Cultist Axe: gold blocks plus wither skeleton skulls (0 for none)
+    axe-gold-blocks: 16
+    axe-wither-skulls: 1
+    # Tumour Seeds: this many gold ingots for a handful of seeds
+    tumour-seeds-gold: 3
+    tumour-seeds-count: 4
+  # only offer the axe to players whose soul is Inhuman
+  axe-inhuman-only: false
+  # What he whispers when you buy each thing (one picked at random).
+  trade-lines:
+    hood:
+      - "Pull it tight. Their breathing sounds better muffled."
+    cudgel:
+      - "From behind. Always from behind. Let them wonder who it was."
+    shackles:
+      - "When they're dazed, close the iron. Wrists first. Then they're yours."
+    tartare:
+      - "Beef. Yes. Let's call it beef."
+      - "If it twitches, just keep chewing."
+    heart:
+      - "He won't let you back into His house after this. Good. It's cold up there."
+      - "His gates won't open for you now. Don't knock. He never answers anyway."
+      - "No more Heaven for you. Don't worry. The view from down here is warmer."
+  # He turns to watch the nearest player within this many blocks.
+  look-range: 16
+  # The first time a player sacrifices someone, he whispers this to them.
+  first-sacrifice-line: "Look at your hands. Now look at me. Now we're the same."
+  # Every sacrifice after that, one of these (picked at random). %player% = captor, %victim% = the sacrificed.
+  sacrifice-lines:
+    - "I've kept a lock of hair from every one of them. Want to see?"
+    - "Sleep well. If you hear chains in the night, don't check."
+    - "You'll dream about this. He'll be in the dream too."
+    - "Do you know why I'm called the Blood Priest? Because I did exactly what you just did. Many, many times."
+  # And everyone sees this. Leave it empty ("") to turn it off.
+  sacrifice-broadcast: "The Blood Priest smiles."
+
+# The Heart of Darkness (the Blood Priest sells it for the World Egg, once you've bought everything else he has).
+# Eating it makes you inhuman: monsters ignore you (unless you hit them), +2 hearts, Fire Resistance and Speed in
+# Moloch's realm, raw meat feeds and fills you, rotten flesh doesn't sicken you, other food makes you hungrier.
+# But animals, wolves, cats and iron golems attack you, villagers flee (wear a Hood to trade, at higher prices;
+# zombie villagers trade with you freely), you can't sleep, and you can never enter the End.
+# /moloch inhuman <player> [off] to set or clear it by hand.
+inhuman:
+  extra-health: 6
+  animal-range: 10
+  animal-damage: 2
+  hooded-price-multiplier: 1.5
+  # Snow golems hunt the inhuman too; their snowballs do this much damage to them (and chill them).
+  snowball-damage: 1
+  # The sun burns them like the undead: daylight, open sky and a bare head. Anything worn on the head shades them.
+  sun-burns: true
+  # Raw meat (and Beef Tartare) feeds the inhuman this much on top of its normal value.
+  raw-meat-bonus-food: 3
+  raw-meat-bonus-saturation: 4.0
+  # Their food bar is the green one the Hunger effect shows (a hidden Hunger that makes them no hungrier).
+  green-hunger: true
+  # The inhuman see their own hearts bruised purple (the pack's hardcore hearts, sent only to them).
+  hearts:
+    enabled: true
+    # Reconnect a player straight away when they turn inhuman or are cured, so the hearts change at once.
+    # Needs accepts-transfers=true in server.properties. Off: the hearts change the next time they join.
+    reconnect: false
+
+# The Angel Engine (the Heart of Darkness, mended in gold). Eaten by the inhuman, it makes them human again; eaten by
+# anyone else it Graces them for good: undead take more damage from them, Heaven's Archangel ghasts leave them be (not
+# while God Himself is fighting), and a Second Wind of Regeneration I lifts them when they fall low.
+# Eating the Heart of Darkness takes Grace away. /sb player <player> grace [on|off] to set it by hand.
+grace:
+  undead-damage-multiplier: 1.2
+  # Extra max health the Graced carry while in Heaven (the End). 6 = three hearts; 0 turns it off.
+  heaven-extra-health: 6
+  # Second Wind: at or below this much health (6 = 3 hearts) you get Regeneration I for this long, once per cooldown.
+  second-wind-below: 6
+  second-wind-seconds: 5
+  second-wind-cooldown-seconds: 60
+
+# Moloch's realm: these structures never generate within min-distance blocks of the temple (new chunks only).
+realm-structures:
+  # No structure at all generates within this many blocks of the temple, except those listed under always-allowed.
+  clear-radius: 400
+  always-allowed:
+    - "sacrifice:sanctum_arena"
+    - "sacrifice:sanctum_shrine"
+  min-distance: 500
+  keep-away:
+    - "sacrifice:bloodaltar"
+    - "sacrifice:calf"
+    - "sacrifice:fortress"
+
+# Zephyrs: Heaven's breezes, roaming the outer islands (never within min-distance of the centre, nor during God's fight).
+# Their wind charge does 'damage' and lifts you with Levitation; Heaven's Slow Falling lets you back down.
+zephyrs:
+  enabled: true
+  min-distance-from-centre: 300
+  max-per-player: 1
+  # Chance every 5 seconds, per player out on the islands, that one more arrives (0.08: about one a minute).
+  chance: 0.08
+  health: 30
+  damage: 5
+  levitation-seconds: 3
+  levitation-level: 2
+
+# The four roads of Moloch's realm (out from the temple along both axes) are protected from bedrock to sky: no breaking,
+# placing, pouring, burning or blowing up, unless you have soulbound.realm.build (ops do). The battle hall is left alone.
+roads:
+  protect: true
+  # Blocks either side of the road's centre line.
+  half-width: 12
+  # From this far out from the centre (outside the battle hall)...
+  from: 35
+  # ...to this far (the roads end here).
+  length: 1200
+
+# The World Egg that appears after each defeat of God: the first player to click or hit it takes it into their
+# inventory (and earns Atlas), instead of it teleporting away. Only within this many blocks of the End's centre.
+world-egg:
+  radius: 40
+
+# The Peacekeeper: a great still vex by the Pearly Gates (/sb world peacekeeper). He sells the Breath of Eden, the
+# Angel Engine (which the inhuman can only get as a gift: they can't come up to Heaven), Levitation and gate frames.
+peacekeeper:
+  scale: 2.2
+  levitation-seconds: 20
+  gate-frames: 3
+  # Cloud Cotton seeds per trade (Heaven's crop: only grows in Heaven, on farmland)
+  cotton-seeds-count: 4
+  price:
+    breath-of-eden-tears: 2
+    heart-of-light-eggs: 1
+    levitation-diamonds: 10
+    gate-frames-tears: 1
+    cotton-seeds-diamonds: 2
+
+heaven:
+  # Outside the main island the sky is always clear midday, so God's night (and the dawn of each Day) is only seen there.
+  outer-islands-always-day: true
+  # The time they see (6000 = noon).
+  outer-islands-time: 6000

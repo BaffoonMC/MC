@@ -1,0 +1,40 @@
+name: Soulbound
+version: '${version}'
+main: net.soulbound.Soulbound
+api-version: '26.3'
+description: Capture, sacrifice and Moloch himself.
+authors: [BaffoonMC]
+softdepend: [PlaceholderAPI]
+commands:
+  soulbound:
+    description: Soulbound admin controls (/sb help), and /sb release to let your captive go.
+    usage: /sb <give|items|player|moloch|god|world|reload|release|help>
+    aliases: [sb]
+  moloch:
+    description: Moloch's state, and admin controls for his awakening.
+    usage: /moloch [leave|awaken|stop|hunger|curse|uncurse|gate|setarrival|reload]
+  bestiary:
+    description: Open the Bestiary, the book of everyone and everything in BaffoonMC.
+    usage: /bestiary
+  god:
+    description: Answer God when he asks why you're here.
+    usage: /god <challenge|lost|forgive|look>
+permissions:
+  soulbound.capture:
+    description: Can capture weakened players with a lead.
+    default: true
+  soulbound.immune:
+    description: Can never be captured.
+    default: op
+  soulbound.admin:
+    description: Can reload the config.
+    default: op
+  soulbound.bestiary.all:
+    description: Every Bestiary page is open, met or not.
+    default: op
+  soulbound.island.build:
+    description: Can build and break on God's main island in the End (everyone else can't).
+    default: op
+  soulbound.realm.build:
+    description: Can build and break on the four roads of Moloch's realm (everyone else can't).
+    default: op
