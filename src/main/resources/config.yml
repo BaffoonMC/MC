@@ -635,9 +635,19 @@ brimstone-cubes:
   health: 40
   # How much bigger than a normal sulfur cube (3: about three blocks across, room for a player inside).
   scale: 3.0
-  sight: 16
-  hop-speed: 0.55
-  hop-height: 0.55
+  # How far away it notices you.
+  sight: 24
+  # Hopping: it jumps again hop-interval-ticks after landing (20 ticks = 1 second), steering towards you in the air.
+  hop-speed: 0.7
+  hop-height: 0.5
+  hop-interval-ticks: 6
+  air-steer: 0.06
+  # Pouncing: within pounce-range it lunges low and fast at where you're running to (pounce-lead-ticks ahead).
+  pounce-range: 7
+  pounce-speed: 1.1
+  pounce-height: 0.42
+  pounce-lead-ticks: 8
+  pounce-cooldown-seconds: 2.5
   engulf-seconds: 3
   damage-per-second: 2
   spit-force: 1.6

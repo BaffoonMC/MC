@@ -92,7 +92,7 @@ final class BrimstoneCubes implements Listener {
         for (World w : plugin.getServer().getWorlds()) {
             if (w.getEnvironment() != World.Environment.THE_END) continue;
             for (SulfurCube s : w.getEntitiesByClass(SulfurCube.class))
-                if (is(s) && (!on || nobodyNear(s.getLocation(), 96)) && !holding(s)) s.remove();
+                if (is(s) && (!on || nobodyNear(s.getLocation(), 96)) && !holding(s)) { nextHop.remove(s.getUniqueId()); nextPounce.remove(s.getUniqueId()); resting.remove(s.getUniqueId()); s.remove(); }
             if (!on || (plugin.god() != null && plugin.god().fighting())) continue;
             double minR = c.getDouble("brimstone-cubes.min-distance-from-centre", 300);
             int max = c.getInt("brimstone-cubes.max-per-player", 1);
@@ -156,7 +156,7 @@ final class BrimstoneCubes implements Listener {
         FileConfiguration c = plugin.getConfig();
         tickHeld(c);
         if (now % 2 != 0) return;
-        double sight = c.getDouble("brimstone-cubes.sight", 16);
+        double sight = c.getDouble("brimstone-cubes.sight", 24);
         for (World w : plugin.getServer().getWorlds()) {
             if (w.getEnvironment() != World.Environment.THE_END) continue;
             for (SulfurCube s : w.getEntitiesByClass(SulfurCube.class)) {
@@ -169,17 +169,68 @@ final class BrimstoneCubes implements Listener {
                     engulf(s, target, c);
                     continue;
                 }
-                // otherwise hop after them, every second or so, when on the ground
-                if (now % 20 == (Math.abs(s.getEntityId()) % 10) * 2 && s.isOnGround()) {
-                    Vector to = target.getLocation().toVector().subtract(s.getLocation().toVector()).setY(0);
-                    if (to.lengthSquared() > 0.01) to.normalize();
-                    double speed = c.getDouble("brimstone-cubes.hop-speed", 0.55);
-                    s.setVelocity(to.multiply(speed).setY(c.getDouble("brimstone-cubes.hop-height", 0.55)));
-                    s.setRotation((float) Math.toDegrees(Math.atan2(-to.getX(), to.getZ())), 0);
-                    w.playSound(s.getLocation(), Sound.ENTITY_SLIME_JUMP, 0.8f, 0.6f);
-                }
+                chase(s, target, c, w);
             }
         }
+        if (now % 4 == 0) {
+            lastSeen.clear();
+            for (World w : plugin.getServer().getWorlds())
+                if (w.getEnvironment() == World.Environment.THE_END) for (Player p : w.getPlayers()) lastSeen.put(p.getUniqueId(), new Seen(p.getLocation().toVector(), now));
+        }
+    }
+
+    /** Cube -> tick it may next jump; cube -> tick it may next pounce. */
+    private final Map<UUID, Integer> nextHop = new HashMap<>(), nextPounce = new HashMap<>();
+
+    /**
+     * Agile hunting: it bounces again almost as soon as it lands, steers in the air towards you, and from close range
+     * it pounces - a long, flat lunge aimed at where you're about to be, not where you are.
+     */
+    private void chase(SulfurCube s, Player target, FileConfiguration c, World w) {
+        UUID id = s.getUniqueId();
+        Vector me = s.getLocation().toVector(), them = target.getLocation().toVector();
+        if (!s.isOnGround()) {
+            // air control: drift towards the target, up to a top speed
+            Vector v = s.getVelocity(), to = them.clone().subtract(me).setY(0);
+            if (to.lengthSquared() > 0.25) {
+                to.normalize().multiply(c.getDouble("brimstone-cubes.air-steer", 0.06));
+                double max = c.getDouble("brimstone-cubes.pounce-speed", 1.1);
+                Vector h = new Vector(v.getX() + to.getX(), 0, v.getZ() + to.getZ());
+                if (h.lengthSquared() > max * max) h.normalize().multiply(max);
+                s.setVelocity(new Vector(h.getX(), v.getY(), h.getZ()));
+            }
+            return;
+        }
+        if (nextHop.getOrDefault(id, 0) > now) return;
+        double dist = them.clone().subtract(me).setY(0).length();
+        boolean pounce = dist <= c.getDouble("brimstone-cubes.pounce-range", 7) && nextPounce.getOrDefault(id, 0) <= now;
+        Vector aim = them.clone();
+        if (pounce) aim.add(runVelocity(target).multiply(c.getDouble("brimstone-cubes.pounce-lead-ticks", 8)));
+        Vector to = aim.subtract(me).setY(0);
+        if (to.lengthSquared() > 0.01) to.normalize();
+        if (pounce) {
+            s.setVelocity(to.clone().multiply(c.getDouble("brimstone-cubes.pounce-speed", 1.1)).setY(c.getDouble("brimstone-cubes.pounce-height", 0.42)));
+            nextPounce.put(id, now + (int) (c.getDouble("brimstone-cubes.pounce-cooldown-seconds", 2.5) * 20));
+            w.playSound(s.getLocation(), Sound.ENTITY_SLIME_ATTACK, 1.2f, 0.5f);
+            w.spawnParticle(Particle.DUST_PLUME, s.getLocation().add(0, 0.3, 0), 12, 0.8, 0.1, 0.8, 0.02);
+        } else {
+            s.setVelocity(to.clone().multiply(c.getDouble("brimstone-cubes.hop-speed", 0.7)).setY(c.getDouble("brimstone-cubes.hop-height", 0.5)));
+            w.playSound(s.getLocation(), Sound.ENTITY_SLIME_JUMP, 0.8f, 0.6f);
+        }
+        s.setRotation((float) Math.toDegrees(Math.atan2(-to.getX(), to.getZ())), 0);
+        nextHop.put(id, now + c.getInt("brimstone-cubes.hop-interval-ticks", 6));
+    }
+
+    /** A player's real running speed (blocks per tick), from where they were a moment ago: the server's own velocity for players is mostly zero. */
+    private record Seen(Vector at, int tick) {}
+    private final Map<UUID, Seen> lastSeen = new HashMap<>();
+
+    private Vector runVelocity(Player p) {
+        Seen was = lastSeen.get(p.getUniqueId());
+        Vector at = p.getLocation().toVector();
+        if (was == null || now - was.tick <= 0 || now - was.tick > 10) return new Vector();
+        Vector v = at.subtract(was.at).setY(0).multiply(1.0 / (now - was.tick));
+        return v.lengthSquared() > 1 ? v.normalize() : v;   // ignore teleports
     }
 
     private static boolean prey(Player p) {
@@ -305,6 +356,8 @@ final class BrimstoneCubes implements Listener {
     public void onDeath(EntityDeathEvent e) {
         if (!is(e.getEntity())) return;
         resting.remove(e.getEntity().getUniqueId());
+        nextHop.remove(e.getEntity().getUniqueId());
+        nextPounce.remove(e.getEntity().getUniqueId());
         held.entrySet().removeIf(en -> {
             if (!en.getValue().cube.equals(e.getEntity().getUniqueId())) return false;
             Player p = plugin.getServer().getPlayer(en.getKey());
