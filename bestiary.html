@@ -72,6 +72,9 @@ nav.index a:hover { border-color: var(--acc); }
 .sb-brand span { color: var(--realm) }
 .sb-link { font: 13px/1 var(--pixel); color: var(--ink-dim); text-decoration: none; border: 1px solid var(--rule); padding: 9px 12px; background: var(--stone) }
 .sb-link:hover { color: var(--ink); border-color: var(--heaven) }
+.sb-links { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end }
+.sb-link { border-radius: 999px }
+.sb-link[aria-current] { color: #0d1218; background: var(--heaven); border-color: var(--heaven) }
 footer { padding-block: 40px 0; color: var(--ink-dim); font-size: 14px; max-width: 66ch; }
 
 @media (max-width: 720px) {
@@ -84,7 +87,7 @@ footer { padding-block: 40px 0; color: var(--ink-dim); font-size: 14px; max-widt
 html { scroll-behavior: smooth; }
 </style>
 <div class="wrap">
-  <nav class="sitebar" aria-label="Site"><a class="sb-brand" href="./">Baffoon<span>MC</span></a><a class="sb-link" href="./">← Back to the store</a></nav>
+  <nav class="sitebar" aria-label="Site"><a class="sb-brand" href="./">Baffoon<span>MC</span></a><span class="sb-links"><a class="sb-link" href="./">Store</a><a class="sb-link" href="bestiary.html" aria-current="page">Bestiary</a><a class="sb-link" href="items.html">Items</a></span></nav>
   <header class="masthead">
     <p class="kicker">BaffoonMC wiki</p>
     <h1>BaffoonMC Bestiary</h1>
