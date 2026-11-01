@@ -143,6 +143,20 @@ section.block { padding-block: 64px 8px }
 .rules-short em { font-style: normal; color: var(--gold) }
 .rules-note { text-align: center; color: var(--muted); font-size: 14.5px; margin: 8px 0 0 }
 @media (max-width: 720px) { .rules { grid-template-columns: 1fr } .rules-short { font-size: 21px } }
+.packs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px }
+.pack { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; position: relative }
+.pack.star { border: 2px solid var(--gold) }
+.pack .badge { position: absolute; top: 14px; right: 14px; background: var(--gold); color: #2a1e00; font: 800 12px/1 var(--body); padding: 6px 10px; border-radius: 999px }
+.pack .plot { height: 92px; display: flex; align-items: flex-end }
+.pack .plot i { display: block; border-radius: 5px; background: repeating-linear-gradient(45deg, rgba(255,255,255,.07) 0 4px, transparent 4px 8px), #5c8f3a; box-shadow: 0 0 0 3px #2f5a1c inset, 0 8px 18px -10px rgba(0,0,0,.7) }
+.pack h3 { font: 700 24px/1.1 var(--display); color: var(--navy); margin: 0 }
+.pack .n { font: 700 30px/1 var(--display); color: var(--gold) }
+.pack .n small { font: 700 14px/1 var(--body); color: var(--muted); margin-left: 4px }
+.pack .size { color: var(--muted); font-size: 14px; margin-top: -6px }
+.pack .price-row { margin-top: auto }
+.packs-note { color: var(--muted); font-size: 14.5px; margin: 14px 0 0 }
+@media (max-width: 980px) { .packs { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+@media (max-width: 520px) { .packs { grid-template-columns: 1fr } }
 .ranks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: stretch }
 .rank { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 24px; display: flex; flex-direction: column; gap: 16px; position: relative; box-shadow: 0 14px 34px -24px rgba(0,0,0,.6); overflow: hidden }
 .rank.star { border: 2px solid var(--gold); box-shadow: 0 18px 44px -22px rgba(242,192,74,.45) }
@@ -308,7 +322,7 @@ aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 1
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#top">Baffoon<span>MC</span></a>
-    <nav class="links"><a href="#ranks">Ranks</a><a href="#hats">Hats</a><a href="#custom">Custom hat</a><a href="#goal">Server goal</a><a href="#rules">Rules</a><a href="bestiary.html">Bestiary</a><a href="items.html">Items</a></nav>
+    <nav class="links"><a href="#ranks">Ranks</a><a href="#claims">Claims</a><a href="#hats">Hats</a><a href="#custom">Custom hat</a><a href="#goal">Server goal</a><a href="#rules">Rules</a><a href="bestiary.html">Bestiary</a><a href="items.html">Items</a></nav>
     <div class="spacer"></div>
     <div class="online off" id="online"><i></i><span>Server status</span></div>
     <button class="basket-btn" id="openBasket" aria-label="Open basket">Basket <b id="count">0</b></button>
@@ -495,6 +509,12 @@ const DEMO = [
     { id: 2, name: "Patron", price: 28.88, cls: "patron", tag: "Fly in your claim", perks: ["Everything in Supporter", "9,000 bonus claim blocks (about 95×95)", "Fly inside your own claim", "4 extra homes", "/craft portable crafting table", "Use colours in chat", "Red [Patron] tag"] },
     { id: 3, name: "Chosen", price: 49.88, cls: "chosen", tag: "Blessed by both", star: true, perks: ["Everything in Patron", "Fly anywhere (off during combat)", "20,000 bonus claim blocks (about 140×140)", "6 extra homes", "/hdb: the player heads menu", "/ec ender chest anywhere", "Reserved slot when the server is full", "Ember particle trail", "Includes the Sinner's Halo", "Gold [Chosen] tag"] }
   ]},
+  { id: "claims", name: "Claim Blocks", kind: "claims", packages: [
+    { id: 50, name: "Small Plot", price: 2.88, blocks: 1000 },
+    { id: 51, name: "Homestead", price: 6.88, blocks: 3000 },
+    { id: 52, name: "Estate", price: 13.88, blocks: 7500 },
+    { id: 53, name: "Kingdom", price: 29.88, blocks: 20000, star: true }
+  ]},
   { id: "hats", name: "Hats", kind: "hats", packages: [
     { id: 30, name: "Sinner's Halo", icon: "sinners_halo_big", price: 4.88, feature: true, ribbon: "New · made for BaffoonMC", note: "Devil horns under a cracked halo, still smouldering where it broke. Too wicked for Heaven, too holy for the furnace. You can only get it here." },
     { id: 31, name: "The Cortex Leech", icon: "cortex_leech", price: 4.88, ribbon: "Animated", note: "It thinks your thoughts a moment before you do." },
@@ -543,6 +563,16 @@ function render() {
   for (const cat of catalogue) {
     cat.packages.forEach(p => byId[p.id] = p);
     if (cat.kind === "custom") { CUSTOM = { std: cat.packages[0], anim: cat.packages[1] || cat.packages[0] }; continue; }
+    if (cat.kind === "claims") {
+      const most = Math.max(...cat.packages.map(p => p.blocks || 0)) || 1;
+      out.push(`<section class="wrap block" id="claims"><div class="sec-head"><div><div class="eyebrow">Land · just claim blocks</div><h2>${esc(cat.name)}</h2><p>Need more land without a rank? Grab a pack. Use a golden shovel in game to claim it.</p></div></div><div class="packs">` +
+        cat.packages.map(p => { const n = p.blocks || 0, side = Math.round(Math.sqrt(n) / 5) * 5, px = Math.round(30 + 62 * Math.sqrt(n / most));
+          return `<article class="pack${p.star ? " star" : ""}">${p.star ? '<div class="badge">Best value</div>' : ""}<div class="plot"><i style="width:${px}px;height:${px}px"></i></div>
+          <h3>${esc(p.name)}</h3>${n ? `<div class="n">${n.toLocaleString("en-GB")}<small>blocks</small></div><div class="size">about ${side} × ${side}</div>` : `<div class="size">${p.description || ""}</div>`}
+          <div class="price-row"><div class="price">${money(p.price)}</div>${addBtn(p)}</div></article>`; }).join("") +
+        `</div><p class="packs-note">Packs stack: buy two Homesteads and you get 6,000 extra blocks. They add on top of any rank's bonus.</p></section>`);
+      continue;
+    }
     if (cat.kind === "ranks") {
       out.push(`<section class="wrap block" id="ranks"><div class="sec-head"><div><div class="eyebrow">Permanent · one payment</div><h2>${esc(cat.name)}</h2><p>Each rank includes everything below it. Perks are for comfort and looks, never for fights.</p></div></div><div class="ranks">` +
         cat.packages.map(p => `<article class="rank ${p.cls || ""} ${p.star ? "star" : ""}">${p.star ? '<div class="badge">Best value</div>' : ""}
@@ -688,7 +718,7 @@ async function loadLive() {
     const norm = s => slug(s).replace(/^the_/, "");
     const looks = {}; DEMO.forEach(c => c.packages.forEach(p => looks[norm(p.name)] = p));
     const fromTebex = cats.filter(c => c.packages && c.packages.length).map(c => {
-      const kind = /custom/i.test(c.name) ? "custom" : /rank/i.test(c.name) ? "ranks" : /hat/i.test(c.name) ? "hats" : "grid";
+      const kind = /custom/i.test(c.name) ? "custom" : /rank/i.test(c.name) ? "ranks" : /claim/i.test(c.name) ? "claims" : /hat/i.test(c.name) ? "hats" : "grid";
       return { id: c.id, name: c.name, kind, packages: c.packages.map((p, i) => {
         const d = looks[norm(p.name)] || {};
         return Object.assign({}, d, { id: p.id, name: p.name, price: p.total_price, description: p.description, image: p.image,
