@@ -102,6 +102,17 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-five-more", true);
             saveConfig();
         }
+        // one-off: the Judge's Wig and Star Stalker join a saved catalogue that already has the earlier additions
+        if (!getConfig().getBoolean("migrated.wardrobe-two-more", false)) {
+            List<String> cat = getConfig().getStringList("wardrobe.catalogue");
+            if (getConfig().isSet("wardrobe.catalogue") && cat.contains("smug_troll") && !cat.contains("judges_wig")) {
+                List<String> l = new java.util.ArrayList<>(cat);
+                l.addAll(List.of("judges_wig", "star_stalker"));
+                getConfig().set("wardrobe.catalogue", l);
+            }
+            getConfig().set("migrated.wardrobe-two-more", true);
+            saveConfig();
+        }
         // one-off: blood moons went from 24 hours to 1
         if (!getConfig().getBoolean("migrated.blood-moon-1h", false)) {
             if (getConfig().getInt("boss.blood-moon-hours", 24) == 24) getConfig().set("boss.blood-moon-hours", 1);
