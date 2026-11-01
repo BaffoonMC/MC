@@ -498,7 +498,7 @@ aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 1
   <div class="head"><h3>Your basket</h3><button class="x" id="closeBasket" aria-label="Close basket">✕</button></div>
   <div class="field">
     <label for="ign">Minecraft username</label>
-    <input id="ign" autocomplete="off" spellcheck="false" maxlength="16" placeholder="e.g. minecraftmurdere">
+    <input id="ign" autocomplete="off" spellcheck="false" maxlength="16" placeholder="e.g. QuietMoth">
     <small>Buying a gift? Put your friend's name here.</small>
   </div>
   <ul class="items" id="items"></ul>
@@ -846,7 +846,7 @@ async function loadStatus() {
   if (CONFIG.discord) $("#discord").href = CONFIG.discord; else $("#discord").hidden = true;
   if (live) for (const [id, p] of [["lTerms", "terms"], ["lPrivacy", "privacy"], ["lRefunds", "terms/checkout"]]) $("#" + id).href = "https://checkout.tebex.io/" + p;
   else ["lTerms", "lPrivacy", "lRefunds"].forEach(id => $("#" + id).removeAttribute("target"));
-  renderRecent([{ who: "minecraftmurdere", what: "Chosen", when: Date.now() - 2.4e6 }, { who: "AshWalker", what: "Hat Box", when: Date.now() - 1.1e7 }, { who: "TumourFarmer", what: "Blood Priest's Hat", when: Date.now() - 9e7 }]);
+  renderRecent([{ who: "CinderFox", what: "Chosen", when: Date.now() - 2.4e6 }, { who: "AshWalker", what: "Hat Box", when: Date.now() - 1.1e7 }, { who: "TumourFarmer", what: "Blood Priest's Hat", when: Date.now() - 9e7 }]);
   render(); loadLive(); loadStatus();
 })();
 </script>
