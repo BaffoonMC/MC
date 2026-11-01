@@ -44,4 +44,8 @@ jobs:
           echo "::notice title=add-package::$(echo "$R" | python3 -c 'import json,sys; d=json.load(sys.stdin); x=d.get("data",d); print({k: x.get(k) for k in ("total_price","currency","links","packages")} if isinstance(x,dict) else d)' 2>&1 | head -c 900)"
           A=$(curl -sS "https://headless.tebex.io/api/accounts/$T/baskets/$B/auth?returnUrl=https://store.playbaffoonmc.net/" | head -c 400)
           echo "::notice title=auth::$A"
+      - name: Sidebar modules (goal, recent payments)
+        run: |
+          T=1560v-3e98abbf684fe7d070513a6896f8e23dbe3ad840
+          echo "::notice title=sidebar::$(curl -sS "https://headless.tebex.io/api/accounts/$T/sidebar" | head -c 1500 | tr '\n' ' ')"
 
