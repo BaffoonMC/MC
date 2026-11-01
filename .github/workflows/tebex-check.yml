@@ -34,4 +34,14 @@ jobs:
           echo "::notice title=basket::$(echo "$R" | head -c 600 | tr '\n' ' ')"
           RAW=$(curl -sS "https://headless.tebex.io/api/accounts/$T" | head -c 900)
           echo "::notice title=account-raw::$RAW"
+      - name: Add Supporter to that basket and see if Tebex gives a checkout link
+        run: |
+          T=1560v-3e98abbf684fe7d070513a6896f8e23dbe3ad840
+          B=$(curl -sS -X POST "https://headless.tebex.io/api/accounts/$T/baskets" -H 'Content-Type: application/json' \
+            -d '{"username":"minecraftmurdere","complete_url":"https://store.playbaffoonmc.net/","cancel_url":"https://store.playbaffoonmc.net/","complete_auto_redirect":true}' | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["ident"])')
+          PID=$(curl -sS "https://headless.tebex.io/api/accounts/$T/categories?includePackages=1" | python3 -c 'import json,sys; d=json.load(sys.stdin)["data"]; print([p["id"] for c in d for p in c["packages"] if p["name"]=="Supporter"][0])')
+          R=$(curl -sS -X POST "https://headless.tebex.io/api/baskets/$B/packages" -H 'Content-Type: application/json' -d "{\"package_id\": $PID, \"quantity\": 1}")
+          echo "::notice title=add-package::$(echo "$R" | python3 -c 'import json,sys; d=json.load(sys.stdin); x=d.get("data",d); print({k: x.get(k) for k in ("total_price","currency","links","packages")} if isinstance(x,dict) else d)' 2>&1 | head -c 900)"
+          A=$(curl -sS "https://headless.tebex.io/api/accounts/$T/baskets/$B/auth?returnUrl=https://store.playbaffoonmc.net/" | head -c 400)
+          echo "::notice title=auth::$A"
 
