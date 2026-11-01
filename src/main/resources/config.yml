@@ -701,6 +701,7 @@ opening-gift:
   days: 7
   timezone: "Europe/London"
 
-# Tumour crops: rotten flesh always pushes one a stage; sugar only sometimes (0.25 = 1 in 4). Used up either way.
+# Tumour crops: the chance one piece of rotten flesh or sugar pushes a tumour a stage (0.25 = 1 in 4). Used up either way.
 tumour-crop:
+  rotten-flesh-chance: 0.25
   sugar-chance: 0.25

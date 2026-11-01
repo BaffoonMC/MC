@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Drawn over the tripwire states with attached=false (see {@link TripwireCrop}).
  *
  * A ripe mass drops 2-4 Tumours and 1-2 Tumour Seeds, an unripe one its seed. Rotten flesh on a crop pushes it a
- * stage; sugar does too, but only 1 time in 4 (tumour-crop.sugar-chance). Left ripe, a mass sometimes spreads to bare soul soil next to it, and you can hear it beating nearby.
+ * stage 1 time in 4, and so does sugar (tumour-crop in config.yml). Left ripe, a mass sometimes spreads to bare soul soil next to it, and you can hear it beating nearby.
  */
 final class TumourCrop extends TripwireCrop {
     private final NamespacedKey seedKey, tumourKey;
@@ -89,10 +89,11 @@ final class TumourCrop extends TripwireCrop {
 
     @Override
     double fertiliseChance(ItemStack it) {
-        return it.getType() == Material.SUGAR ? Math.max(0, Math.min(1, plugin.getConfig().getDouble("tumour-crop.sugar-chance", 0.25))) : 1.0;
+        String k = it.getType() == Material.SUGAR ? "tumour-crop.sugar-chance" : "tumour-crop.rotten-flesh-chance";
+        return Math.max(0, Math.min(1, plugin.getConfig().getDouble(k, 0.25)));
     }
 
-    /** it ate the sugar but didn't grow */
+    /** it ate it but didn't grow */
     @Override
     void fed(Block b) {
         b.getWorld().spawnParticle(Particle.BLOCK, b.getLocation().add(.5, .3, .5), 5, .2, .1, .2, Material.NETHER_WART_BLOCK.createBlockData());
