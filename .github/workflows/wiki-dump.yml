@@ -20,6 +20,7 @@ jobs:
           mkdir -p srv/plugins && cp build/libs/*.jar srv/plugins/
           URL=$(curl -sS -A "baffoonmc-ci" https://fill.papermc.io/v3/projects/paper/versions/26.3/builds/latest | python3 -c 'import json,sys; print(json.load(sys.stdin)["downloads"]["server:default"]["url"])')
           curl -sS -L -A "baffoonmc-ci" -o srv/server.jar "$URL"
+          curl -sS -L -A "baffoonmc-ci" -o srv/plugins/GriefPrevention.jar https://github.com/GriefPrevention/GriefPrevention/releases/latest/download/GriefPrevention.jar || true
           echo eula=true > srv/eula.txt
           printf 'online-mode=false\nlevel-type=minecraft\\:flat\n' > srv/server.properties
       - run: cd srv && timeout 900 python3 ../tools/dump.py

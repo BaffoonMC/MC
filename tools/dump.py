@@ -9,7 +9,17 @@ def wait_for(pat, t):
         except queue.Empty: continue
         print(l, end="")
         if re.search(pat, l): return l
+hooks = []
+def wait_for(pat, t, keep=hooks):
+    end = time.time() + t
+    while time.time() < end:
+        try: l = q.get(timeout=1)
+        except queue.Empty: continue
+        print(l, end="")
+        if "God's island" in l or "GriefPrevention" in l and ("Enabling" in l or "rror" in l): keep.append(l.strip()[-240:])
+        if re.search(pat, l): return l
 print("ready:", wait_for(r"Done \(", 900))
+print("::notice title=island-claims::" + (" | ".join(hooks)[:3500] or "nothing logged"))
 p.stdin.write("sb dumpitems\n"); p.stdin.flush()
 print("dump:", wait_for(r"Dumped|Couldn't|nknown", 120))
 p.stdin.write("forceload add 0 0\n"); p.stdin.flush(); time.sleep(3)

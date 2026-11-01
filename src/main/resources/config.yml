@@ -408,6 +408,8 @@ island:
   protect: true
   # How far from the centre of the End the protection reaches.
   radius: 200
+  # GriefPrevention claims can't touch the island (claims out in the Seven Heavens are fine; soulbound.island.build can).
+  no-claims: true
   # Take the iron cages off the crystal towers so every crystal can be shot from the ground.
   remove-crystal-cages: true
   # Players may pour and scoop up water on the island (lava and everything else stays blocked).

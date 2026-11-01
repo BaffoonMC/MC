@@ -241,6 +241,7 @@ public final class Soulbound extends JavaPlugin {
         archangels = new Archangels(this);
         pm.registerEvents(archangels, this);
         archangels.start();
+        new IslandClaims(this).start();
         island = new IslandGuard(this);
         pm.registerEvents(island, this);
         island.start();
