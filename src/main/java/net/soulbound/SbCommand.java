@@ -382,7 +382,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                         } else { s.sendMessage(bad("From the console: /sb world brimstone <world> <x> <y> <z>")); return true; }
                         var cube = plugin.brimstone().summon(at);
                         s.sendMessage(ok("A Brimstone Cube oozes out."));
-                        Bukkit.getScheduler().runTaskLater(plugin, () -> { if (cube.isValid()) s.sendMessage(ok(plugin.brimstone().describe(cube))); }, 2L);
+                        Bukkit.getScheduler().runTaskLater(plugin, () -> s.sendMessage(ok(plugin.brimstone().describe(cube) + (cube.isValid() ? "" : " (not loaded here)"))), 2L);
                     }
                     default -> help(s, "world");
                 }
