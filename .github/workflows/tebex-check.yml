@@ -1,0 +1,27 @@
+name: tebex-check
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/tebex-check.yml']
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: What the store's public API shows
+        run: |
+          T=1560v-3e98abbf684fe7d070513a6896f8e23dbe3ad840
+          curl -sS "https://headless.tebex.io/api/accounts/$T" -o acct.json
+          curl -sS "https://headless.tebex.io/api/accounts/$T/categories?includePackages=1" -o cats.json
+          python3 - <<'PY'
+          import json
+          a = json.load(open('acct.json')).get('data', {})
+          print("::notice title=store::name=%s currency=%s disabled=%s" % (a.get('name'), a.get('currency'), a.get('disabled')))
+          c = json.load(open('cats.json')).get('data', [])
+          lines = []
+          for cat in c:
+              lines.append("[%s] %s (parent=%s, %d packages)" % (cat.get('id'), cat.get('name'), (cat.get('parent') or {}).get('name') if isinstance(cat.get('parent'), dict) else cat.get('parent'), len(cat.get('packages') or [])))
+              for p in cat.get('packages') or []:
+                  lines.append("   - %s | %s %s | type=%s" % (p.get('name'), p.get('total_price'), p.get('currency'), p.get('type')))
+          print("::notice title=categories::" + " %0A ".join(lines)[:3800])
+          PY
