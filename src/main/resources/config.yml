@@ -700,3 +700,7 @@ opening-gift:
   start: "2026-11-06"
   days: 7
   timezone: "Europe/London"
+
+# Tumour crops: rotten flesh always pushes one a stage; sugar only sometimes (0.25 = 1 in 4). Used up either way.
+tumour-crop:
+  sugar-chance: 0.25

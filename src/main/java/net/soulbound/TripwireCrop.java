@@ -78,6 +78,10 @@ abstract class TripwireCrop implements Listener {
     /** the item that pushes it a stage when used on it (rotten flesh, bone meal...) */
     abstract boolean isFertiliser(ItemStack it);
     abstract void fertilised(Block b);
+    /** the chance this fertiliser pushes the crop a stage (it's used up either way) */
+    double fertiliseChance(ItemStack it) { return 1.0; }
+    /** fed, but it didn't grow this time */
+    void fed(Block b) {}
     abstract void planted(Block b);
     /** drops for a ripe crop (an unripe one gives back one seed) */
     abstract void dropRipe(Block b, Location at);
@@ -273,9 +277,10 @@ abstract class TripwireCrop implements Listener {
             e.setCancelled(true);
             if (!tracked(b)) of(b.getChunk()).put(pack(b), st);
             if (st < RIPE) {
-                set(b, st + 1);
+                boolean grew = java.util.concurrent.ThreadLocalRandom.current().nextDouble() < fertiliseChance(hand);
+                if (grew) set(b, st + 1);
                 if (p.getGameMode() != org.bukkit.GameMode.CREATIVE) hand.setAmount(hand.getAmount() - 1);
-                fertilised(b);
+                if (grew) fertilised(b); else fed(b);
             }
             return;
         }
