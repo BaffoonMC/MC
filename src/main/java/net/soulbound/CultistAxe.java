@@ -50,6 +50,8 @@ import java.util.concurrent.ThreadLocalRandom;
  * - Executioner: +25% damage to anything below 30% health.
  * - Headhunter: beheading a player makes the killer glow for 2 minutes; milk won't wash it off.
  * - The axe counts the heads it has taken; at 10, 25 and 50 its texture gets bloodier.
+ * - Only Inhumans can wield it. In a human's hands it won't cut anything: no damage, no blocks, no stripping logs.
+ *   Humans can still carry, steal, sell or hand it on.
  */
 final class CultistAxe implements Listener {
     static final String NAME = "Spiked Cultist Axe";
@@ -111,6 +113,8 @@ final class CultistAxe implements Listener {
         m.lore(List.of(
                 Component.text("Moloch takes what it cuts.", NamedTextColor.DARK_RED).decoration(TextDecoration.ITALIC, true),
                 Component.empty(),
+                Component.text("Only Inhumans can wield it.", NamedTextColor.DARK_PURPLE).decoration(TextDecoration.ITALIC, false),
+                Component.empty(),
                 Component.text("Beheading: ", NamedTextColor.RED).append(Component.text("kills with it take the head.", NamedTextColor.GRAY)).decoration(TextDecoration.ITALIC, false),
                 Component.text("Executioner: ", NamedTextColor.RED).append(Component.text("+25% damage below 30% health.", NamedTextColor.GRAY)).decoration(TextDecoration.ITALIC, false),
                 Component.text("Headhunter: ", NamedTextColor.RED).append(Component.text("beheading a player marks you for 2 minutes.", NamedTextColor.GRAY)).decoration(TextDecoration.ITALIC, false),
@@ -131,6 +135,56 @@ final class CultistAxe implements Listener {
     String adminGive(Player to) {
         for (ItemStack left : to.getInventory().addItem(item()).values()) to.getWorld().dropItem(to.getLocation(), left);
         return "Gave " + to.getName() + " the " + NAME + ".";
+    }
+
+    // ---------------------------------------------------------------- Inhumans only
+
+    private boolean wielder(Player p) {
+        return p.getGameMode() == org.bukkit.GameMode.CREATIVE || (plugin.inhuman() != null && plugin.inhuman().is(p));
+    }
+
+    private void refuse(Player p) {
+        p.sendActionBar(Component.text("The axe won't cut for a human hand.", NamedTextColor.DARK_RED));
+        p.playSound(p.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.6f, 0.6f);
+    }
+
+    /** A human swinging it hits nothing. Runs first, so beheading and Executioner never see the blow. */
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onHumanSwing(EntityDamageByEntityEvent e) {
+        if (!(e.getDamager() instanceof Player p)) return;
+        if (e.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK && e.getCause() != EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) return;
+        if (!is(p.getInventory().getItemInMainHand()) || wielder(p)) return;
+        e.setCancelled(true);
+        refuse(p);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onHumanChop(org.bukkit.event.block.BlockBreakEvent e) {
+        Player p = e.getPlayer();
+        if (!is(p.getInventory().getItemInMainHand()) || wielder(p)) return;
+        e.setCancelled(true);
+        refuse(p);
+    }
+
+    /** No stripping logs, scraping copper or the like. */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onHumanUse(org.bukkit.event.player.PlayerInteractEvent e) {
+        if (e.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK || e.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) return;
+        Player p = e.getPlayer();
+        if (!is(p.getInventory().getItemInMainHand()) || wielder(p)) return;
+        e.setUseItemInHand(org.bukkit.event.Event.Result.DENY);
+    }
+
+    /** Older axes pick up the new line in their tooltip when held. */
+    @EventHandler(ignoreCancelled = true)
+    public void onHold(org.bukkit.event.player.PlayerItemHeldEvent e) {
+        ItemStack it = e.getPlayer().getInventory().getItem(e.getNewSlot());
+        if (!is(it)) return;
+        ItemMeta m = it.getItemMeta();
+        var plain = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText();
+        if (m.lore() != null && m.lore().stream().anyMatch(l -> plain.serialize(l).contains("Only Inhumans"))) return;
+        dress(m);
+        it.setItemMeta(m);
     }
 
     // ---------------------------------------------------------------- Executioner
