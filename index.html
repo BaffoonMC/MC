@@ -121,6 +121,22 @@ section.block { padding-block: 64px 8px }
 .claim .who { font: 800 13px/1.2 var(--body); color: var(--c); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px }
 .claim .size { color: var(--muted); font-size: 13.5px; margin-top: 4px }
 @media (max-width: 720px) { .claim-row { grid-template-columns: 1fr } }
+.rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px }
+.rulecard { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 22px 24px }
+.rulecard h3 { font: 700 28px/1 var(--display); margin: 0 0 14px }
+.rulecard.yes { border-top: 4px solid var(--good) } .rulecard.yes h3 { color: var(--good) }
+.rulecard.no { border-top: 4px solid var(--red) } .rulecard.no h3 { color: var(--red) }
+.rulecard ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px }
+.rulecard li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start }
+.rulecard li::before { font: 800 18px/24px var(--body); text-align: center; border-radius: 8px }
+.rulecard.yes li::before { content: "\2713"; color: var(--good); background: rgba(76,199,119,.12) }
+.rulecard.no li::before { content: "\2715"; color: var(--red); background: rgba(255,75,62,.12) }
+.rulecard b { color: var(--navy); display: block }
+.rulecard span { color: var(--muted); font-size: 15px }
+.rules-short { margin-top: 20px; text-align: center; font: 700 26px/1.2 var(--display); color: var(--navy) }
+.rules-short em { font-style: normal; color: var(--gold) }
+.rules-note { text-align: center; color: var(--muted); font-size: 14.5px; margin: 8px 0 0 }
+@media (max-width: 720px) { .rules { grid-template-columns: 1fr } .rules-short { font-size: 21px } }
 .ranks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: stretch }
 .rank { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 24px; display: flex; flex-direction: column; gap: 16px; position: relative; box-shadow: 0 14px 34px -24px rgba(0,0,0,.6); overflow: hidden }
 .rank.star { border: 2px solid var(--gold); box-shadow: 0 18px 44px -22px rgba(242,192,74,.45) }
@@ -286,7 +302,7 @@ aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 1
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#top">Baffoon<span>MC</span></a>
-    <nav class="links"><a href="#ranks">Ranks</a><a href="#hats">Hats</a><a href="#custom">Custom hat</a><a href="#goal">Server goal</a><a href="bestiary.html">Bestiary</a><a href="items.html">Items</a></nav>
+    <nav class="links"><a href="#ranks">Ranks</a><a href="#hats">Hats</a><a href="#custom">Custom hat</a><a href="#goal">Server goal</a><a href="#rules">Rules</a><a href="bestiary.html">Bestiary</a><a href="items.html">Items</a></nav>
     <div class="spacer"></div>
     <div class="online off" id="online"><i></i><span>Server status</span></div>
     <button class="basket-btn" id="openBasket" aria-label="Open basket">Basket <b id="count">0</b></button>
@@ -390,12 +406,32 @@ aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 1
       <div class="sample" id="recentNote">Example entries: real supporters appear once the store is live.</div>
     </div>
   </div>
+  <section class="wrap block" id="rules">
+    <div class="sec-head"><div><div class="eyebrow">Before you play</div><h2>Server rules</h2><p>BaffoonMC is a dark, cutthroat server. Almost anything goes in the game. People still get respect.</p></div></div>
+    <div class="rules">
+      <div class="rulecard yes"><h3>Allowed</h3><ul>
+        <li><div><b>PvP, anywhere</b><span>Fight anyone, any time. Watch your back.</span></div></li>
+        <li><div><b>Stealing</b><span>Take from any chest you can get into, loot what people drop, pick a lock with a Thief Key.</span></div></li>
+        <li><div><b>Kidnapping</b><span>Hood, cudgel and shackles are part of the game. So is escaping.</span></div></li>
+        <li><div><b>Deception</b><span>Lies, betrayals, fake alliances and sneaky trades. Trust carefully.</span></div></li>
+      </ul></div>
+      <div class="rulecard no"><h3>Not allowed</h3><ul>
+        <li><div><b>Griefing</b><span>Don't destroy, burn, flood or deface anyone's builds. Take what's inside, leave the build standing.</span></div></li>
+        <li><div><b>Personal attacks</b><span>No insults about someone's race, religion, gender, sexuality, disability, looks, family or real life. Roast the play, not the person.</span></div></li>
+        <li><div><b>Real-life harm</b><span>No threats, no sharing anyone's personal details, nothing that follows someone outside the game.</span></div></li>
+        <li><div><b>Cheating</b><span>No hacked clients, X-ray, duping or abusing bugs. Found one? Report it.</span></div></li>
+        <li><div><b>Being unreasonable</b><span>No spawn-camping, and don't hound the same player over and over. Win, then move on.</span></div></li>
+      </ul></div>
+    </div>
+    <p class="rules-short">Steal the loot, not the build. <em>Roast the play, not the person.</em></p>
+    <p class="rules-note">Staff have the final say. Breaking a rule can mean a warning, a temporary ban or a permanent one.</p>
+  </section>
 </main>
 
 <footer>
   <div class="wrap">
     <div class="row">
-      <a href="#ranks">Ranks</a><a href="#hats">Hats</a><a href="#how">How it works</a><a href="bestiary.html">Bestiary</a><a href="items.html">Items</a>
+      <a href="#ranks">Ranks</a><a href="#hats">Hats</a><a href="#how">How it works</a><a href="#rules">Rules</a><a href="bestiary.html">Bestiary</a><a href="items.html">Items</a>
       <a id="lTerms" href="#" target="_blank" rel="noopener">Terms</a><a id="lPrivacy" href="#" target="_blank" rel="noopener">Privacy</a><a id="lRefunds" href="#" target="_blank" rel="noopener">Refunds</a>
     </div>
     <p class="legal">BaffoonMC is not an official Minecraft product and is not approved by or associated with Mojang or Microsoft. All purchases are cosmetic or convenience only and give no competitive advantage.</p>
