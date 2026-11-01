@@ -133,6 +133,12 @@ section.block { padding-block: 64px 8px }
 .rulecard.no li::before { content: "\2715"; color: var(--red); background: rgba(255,75,62,.12) }
 .rulecard b { color: var(--navy); display: block }
 .rulecard span { color: var(--muted); font-size: 15px }
+.rulecard.art { grid-column: 1 / -1; border-top: 4px solid var(--gold) } .rulecard.art h3 { color: var(--gold) }
+.rulecard.art ul { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px }
+.rulecard.art li.ok::before { content: "\2713"; color: var(--good); background: rgba(76,199,119,.12) }
+.rulecard.art li.bad::before { content: "\2715"; color: var(--red); background: rgba(255,75,62,.12) }
+.rulecard.art li.ask::before { content: "?"; color: var(--gold); background: rgba(242,192,74,.14) }
+@media (max-width: 720px) { .rulecard.art ul { grid-template-columns: 1fr } }
 .rules-short { margin-top: 20px; text-align: center; font: 700 26px/1.2 var(--display); color: var(--navy) }
 .rules-short em { font-style: normal; color: var(--gold) }
 .rules-note { text-align: center; color: var(--muted); font-size: 14.5px; margin: 8px 0 0 }
@@ -421,6 +427,11 @@ aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 1
         <li><div><b>Real-life harm</b><span>No threats, no sharing anyone's personal details, nothing that follows someone outside the game.</span></div></li>
         <li><div><b>Cheating</b><span>No hacked clients, X-ray, duping or abusing bugs. Found one? Report it.</span></div></li>
         <li><div><b>Being unreasonable</b><span>No spawn-camping, and don't hound the same player over and over. Win, then move on.</span></div></li>
+      </ul></div>
+      <div class="rulecard art"><h3>Builds, art and skins</h3><ul>
+        <li class="ok"><div><b>Cheeky is fine</b><span>Raunchy jokes, suggestive statues and innuendo are part of the fun.</span></div></li>
+        <li class="bad"><div><b>Explicit isn't</b><span>No pornographic builds, map art, pixel art, banners, signs, books or skins. It gets removed.</span></div></li>
+        <li class="ask"><div><b>Not sure? Ask first</b><span>Planning art, a statue or anything borderline? Run it past a staff member before you build.</span></div></li>
       </ul></div>
     </div>
     <p class="rules-short">Steal the loot, not the build. <em>Roast the play, not the person.</em></p>
