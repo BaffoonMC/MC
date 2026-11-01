@@ -25,3 +25,13 @@ jobs:
                   lines.append("   - %s | %s %s | type=%s" % (p.get('name'), p.get('total_price'), p.get('currency'), p.get('type')))
           print("::notice title=categories::" + " %0A ".join(lines)[:3800])
           PY
+      - name: Can a basket be made (what checkout would do)?
+        run: |
+          T=1560v-3e98abbf684fe7d070513a6896f8e23dbe3ad840
+          R=$(curl -sS -X POST "https://headless.tebex.io/api/accounts/$T/baskets" -H 'Content-Type: application/json' \
+            -d '{"username":"minecraftmurdere","complete_url":"https://store.playbaffoonmc.net/","cancel_url":"https://store.playbaffoonmc.net/","complete_auto_redirect":true}')
+          echo "$R" | head -c 600
+          echo "::notice title=basket::$(echo "$R" | head -c 600 | tr '\n' ' ')"
+          RAW=$(curl -sS "https://headless.tebex.io/api/accounts/$T" | head -c 900)
+          echo "::notice title=account-raw::$RAW"
+
