@@ -171,6 +171,8 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
         // parasites
         m.put("black_filament", new Item("Parasites", () -> one(p.parasite().create())));
         m.put("cortex_leech", new Item("Parasites", () -> one(p.parasite().crown())));
+        // the store's Hat Token: spent in /wardrobe
+        m.put("hat_token", new Item("Store", () -> one(p.wardrobe().token(1))));
         items = m;
         return m;
     }

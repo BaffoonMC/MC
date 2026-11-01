@@ -16,6 +16,10 @@ commands:
   bestiary:
     description: Open the Bestiary, the book of everyone and everything in BaffoonMC.
     usage: /bestiary
+  wardrobe:
+    description: Your Hat Wardrobe. Store hats, put them on, unlock new ones with Hat Tokens, and sell them to other players.
+    usage: /wardrobe [sell <player> <price>|accept|decline|tokens]
+    aliases: [hats]
   god:
     description: Answer God when he asks why you're here.
     usage: /god <challenge|lost|forgive|look>

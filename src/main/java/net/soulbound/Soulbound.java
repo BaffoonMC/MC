@@ -60,6 +60,7 @@ public final class Soulbound extends JavaPlugin {
     private Zephyrs zephyrs;
     private BrimstoneCubes brimstone;
     private SulfurStrawberry sulfurStrawberry;
+    private HatWardrobe wardrobe;
     private Peacekeeper peacekeeper;
     private IslandGuard island;
     private ScreenCrack cracks;
@@ -284,8 +285,12 @@ public final class Soulbound extends JavaPlugin {
         pm.registerEvents(peacekeeper, this);
         peacekeeper.start();
         pm.registerEvents(grace, this);
+        wardrobe = new HatWardrobe(this);
+        pm.registerEvents(wardrobe, this);
+        if (getCommand("wardrobe") != null) { getCommand("wardrobe").setExecutor(wardrobe); getCommand("wardrobe").setTabCompleter(wardrobe); }
         SbCommand sb = new SbCommand(this);
         pm.registerEvents(sb, this);
+        wardrobe.useRegistry(sb::items);
         if (getCommand("soulbound") != null) { getCommand("soulbound").setExecutor(sb); getCommand("soulbound").setTabCompleter(sb); }
         pm.registerEvents(new Listener() {
             @EventHandler public void onJoin(PlayerJoinEvent e) { leash.unlockFor(e.getPlayer()); }
@@ -372,6 +377,7 @@ public final class Soulbound extends JavaPlugin {
     Zephyrs zephyrs() { return zephyrs; }
     BrimstoneCubes brimstone() { return brimstone; }
     SulfurStrawberry sulfurStrawberry() { return sulfurStrawberry; }
+    HatWardrobe wardrobe() { return wardrobe; }
     Peacekeeper peacekeeper() { return peacekeeper; }
     IslandGuard island() { return island; }
     CaptureManager captures() { return captures; }

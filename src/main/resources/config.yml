@@ -729,3 +729,14 @@ creative-world:
   swap-inventories: auto
   allowed-commands: [spawn, home, homes, sethome, delhome, tpa, tpahere, tpaccept, tpyes, tpdeny, tpno, tpacancel, back, warp, warps,
     msg, tell, w, r, reply, me, rules, list, help, ping, hat, nick]
+
+# The Hat Wardrobe (/wardrobe or /hats): store hats, wear them, unlock new ones with Hat Tokens, sell them to players.
+# Store package command for one token:  sb give {username} hat_token     (three: sb give {username} hat_token 3)
+wardrobe:
+  # The hats one token can unlock (ids from /sb items).
+  catalogue: [sinners_halo, cortex_leech, wizard_hat, crocodile_mask, baroque, flower_crown, bunny_ears]
+  max-hats: 135
+  # /wardrobe sell <player> <price>: what the price is paid in, and how long the buyer has to click [Buy].
+  sell-currency: DIAMOND
+  offer-seconds: 60
+  store-url: store.playbaffoonmc.net
