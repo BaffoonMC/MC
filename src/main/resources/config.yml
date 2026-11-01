@@ -648,6 +648,8 @@ brimstone-cubes:
   pounce-height: 0.42
   pounce-lead-ticks: 8
   pounce-cooldown-seconds: 2.5
+  # Which way its face points while it chases you, in degrees (set 0 if it ever looks backwards).
+  face-offset: 180
   engulf-seconds: 3
   damage-per-second: 2
   spit-force: 1.6

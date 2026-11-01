@@ -189,6 +189,7 @@ final class BrimstoneCubes implements Listener {
     private void chase(SulfurCube s, Player target, FileConfiguration c, World w) {
         UUID id = s.getUniqueId();
         Vector me = s.getLocation().toVector(), them = target.getLocation().toVector();
+        face(s, them.clone().subtract(me), c);
         if (!s.isOnGround()) {
             // air control: drift towards the target, up to a top speed
             Vector v = s.getVelocity(), to = them.clone().subtract(me).setY(0);
@@ -217,7 +218,6 @@ final class BrimstoneCubes implements Listener {
             s.setVelocity(to.clone().multiply(c.getDouble("brimstone-cubes.hop-speed", 0.7)).setY(c.getDouble("brimstone-cubes.hop-height", 0.5)));
             w.playSound(s.getLocation(), Sound.ENTITY_SLIME_JUMP, 0.8f, 0.6f);
         }
-        s.setRotation((float) Math.toDegrees(Math.atan2(-to.getX(), to.getZ())), 0);
         nextHop.put(id, now + c.getInt("brimstone-cubes.hop-interval-ticks", 6));
     }
 
@@ -231,6 +231,14 @@ final class BrimstoneCubes implements Listener {
         if (was == null || now - was.tick <= 0 || now - was.tick > 10) return new Vector();
         Vector v = at.subtract(was.at).setY(0).multiply(1.0 / (now - was.tick));
         return v.lengthSquared() > 1 ? v.normalize() : v;   // ignore teleports
+    }
+
+    /** Turn its face towards the player (the model's face points backwards from the yaw, hence face-offset 180). */
+    private static void face(SulfurCube s, Vector to, FileConfiguration c) {
+        if (to.getX() * to.getX() + to.getZ() * to.getZ() < 0.01) return;
+        float yaw = (float) (Math.toDegrees(Math.atan2(-to.getX(), to.getZ())) + c.getDouble("brimstone-cubes.face-offset", 180));
+        s.setRotation(yaw, 0);
+        s.setBodyYaw(yaw);
     }
 
     private static boolean prey(Player p) {
