@@ -71,7 +71,12 @@ final class Cute implements Listener {
         BAG("Bag Man", "bag_man", null, "He's smiling. He's always smiling."),
         FROG("Froggy", "froggy", null, "Ribbit. (He means it.)"),
         BULL("Load of Bull", "load_of_bull", null, "Everything he says is a lie. Including this."),
-        ONI("Oni Mask", "oni_mask", null, "Wear it to the festival. Or to a fight.");
+        ONI("Oni Mask", "oni_mask", null, "Wear it to the festival. Or to a fight."),
+        HEADFIRST("Head First", "head_first", null, "He went in head first. He's not coming out."),
+        HYPNO("Hypno Helm", "hypno_helm", null, "You will wear this hat. You will like this hat."),
+        SHROOM("Shroom Bloom", "shroom_bloom", null, "It's growing on you."),
+        HEHE("Hehe", "hehe_mask", null, "hehe."),
+        TROLL("Smug Troll", "smug_troll", null, "u mad?");
         final String title, model, alt, perk;
         final EquipmentSlot slot;
         final int armor;
@@ -83,10 +88,16 @@ final class Cute implements Listener {
         boolean priest() { return false; }
     }
     private static final TextColor PINK = TextColor.color(0xF48FB1);
-    private static final Map<Kind, TextColor> NAME_COLOURS = Map.of(
+    private static Map<Kind, TextColor> colours(Object... kv) {
+        Map<Kind, TextColor> m = new java.util.EnumMap<>(Kind.class);
+        for (int i = 0; i < kv.length; i += 2) m.put((Kind) kv[i], (TextColor) kv[i + 1]);
+        return m;
+    }
+    private static final Map<Kind, TextColor> NAME_COLOURS = colours(
             Kind.DUNCE, TextColor.color(0xECE6D4), Kind.FOX, TextColor.color(0xE9792B), Kind.BOWL, TextColor.color(0x7FD3EA),
             Kind.PIGEON, TextColor.color(0x9AA3B4), Kind.LAMPSHADE, TextColor.color(0xE36B8A), Kind.VISITOR, TextColor.color(0x9FD39A),
-            Kind.BAG, TextColor.color(0xC49A63), Kind.FROG, TextColor.color(0x7CC56A), Kind.BULL, TextColor.color(0xB07A4E), Kind.ONI, TextColor.color(0xD8322B));
+            Kind.BAG, TextColor.color(0xC49A63), Kind.FROG, TextColor.color(0x7CC56A), Kind.BULL, TextColor.color(0xB07A4E), Kind.ONI, TextColor.color(0xD8322B),
+            Kind.HEADFIRST, TextColor.color(0x3B4FA6), Kind.HYPNO, TextColor.color(0xA45BE6), Kind.SHROOM, TextColor.color(0xC42A2A), Kind.HEHE, TextColor.color(0xF4EFE8), Kind.TROLL, TextColor.color(0x7E9A6A));
 
     private final Soulbound plugin;
     private final NamespacedKey key;
@@ -205,6 +216,11 @@ final class Cute implements Listener {
             case "froggy", "frog" -> Kind.FROG;
             case "loadofbull", "bull" -> Kind.BULL;
             case "onimask", "oni" -> Kind.ONI;
+            case "headfirst", "legs", "stuck" -> Kind.HEADFIRST;
+            case "hypnohelm", "hypno", "mindcontrol" -> Kind.HYPNO;
+            case "shroombloom", "shroom", "fungus", "mushroom" -> Kind.SHROOM;
+            case "hehemask", "hehe", "grin" -> Kind.HEHE;
+            case "smugtroll", "troll" -> Kind.TROLL;
             case "lab" -> {
                 for (Kind each : new Kind[]{Kind.LAB_COAT, Kind.LAB_PANTS, Kind.LAB_SHOES}) t.getInventory().addItem(create(each));
                 yield null;
