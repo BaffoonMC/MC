@@ -329,6 +329,24 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
         switch (sub) {
             case "help" -> help(s, a.length > 1 ? a[1].toLowerCase(Locale.ROOT) : null);
             case "items" -> { if (s instanceof Player p) openMenu(p); else s.sendMessage("Players only."); }
+            case "selftest" -> {   // console only: the creative world's inventory save and load, end to end
+                if (s instanceof Player) { s.sendMessage("Console only."); return true; }
+                ItemStack[] in = new ItemStack[41];
+                in[0] = plugin.sulfurStrawberry().create(3); in[5] = new ItemStack(Material.DIAMOND_SWORD); in[39] = new ItemStack(Material.IRON_HELMET);
+                ItemStack[] safe = new ItemStack[in.length];
+                for (int i = 0; i < in.length; i++) safe[i] = in[i] == null ? ItemStack.empty() : in[i];
+                String enc = java.util.Base64.getEncoder().encodeToString(ItemStack.serializeItemsAsBytes(safe));
+                org.bukkit.configuration.file.YamlConfiguration y = new org.bukkit.configuration.file.YamlConfiguration();
+                y.set("items", enc);
+                y.set("fx", java.util.List.of(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.SPEED, 200, 1)));
+                org.bukkit.configuration.file.YamlConfiguration back = new org.bukkit.configuration.file.YamlConfiguration();
+                try { back.loadFromString(y.saveToString()); } catch (Exception ex) { s.sendMessage("selftest: yaml failed " + ex); return true; }
+                ItemStack[] out = ItemStack.deserializeItemsFromBytes(java.util.Base64.getDecoder().decode(back.getString("items")));
+                boolean same = out.length == in.length && plugin.sulfurStrawberry().is(out[0]) && out[0].getAmount() == 3
+                        && out[5].getType() == Material.DIAMOND_SWORD && out[39].getType() == Material.IRON_HELMET && (out[1] == null || out[1].isEmpty());
+                Object fx = back.getList("fx") == null ? null : back.getList("fx").get(0);
+                s.sendMessage("selftest: creative inventory round trip " + (same ? "OK" : "FAILED") + ", effects " + (fx instanceof org.bukkit.potion.PotionEffect ? "OK" : "FAILED " + fx));
+            }
             case "dumpitems" -> { if (s instanceof Player) s.sendMessage("Console only."); else s.sendMessage(dumpItems()); }
             case "give" -> {
                 if (a.length < 2) { help(s, "give"); return true; }
