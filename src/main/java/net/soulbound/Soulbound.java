@@ -113,6 +113,17 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-two-more", true);
             saveConfig();
         }
+        // one-off: the Fat Steve Head and Villager Head join a saved catalogue that already has the earlier additions
+        if (!getConfig().getBoolean("migrated.wardrobe-heads", false)) {
+            List<String> cat = getConfig().getStringList("wardrobe.catalogue");
+            if (getConfig().isSet("wardrobe.catalogue") && cat.contains("star_stalker") && !cat.contains("fat_steve_head")) {
+                List<String> l = new java.util.ArrayList<>(cat);
+                l.addAll(List.of("fat_steve_head", "villager_head"));
+                getConfig().set("wardrobe.catalogue", l);
+            }
+            getConfig().set("migrated.wardrobe-heads", true);
+            saveConfig();
+        }
         // one-off: blood moons went from 24 hours to 1
         if (!getConfig().getBoolean("migrated.blood-moon-1h", false)) {
             if (getConfig().getInt("boss.blood-moon-hours", 24) == 24) getConfig().set("boss.blood-moon-hours", 1);
