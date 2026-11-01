@@ -26,5 +26,9 @@ jobs:
             echo "$out"
             echo "::notice title=${c}::${out:0:3900}"
           done
+          for c in org.bukkit.entity.AbstractCubeMob 'org.bukkit.entity.SulfurCube$Archetype' io.papermc.paper.entity.Bucketable io.papermc.paper.entity.Shearable io.papermc.paper.registry.RegistryKey; do
+            out=$(javap -cp . "$c" | grep -i -E 'cube|sulf|abstract|interface|class' | tr '\n' ' ' | tr -s ' ')
+            echo "::notice title=$c::${out:0:3900}"
+          done
           e=$(javap -cp . -constants org.bukkit.entity.EntityType | grep -i -E 'sulf|sulph' | tr '\n' ' ')
           echo "::notice title=EntityType::$e"
