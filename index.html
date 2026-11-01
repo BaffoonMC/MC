@@ -111,6 +111,16 @@ section.block { padding-block: 64px 8px }
 .sec-head h2 { font: 700 46px/1.05 var(--display); color: var(--navy); margin-top: 6px }
 .sec-head p { color: var(--muted); margin: 6px 0 0; max-width: 60ch }
 
+.claims { margin-top: 22px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px }
+.claims h4 { font: 700 20px/1.2 var(--display); color: var(--navy); margin: 0 0 4px }
+.claims > p { color: var(--muted); font-size: 14.5px; margin: 0 0 14px }
+.claim-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: end }
+.claim { display: flex; align-items: flex-end; gap: 14px; background: var(--sky); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-height: 96px }
+.claim .sq { flex: none; border-radius: 4px; background: repeating-linear-gradient(45deg, rgba(255,255,255,.06) 0 4px, transparent 4px 8px), var(--c); box-shadow: 0 0 0 2px rgba(0,0,0,.25) inset }
+.claim .n { font: 700 28px/1 var(--display); color: var(--c) }
+.claim .who { font: 800 13px/1.2 var(--body); color: var(--c); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px }
+.claim .size { color: var(--muted); font-size: 13.5px; margin-top: 4px }
+@media (max-width: 720px) { .claim-row { grid-template-columns: 1fr } }
 .ranks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: stretch }
 .rank { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 24px; display: flex; flex-direction: column; gap: 16px; position: relative; box-shadow: 0 14px 34px -24px rgba(0,0,0,.6); overflow: hidden }
 .rank.star { border: 2px solid var(--gold); box-shadow: 0 18px 44px -22px rgba(242,192,74,.45) }
@@ -428,9 +438,9 @@ const FIGS = { supporter: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASoAAAD
 /* example catalogue: mirrors what to create in Tebex (name, price, command) */
 const DEMO = [
   { id: "ranks", name: "Ranks", kind: "ranks", packages: [
-    { id: 1, name: "Supporter", price: 12.88, cls: "supporter", tag: "Starter tier", perks: ["[Supporter] tag", "Access to the Creative world", "/nick to change your display name", "2,500 bonus claim blocks (a 50×50 base)", "2 extra homes", "/hat to wear any block", "Exclusive hat: Propeller Cap"] },
-    { id: 2, name: "Patron", price: 28.88, cls: "patron", tag: "Fly in your claim", perks: ["Everything in Supporter", "7,500 bonus claim blocks", "Fly inside your own claim", "4 extra homes", "/craft portable crafting table", "Use colours in chat", "Red [Patron] tag"] },
-    { id: 3, name: "Chosen", price: 49.88, cls: "chosen", tag: "Blessed by both", star: true, perks: ["Everything in Patron", "15,000 bonus claim blocks", "6 extra homes", "/ec ender chest anywhere", "Reserved slot when the server is full", "Ember particle trail", "Includes the Sinner's Halo", "Gold [Chosen] tag"] }
+    { id: 1, name: "Supporter", price: 12.88, cls: "supporter", tag: "Starter tier", perks: ["[Supporter] tag", "Access to the Creative world", "/nick to change your display name", "3,000 bonus claim blocks (about 55×55)", "2 extra homes", "/hat to wear any block", "Exclusive hat: Propeller Cap"] },
+    { id: 2, name: "Patron", price: 28.88, cls: "patron", tag: "Fly in your claim", perks: ["Everything in Supporter", "9,000 bonus claim blocks (about 95×95)", "Fly inside your own claim", "4 extra homes", "/craft portable crafting table", "Use colours in chat", "Red [Patron] tag"] },
+    { id: 3, name: "Chosen", price: 49.88, cls: "chosen", tag: "Blessed by both", star: true, perks: ["Everything in Patron", "20,000 bonus claim blocks (about 140×140)", "6 extra homes", "/ec ender chest anywhere", "Reserved slot when the server is full", "Ember particle trail", "Includes the Sinner's Halo", "Gold [Chosen] tag"] }
   ]},
   { id: "hats", name: "Hats", kind: "hats", packages: [
     { id: 30, name: "Sinner's Halo", icon: "sinners_halo_big", price: 4.88, feature: true, ribbon: "New · made for BaffoonMC", note: "Devil horns under a cracked halo, still smouldering where it broke. Too wicked for Heaven, too holy for the furnace. You can only get it here." },
@@ -463,6 +473,18 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;",
 
 /* ===================================================================== render */
 function render() {
+  // claim blocks per rank, side by side: each is that rank's own total, not added to the one below
+  const CLAIMS = { supporter: 3000, patron: 9000, chosen: 20000 };
+  const CLAIM_COL = { supporter: "#e8d9a8", patron: "var(--red)", chosen: "var(--gold)" };
+  function claimStrip(pkgs) {
+    const rows = pkgs.filter(p => CLAIMS[p.cls]);
+    if (!rows.length) return "";
+    const max = Math.max(...rows.map(p => CLAIMS[p.cls]));
+    return `<div class="claims"><h4>Claim blocks by rank</h4><p>Each number is that rank's total bonus, on top of the blocks everyone earns by playing. They don't add up across ranks.</p><div class="claim-row">` +
+      rows.map(p => { const n = CLAIMS[p.cls], side = Math.round(Math.sqrt(n) / 5) * 5, px = Math.round(28 + 44 * Math.sqrt(n / max));
+        return `<div class="claim" style="--c:${CLAIM_COL[p.cls]}"><div class="sq" style="width:${px}px;height:${px}px"></div><div><div class="who">${esc(p.name)}</div><div class="n">${n.toLocaleString("en-GB")}</div><div class="size">about ${side} × ${side} blocks</div></div></div>`; }).join("") +
+      `</div></div>`;
+  }
   byId = {}; CUSTOM = null;
   const out = [];
   for (const cat of catalogue) {
@@ -473,7 +495,7 @@ function render() {
         cat.packages.map(p => `<article class="rank ${p.cls || ""} ${p.star ? "star" : ""}">${p.star ? '<div class="badge">Best value</div>' : ""}
           <div class="rhead"><div><h3>${esc(p.name)}</h3>${p.tag ? `<div class="tag">${esc(p.tag)}</div>` : ""}</div>${FIGS[p.cls] ? `<img class="fig" alt="" src="${FIGS[p.cls]}">` : ""}</div>
           ${p.perks ? `<ul>${p.perks.map(x => `<li class="${/^Everything/.test(x) ? "inh" : ""}">${esc(x)}</li>`).join("")}</ul>` : `<div class="desc">${p.description || ""}</div>`}
-          <div class="price-row"><div class="price">${money(p.price)}</div>${addBtn(p)}</div></article>`).join("") + `</div></section>`);
+          <div class="price-row"><div class="price">${money(p.price)}</div>${addBtn(p)}</div></article>`).join("") + `</div>${claimStrip(cat.packages)}</section>`);
     } else {
       out.push(`<section class="wrap block" id="${cat.kind === "hats" ? "hats" : "c" + cat.id}"><div class="sec-head"><div><div class="eyebrow">Wearable · goes in your helmet slot</div><h2>${esc(cat.name)}</h2><p>Custom-made for BaffoonMC. They show over your helmet and don't change your armour.</p></div></div><div class="hats">` +
         cat.packages.map(p => p.feature ? `<article class="hat feature"><div class="ribbon">${esc(p.ribbon)}</div><div class="pic"><img alt="${esc(p.name)}" src="${iconFor(p)}"></div>
