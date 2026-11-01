@@ -127,6 +127,12 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.capture-immunity-180", true);
             saveConfig();
         }
+        // one-off: Brimstone Cubes burn twice as hard inside (1 heart a second -> 2)
+        if (!getConfig().getBoolean("migrated.brimstone-damage-4", false)) {
+            if (getConfig().getDouble("brimstone-cubes.damage-per-second", 4) == 2) getConfig().set("brimstone-cubes.damage-per-second", 4);
+            getConfig().set("migrated.brimstone-damage-4", true);
+            saveConfig();
+        }
         // one-off: fewer Zephyrs (one at a time, about one a minute)
         if (!getConfig().getBoolean("migrated.zephyrs-fewer", false)) {
             if (getConfig().getDouble("zephyrs.chance", 0.08) == 0.25) getConfig().set("zephyrs.chance", 0.08);

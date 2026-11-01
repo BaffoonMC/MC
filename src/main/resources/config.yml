@@ -651,7 +651,8 @@ brimstone-cubes:
   # Which way its face points while it chases you, in degrees (set 0 if it ever looks backwards).
   face-offset: 180
   engulf-seconds: 3
-  damage-per-second: 2
+  # Damage each second while you're inside (4 = 2 hearts).
+  damage-per-second: 4
   spit-force: 1.6
   spit-lift: 0.7
   # After being spat out, no cube can swallow you again for this long; the cube itself rests for rest-seconds.

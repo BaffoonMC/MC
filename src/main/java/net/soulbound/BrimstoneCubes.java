@@ -290,7 +290,7 @@ final class BrimstoneCubes implements Listener {
 
     private void tickHeld(FileConfiguration c) {
         if (held.isEmpty()) return;
-        double dmg = c.getDouble("brimstone-cubes.damage-per-second", 2);
+        double dmg = c.getDouble("brimstone-cubes.damage-per-second", 4);
         var it = held.entrySet().iterator();
         while (it.hasNext()) {
             var en = it.next();
