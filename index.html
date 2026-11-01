@@ -791,7 +791,7 @@ async function loadLive() {
   try {
     try { const ws = await api("GET", `/accounts/${CONFIG.tebexToken}`);
       CONFIG.currency = ({ GBP: "£", USD: "$", EUR: "€", CAD: "CA$", AUD: "A$" })[ws.currency] || (ws.currency + " ");
-      STORE_OPEN = !ws.disabled; } catch (e) { console.warn("Tebex store:", e); }
+      /* Tebex's 'disabled' flag can stay on after a store goes live, and baskets and checkout work regardless: let Tebex's own checkout decide */ } catch (e) { console.warn("Tebex store:", e); }
     const cats = await api("GET", `/accounts/${CONFIG.tebexToken}/categories?includePackages=1`);
     /* Tebex owns names, prices and ids; the page's own catalogue supplies the looks (icons, perks, ribbons) by matching names */
     const norm = s => slug(s).replace(/^the_/, "");
