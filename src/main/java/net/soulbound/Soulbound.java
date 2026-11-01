@@ -146,6 +146,17 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-brine", true);
             saveConfig();
         }
+        // one-off: Hatception is the Blood Priest's own now, so it comes off a saved token catalogue
+        if (!getConfig().getBoolean("migrated.wardrobe-no-hatception", false)) {
+            List<String> cat = getConfig().getStringList("wardrobe.catalogue");
+            if (getConfig().isSet("wardrobe.catalogue") && cat.contains("hatception")) {
+                List<String> l = new java.util.ArrayList<>(cat);
+                l.remove("hatception");
+                getConfig().set("wardrobe.catalogue", l);
+            }
+            getConfig().set("migrated.wardrobe-no-hatception", true);
+            saveConfig();
+        }
         // one-off: blood moons went from 24 hours to 1
         if (!getConfig().getBoolean("migrated.blood-moon-1h", false)) {
             if (getConfig().getInt("boss.blood-moon-hours", 24) == 24) getConfig().set("boss.blood-moon-hours", 1);

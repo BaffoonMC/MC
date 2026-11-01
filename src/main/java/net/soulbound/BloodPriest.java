@@ -122,12 +122,13 @@ final class BloodPriest implements Listener {
         Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, 2L);
     }
 
-    /** His wide-brimmed priest's hat (a 3D model the pack draws), put on any priest not already wearing it. */
+    /** His face with its nose, and his wide-brimmed hat on top (a 3D model the pack draws), put on any priest not already wearing it.
+     *  Priests still in the old plain hat are switched over. */
     private void wearHat(Mannequin m) {
         var eq = m.getEquipment();
         org.bukkit.inventory.ItemStack h = eq.getHelmet();
-        NamespacedKey model = HAT;
-        if (h != null && !h.getType().isAir()) return;   // his hat, or a helmet someone dressed him in
+        NamespacedKey model = HEAD;
+        if (h != null && !h.getType().isAir() && !(isHat(h) && !model.equals(h.getItemMeta().getItemModel()))) return;   // his own head-piece, or a helmet someone dressed him in
         org.bukkit.inventory.ItemStack hat = new org.bukkit.inventory.ItemStack(org.bukkit.Material.PAPER);
         var meta = hat.getItemMeta();
         meta.setItemModel(model);
@@ -292,7 +293,13 @@ final class BloodPriest implements Listener {
     }
 
     private static final NamespacedKey HAT = new NamespacedKey("soulbound", "blood_priest_hat");
-    private static boolean isHat(org.bukkit.inventory.ItemStack it) { return it != null && it.hasItemMeta() && HAT.equals(it.getItemMeta().getItemModel()); }
+    /** What he wears now: his own face over his skin, with his nose and his hat on top (Hatception, fitted to him). */
+    private static final NamespacedKey HEAD = new NamespacedKey("soulbound", "blood_priest_head");
+    private static boolean isHat(org.bukkit.inventory.ItemStack it) {
+        if (it == null || !it.hasItemMeta() || !it.getItemMeta().hasItemModel()) return false;
+        NamespacedKey k = it.getItemMeta().getItemModel();
+        return HAT.equals(k) || HEAD.equals(k);
+    }
 
 
     @EventHandler(ignoreCancelled = true)
