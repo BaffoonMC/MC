@@ -1,0 +1,23 @@
+name: pages-unstick
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/pages-unstick.yml']
+  workflow_dispatch:
+permissions:
+  pages: write
+  actions: write
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel the Pages deployment that never finished
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          for sha in c08be17ae9b5e4e5ef2fe1887cf200dc944a91a4 115c7110f55ca9ad69d950a08333fef9fa4c43d5; do
+            echo "== $sha"; gh api "repos/${{ github.repository }}/pages/deployments/$sha" || true
+            gh api -X POST "repos/${{ github.repository }}/pages/deployments/$sha/cancel" && echo "cancelled $sha" || true
+          done
+      - name: Publish the store-site branch again
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || true
