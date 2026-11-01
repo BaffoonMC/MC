@@ -60,7 +60,18 @@ final class Cute implements Listener {
         BALLOON("Balloon Bonnet", "balloon_bonnet", null, "Proof you were here when it all began."),
         LAB_COAT("Lab Coat", "lab_coat", null, "Lab outfit (1 of 3). Full outfit: potions last 50% longer.", EquipmentSlot.CHEST, 3),
         LAB_PANTS("Lab Trousers", "lab_pants", null, "Lab outfit (2 of 3). Full outfit: potions last 50% longer.", EquipmentSlot.LEGS, 2),
-        LAB_SHOES("Lab Shoes", "lab_shoes", null, "Lab outfit (3 of 3). Full outfit: potions last 50% longer.", EquipmentSlot.FEET, 1);
+        LAB_SHOES("Lab Shoes", "lab_shoes", null, "Lab outfit (3 of 3). Full outfit: potions last 50% longer.", EquipmentSlot.FEET, 1),
+        // token-only hats and masks (no recipes): cosmetic, each with a line of nonsense
+        DUNCE("Dunce Cap", "dunce_cap", null, "Sit in the corner and think about what you did."),
+        FOX("Furry Fox Mask", "furry_mask", null, "OwO. It's not a phase."),
+        BOWL("Goldfish Bowl", "goldfish_bowl", null, "He doesn't remember you. He's happy."),
+        PIGEON("Pigeon Pal", "pigeon_pal", null, "He lives here now."),
+        LAMPSHADE("Party Lampshade", "party_lampshade", null, "Someone had a good night."),
+        VISITOR("The Visitor", "the_visitor", null, "Take me to your leader. Or your fridge."),
+        BAG("Bag Man", "bag_man", null, "He's smiling. He's always smiling."),
+        FROG("Froggy", "froggy", null, "Ribbit. (He means it.)"),
+        BULL("Load of Bull", "load_of_bull", null, "Everything he says is a lie. Including this."),
+        ONI("Oni Mask", "oni_mask", null, "Wear it to the festival. Or to a fight.");
         final String title, model, alt, perk;
         final EquipmentSlot slot;
         final int armor;
@@ -72,6 +83,10 @@ final class Cute implements Listener {
         boolean priest() { return false; }
     }
     private static final TextColor PINK = TextColor.color(0xF48FB1);
+    private static final Map<Kind, TextColor> NAME_COLOURS = Map.of(
+            Kind.DUNCE, TextColor.color(0xECE6D4), Kind.FOX, TextColor.color(0xE9792B), Kind.BOWL, TextColor.color(0x7FD3EA),
+            Kind.PIGEON, TextColor.color(0x9AA3B4), Kind.LAMPSHADE, TextColor.color(0xE36B8A), Kind.VISITOR, TextColor.color(0x9FD39A),
+            Kind.BAG, TextColor.color(0xC49A63), Kind.FROG, TextColor.color(0x7CC56A), Kind.BULL, TextColor.color(0xB07A4E), Kind.ONI, TextColor.color(0xD8322B));
 
     private final Soulbound plugin;
     private final NamespacedKey key;
@@ -89,7 +104,7 @@ final class Cute implements Listener {
         // repairable, damageable. The equippable has no armour layer, so its own 3D model is what's worn.
         ItemStack it = new ItemStack(k == Kind.BP_HAT ? Material.NETHERITE_HELMET : Material.ECHO_SHARD);
         ItemMeta m = it.getItemMeta();
-        m.displayName(Component.text(k.title, k == Kind.BAROQUE ? TextColor.color(0xD6AC48) : k == Kind.CROC ? TextColor.color(0x7FA84A) : k == Kind.SINNER ? TextColor.color(0xF2C04A) : k == Kind.BALLOON ? TextColor.color(0x3FA2EC)
+        m.displayName(Component.text(k.title, NAME_COLOURS.containsKey(k) ? NAME_COLOURS.get(k) : k == Kind.BAROQUE ? TextColor.color(0xD6AC48) : k == Kind.CROC ? TextColor.color(0x7FA84A) : k == Kind.SINNER ? TextColor.color(0xF2C04A) : k == Kind.BALLOON ? TextColor.color(0x3FA2EC)
                 : (k == Kind.BP_HAT || k.priest()) ? TextColor.color(0xB3122E) : PINK, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
         String where = switch (k.slot) { case CHEST -> "Worn on the chest"; case LEGS -> "Worn on the legs"; case FEET -> "Worn on the feet"; default -> "Worn on the head"; };
         m.lore(List.of(Component.text(where, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false),
@@ -180,6 +195,16 @@ final class Cute implements Listener {
             case "labcoat", "coat" -> Kind.LAB_COAT;
             case "labpants", "trousers", "pants" -> Kind.LAB_PANTS;
             case "labshoes", "shoes" -> Kind.LAB_SHOES;
+            case "duncecap", "dunce" -> Kind.DUNCE;
+            case "furrymask", "furry", "fox", "foxmask" -> Kind.FOX;
+            case "goldfishbowl", "fishbowl", "bowl", "goldfish" -> Kind.BOWL;
+            case "pigeonpal", "pigeon" -> Kind.PIGEON;
+            case "partylampshade", "lampshade", "lamp" -> Kind.LAMPSHADE;
+            case "thevisitor", "visitor", "alien" -> Kind.VISITOR;
+            case "bagman", "bag", "paperbag" -> Kind.BAG;
+            case "froggy", "frog" -> Kind.FROG;
+            case "loadofbull", "bull" -> Kind.BULL;
+            case "onimask", "oni" -> Kind.ONI;
             case "lab" -> {
                 for (Kind each : new Kind[]{Kind.LAB_COAT, Kind.LAB_PANTS, Kind.LAB_SHOES}) t.getInventory().addItem(create(each));
                 yield null;

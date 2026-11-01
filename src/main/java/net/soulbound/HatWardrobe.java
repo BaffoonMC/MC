@@ -124,7 +124,8 @@ final class HatWardrobe implements Listener, CommandExecutor, TabCompleter {
     /** The hats a token can unlock, in order: ids from the /sb items registry. */
     private List<String> catalogue() {
         List<String> ids = plugin.getConfig().getStringList("wardrobe.catalogue");
-        if (ids.isEmpty()) ids = List.of("sinners_halo", "cortex_leech", "wizard_hat", "crocodile_mask", "baroque", "flower_crown", "bunny_ears");
+        if (ids.isEmpty()) ids = List.of("sinners_halo", "cortex_leech", "wizard_hat", "crocodile_mask", "baroque", "flower_crown", "bunny_ears",
+                "dunce_cap", "furry_mask", "goldfish_bowl", "pigeon_pal", "party_lampshade", "the_visitor", "bag_man", "froggy", "load_of_bull", "oni_mask");
         List<String> ok = new ArrayList<>();
         for (String id : ids) if (registry.get().containsKey(id.toLowerCase(Locale.ROOT))) ok.add(id.toLowerCase(Locale.ROOT));
         return ok;

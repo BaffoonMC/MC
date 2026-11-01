@@ -81,6 +81,16 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.archangel-ghasts-more", true);
             saveConfig();
         }
+        // one-off: ten new hats and masks join the Hat Token catalogue (only if the list was never customised)
+        if (!getConfig().getBoolean("migrated.wardrobe-ten-more", false)) {
+            if (getConfig().isSet("wardrobe.catalogue") && getConfig().getStringList("wardrobe.catalogue").equals(List.of("sinners_halo", "cortex_leech", "wizard_hat", "crocodile_mask", "baroque", "flower_crown", "bunny_ears"))) {
+                List<String> l = new java.util.ArrayList<>(getConfig().getStringList("wardrobe.catalogue"));
+                l.addAll(List.of("dunce_cap", "furry_mask", "goldfish_bowl", "pigeon_pal", "party_lampshade", "the_visitor", "bag_man", "froggy", "load_of_bull", "oni_mask"));
+                getConfig().set("wardrobe.catalogue", l);
+            }
+            getConfig().set("migrated.wardrobe-ten-more", true);
+            saveConfig();
+        }
         // one-off: blood moons went from 24 hours to 1
         if (!getConfig().getBoolean("migrated.blood-moon-1h", false)) {
             if (getConfig().getInt("boss.blood-moon-hours", 24) == 24) getConfig().set("boss.blood-moon-hours", 1);
