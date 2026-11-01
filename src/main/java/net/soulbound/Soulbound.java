@@ -135,6 +135,17 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-three-more", true);
             saveConfig();
         }
+        // one-off: Villagerbrine joins a saved catalogue that already has the earlier additions
+        if (!getConfig().getBoolean("migrated.wardrobe-brine", false)) {
+            List<String> cat = getConfig().getStringList("wardrobe.catalogue");
+            if (getConfig().isSet("wardrobe.catalogue") && cat.contains("hatception") && !cat.contains("villagerbrine")) {
+                List<String> l = new java.util.ArrayList<>(cat);
+                l.add("villagerbrine");
+                getConfig().set("wardrobe.catalogue", l);
+            }
+            getConfig().set("migrated.wardrobe-brine", true);
+            saveConfig();
+        }
         // one-off: blood moons went from 24 hours to 1
         if (!getConfig().getBoolean("migrated.blood-moon-1h", false)) {
             if (getConfig().getInt("boss.blood-moon-hours", 24) == 24) getConfig().set("boss.blood-moon-hours", 1);
