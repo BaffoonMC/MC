@@ -22,7 +22,12 @@ jobs:
           mkdir -p srv/plugins && cp build/libs/*.jar srv/plugins/
           URL=$(curl -sS -A "baffoonmc-ci" https://fill.papermc.io/v3/projects/paper/versions/26.3/builds/latest | python3 -c 'import json,sys; print(json.load(sys.stdin)["downloads"]["server:default"]["url"])')
           curl -sS -L -A "baffoonmc-ci" -o srv/server.jar "$URL"
-          gh release download -R GriefPrevention/GriefPrevention --pattern '*.jar' -D srv/plugins || true
+          gh release download -R GriefPrevention/GriefPrevention --pattern '*.jar' -D srv/plugins 2>/tmp/gp.err || echo "::notice title=gp-github::$(tail -c 300 /tmp/gp.err)"
+          if ! ls srv/plugins | grep -qi grief; then
+            U=$(curl -sS -A "baffoonmc-ci" "https://api.modrinth.com/v2/project/griefprevention/version" | python3 -c 'import json,sys; v=json.load(sys.stdin); print(v[0]["files"][0]["url"] if v else "")' 2>/tmp/gp2.err)
+            echo "::notice title=gp-modrinth::$U $(tail -c 200 /tmp/gp2.err)"
+            [ -n "$U" ] && curl -sS -L -A "baffoonmc-ci" -o srv/plugins/GriefPrevention.jar "$U"
+          fi
           echo "::notice title=plugins::$(ls srv/plugins | tr '\n' ' ')"
           echo eula=true > srv/eula.txt
           printf 'online-mode=false\nlevel-type=minecraft\\:flat\n' > srv/server.properties
