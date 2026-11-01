@@ -278,6 +278,7 @@ public final class Soulbound extends JavaPlugin {
         pm.registerEvents(brimstone, this);
         brimstone.start();
         sulfurStrawberry = new SulfurStrawberry(this);
+        pm.registerEvents(new CreativeWorld(this), this);
         pm.registerEvents(sulfurStrawberry, this);
         peacekeeper = new Peacekeeper(this);
         pm.registerEvents(peacekeeper, this);

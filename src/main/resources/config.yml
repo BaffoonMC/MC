@@ -717,3 +717,15 @@ sulfur-strawberry:
   drop-chance: 0.004
   hunger-multiplier: 0.5
   twin-chance: 0.33
+
+# The Creative world is sealed off from survival: inventories (and XP, health, hunger, effects) swap at the border,
+# no ender chests or /ec, no portals, creative mode only inside, and only allowed-commands work there.
+# soulbound.creative.bypass (ops) skips all of it.
+creative-world:
+  enabled: true
+  # The world name(s), as Multiverse made them.
+  worlds: [creative]
+  # auto: swap inventories here unless Multiverse-Inventories is installed (then it does it). true / false to force.
+  swap-inventories: auto
+  allowed-commands: [spawn, home, homes, sethome, delhome, tpa, tpahere, tpaccept, tpyes, tpdeny, tpno, tpacancel, back, warp, warps,
+    msg, tell, w, r, reply, me, rules, list, help, ping, hat, nick]

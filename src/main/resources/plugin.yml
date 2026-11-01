@@ -20,6 +20,9 @@ commands:
     description: Answer God when he asks why you're here.
     usage: /god <challenge|lost|forgive|look>
 permissions:
+  soulbound.creative.bypass:
+    description: Not locked down in the Creative world (keeps your own inventory, ender chest and commands there).
+    default: op
   soulbound.capture:
     description: Can capture weakened players with a lead.
     default: true
