@@ -338,7 +338,34 @@ final class Cute implements Listener {
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent e) { for (Kind k : Kind.values()) e.getPlayer().discoverRecipe(new NamespacedKey(plugin, k.model)); }
+    public void onJoin(PlayerJoinEvent e) {
+        for (Kind k : Kind.values()) e.getPlayer().discoverRecipe(new NamespacedKey(plugin, k.model));
+        Player p = e.getPlayer();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> { if (p.isOnline()) openingGift(p); }, 40L);   // after any starter kit lands
+    }
+
+    /** Grand opening week: everyone who joins gets the Balloon Bonnet once, on their head if it's free. */
+    private void openingGift(Player p) {
+        var c = plugin.getConfig();
+        if (!c.getBoolean("opening-gift.enabled", true)) return;
+        java.time.LocalDate start;
+        try { start = java.time.LocalDate.parse(c.getString("opening-gift.start", "2026-11-06")); }
+        catch (java.time.format.DateTimeParseException ex) { return; }
+        java.time.LocalDate today = java.time.LocalDate.now(java.time.ZoneId.of(c.getString("opening-gift.timezone", "Europe/London")));
+        if (today.isBefore(start) || !today.isBefore(start.plusDays(Math.max(1, c.getInt("opening-gift.days", 7))))) return;
+        NamespacedKey got = new NamespacedKey(plugin, "opening_gift");
+        if (p.getPersistentDataContainer().has(got, PersistentDataType.BYTE)) return;
+        p.getPersistentDataContainer().set(got, PersistentDataType.BYTE, (byte) 1);
+        ItemStack hat = create(Kind.BALLOON);
+        org.bukkit.inventory.PlayerInventory inv = p.getInventory();
+        boolean worn = inv.getHelmet() == null || inv.getHelmet().getType().isAir();
+        if (worn) inv.setHelmet(hat);
+        else inv.addItem(hat).values().forEach(left -> p.getWorld().dropItem(p.getLocation(), left));
+        p.sendMessage(Component.text("Welcome to the grand opening! ", NamedTextColor.GOLD, TextDecoration.BOLD)
+                .append(Component.text(worn ? "Your Balloon Bonnet is on your head. " : "Your Balloon Bonnet is in your inventory. ", NamedTextColor.YELLOW).decoration(TextDecoration.BOLD, false))
+                .append(Component.text("Proof you were here when it all began.", NamedTextColor.GRAY, TextDecoration.ITALIC).decoration(TextDecoration.BOLD, false)));
+        p.playSound(p.getLocation(), "minecraft:entity.player.levelup", 0.7f, 1.4f);
+    }
 
     @EventHandler
     public void onCraft(PrepareItemCraftEvent e) {

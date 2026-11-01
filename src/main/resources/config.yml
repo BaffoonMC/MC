@@ -659,3 +659,11 @@ heaven:
   outer-islands-always-day: true
   # The time they see (6000 = noon).
   outer-islands-time: 6000
+
+# Grand opening week: everyone who joins in this window gets the Balloon Bonnet once (worn if their head slot is empty).
+opening-gift:
+  enabled: true
+  # first day of the grand opening, and how many days it lasts (dates in this timezone)
+  start: "2026-11-06"
+  days: 7
+  timezone: "Europe/London"
