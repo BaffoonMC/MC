@@ -307,6 +307,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             s.sendMessage(line("/sb world temple", "rebuild the pyramid stairs and side gates"));
             s.sendMessage(line("/sb world setarrival", "portals into his realm arrive where you stand"));
             s.sendMessage(line("/sb world zephyr", "a Zephyr (Heaven's breeze) in front of you"));
+            s.sendMessage(line("/sb world brimstone", "a Brimstone Cube (it swallows players) in front of you"));
             s.sendMessage(line("/sb world peacekeeper [remove]", "place (or remove) the Peacekeeper here"));
         }
         if (group == null || group.equals("size")) {
@@ -371,6 +372,17 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                         if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
                         plugin.zephyrs().summon(p.getLocation().add(p.getLocation().getDirection().setY(0).normalize().multiply(4)));
                         s.sendMessage(ok("A Zephyr rises."));
+                    }
+                    case "brimstone" -> {
+                        org.bukkit.Location at;
+                        if (s instanceof Player p) at = p.getLocation().add(p.getLocation().getDirection().setY(0).normalize().multiply(5));
+                        else if (a.length >= 6 && Bukkit.getWorld(a[2]) != null) {
+                            try { at = new org.bukkit.Location(Bukkit.getWorld(a[2]), Double.parseDouble(a[3]), Double.parseDouble(a[4]), Double.parseDouble(a[5])); }
+                            catch (NumberFormatException ex) { s.sendMessage(bad("Usage: /sb world brimstone [world x y z]")); return true; }
+                        } else { s.sendMessage(bad("From the console: /sb world brimstone <world> <x> <y> <z>")); return true; }
+                        var cube = plugin.brimstone().summon(at);
+                        s.sendMessage(ok("A Brimstone Cube oozes out."));
+                        Bukkit.getScheduler().runTaskLater(plugin, () -> { if (cube.isValid()) s.sendMessage(ok(plugin.brimstone().describe(cube))); }, 2L);
                     }
                     default -> help(s, "world");
                 }
@@ -462,7 +474,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             }
             case "god" -> { if (a.length == 2) return filter(List.of("test", "heaven"), a[1]); }
             case "world" -> {
-                if (a.length == 2) return filter(List.of("priest", "peacekeeper", "gate", "temple", "setarrival", "zephyr"), a[1]);
+                if (a.length == 2) return filter(List.of("priest", "peacekeeper", "gate", "temple", "setarrival", "zephyr", "brimstone"), a[1]);
                 if (a.length == 3 && (a[1].equalsIgnoreCase("priest") || a[1].equalsIgnoreCase("peacekeeper"))) return filter(List.of("remove"), a[2]);
                 if (a.length == 3 && a[1].equalsIgnoreCase("gate")) return filter(List.of("here"), a[2]);
             }

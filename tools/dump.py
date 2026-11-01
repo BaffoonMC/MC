@@ -12,4 +12,7 @@ def wait_for(pat, t):
 print("ready:", wait_for(r"Done \(", 900))
 p.stdin.write("sb dumpitems\n"); p.stdin.flush()
 print("dump:", wait_for(r"Dumped|Couldn't|nknown", 120))
+p.stdin.write("sb world brimstone world 0.5 -60 0.5\n"); p.stdin.flush()
+r = wait_for(r"hitbox|Usage|From the console|Exception|nknown", 60)
+print("::notice title=brimstone::" + (r or "no reply").strip())
 p.stdin.write("stop\n"); p.stdin.flush(); p.wait(timeout=300)

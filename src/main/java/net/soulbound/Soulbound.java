@@ -58,6 +58,7 @@ public final class Soulbound extends JavaPlugin {
     private Grace grace;
     private EdenMask eden;
     private Zephyrs zephyrs;
+    private BrimstoneCubes brimstone;
     private Peacekeeper peacekeeper;
     private IslandGuard island;
     private ScreenCrack cracks;
@@ -265,6 +266,9 @@ public final class Soulbound extends JavaPlugin {
         zephyrs = new Zephyrs(this);
         pm.registerEvents(zephyrs, this);
         zephyrs.start();
+        brimstone = new BrimstoneCubes(this);
+        pm.registerEvents(brimstone, this);
+        brimstone.start();
         peacekeeper = new Peacekeeper(this);
         pm.registerEvents(peacekeeper, this);
         peacekeeper.start();
@@ -306,6 +310,7 @@ public final class Soulbound extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (brimstone != null) brimstone.stop();
         if (sacrifices != null) sacrifices.stop();
         if (bloodEmeralds != null) bloodEmeralds.stop();
         if (tumourCrop != null) tumourCrop.stop();
@@ -354,6 +359,7 @@ public final class Soulbound extends JavaPlugin {
     Grace grace() { return grace; }
     EdenMask eden() { return eden; }
     Zephyrs zephyrs() { return zephyrs; }
+    BrimstoneCubes brimstone() { return brimstone; }
     Peacekeeper peacekeeper() { return peacekeeper; }
     IslandGuard island() { return island; }
     CaptureManager captures() { return captures; }
