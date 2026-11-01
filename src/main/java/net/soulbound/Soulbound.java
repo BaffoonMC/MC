@@ -59,6 +59,7 @@ public final class Soulbound extends JavaPlugin {
     private EdenMask eden;
     private Zephyrs zephyrs;
     private BrimstoneCubes brimstone;
+    private SulfurStrawberry sulfurStrawberry;
     private Peacekeeper peacekeeper;
     private IslandGuard island;
     private ScreenCrack cracks;
@@ -276,6 +277,8 @@ public final class Soulbound extends JavaPlugin {
         brimstone = new BrimstoneCubes(this);
         pm.registerEvents(brimstone, this);
         brimstone.start();
+        sulfurStrawberry = new SulfurStrawberry(this);
+        pm.registerEvents(sulfurStrawberry, this);
         peacekeeper = new Peacekeeper(this);
         pm.registerEvents(peacekeeper, this);
         peacekeeper.start();
@@ -367,6 +370,7 @@ public final class Soulbound extends JavaPlugin {
     EdenMask eden() { return eden; }
     Zephyrs zephyrs() { return zephyrs; }
     BrimstoneCubes brimstone() { return brimstone; }
+    SulfurStrawberry sulfurStrawberry() { return sulfurStrawberry; }
     Peacekeeper peacekeeper() { return peacekeeper; }
     IslandGuard island() { return island; }
     CaptureManager captures() { return captures; }

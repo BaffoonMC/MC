@@ -710,3 +710,10 @@ opening-gift:
 tumour-crop:
   rotten-flesh-chance: 0.25
   sugar-chance: 0.25
+
+# The Sulfur Strawberry: a carrot idol, very rarely dug up when harvesting ripe carrots (0.004 = 1 in 250).
+# Held: hunger drains at hunger-multiplier speed (0.5 = half), and animals you breed have twins twin-chance of the time.
+sulfur-strawberry:
+  drop-chance: 0.004
+  hunger-multiplier: 0.5
+  twin-chance: 0.33
