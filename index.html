@@ -157,6 +157,25 @@ section.block { padding-block: 64px 8px }
 .packs-note { color: var(--muted); font-size: 14.5px; margin: 14px 0 0 }
 @media (max-width: 980px) { .packs { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
 @media (max-width: 520px) { .packs { grid-template-columns: 1fr } }
+.shop { padding-block: 56px 0; scroll-margin-top: 64px }
+.cats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px }
+.cat { all: unset; box-sizing: border-box; cursor: pointer; background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: center; transition: border-color .15s, transform .15s, background .15s }
+.cat:hover { border-color: #4f86b0; transform: translateY(-2px) }
+.cat:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px }
+.cat[aria-selected="true"] { border-color: var(--gold); background: linear-gradient(180deg, #2b2412, var(--card)) }
+.cat .ic { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 14px; background: radial-gradient(closest-side, #22303e, transparent) }
+.cat .ic img { max-width: 60px; max-height: 60px; image-rendering: pixelated; object-fit: contain; filter: drop-shadow(0 6px 6px rgba(0,0,0,.45)) }
+.cat .ic .plotic { width: 40px; height: 40px; border-radius: 5px; background: repeating-linear-gradient(45deg, rgba(255,255,255,.07) 0 4px, transparent 4px 8px), #5c8f3a; box-shadow: 0 0 0 3px #2f5a1c inset }
+.cat .ic .newic { width: 46px; height: 46px; border-radius: 10px; border: 2px dashed var(--gold); color: var(--gold); display: grid; place-items: center; font: 700 30px/1 var(--display) }
+.cat b { display: block; font: 700 21px/1.1 var(--display); color: var(--navy) }
+.cat[aria-selected="true"] b { color: var(--gold) }
+.cat small { display: block; color: var(--muted); font-size: 13.5px; margin-top: 4px }
+.panel-sec[hidden] { display: none !important }
+.more { margin-top: 26px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--muted); font-size: 14.5px }
+.more a { color: var(--navy); text-decoration: none; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 8px 14px; font-weight: 700 }
+.more a:hover { border-color: var(--gold); color: var(--gold) }
+@media (max-width: 900px) { .cats { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+@media (max-width: 420px) { .cat { grid-template-columns: 48px 1fr; padding: 12px } .cat .ic { width: 48px; height: 48px } .cat .ic img { max-width: 46px; max-height: 46px } .cat b { font-size: 18px } }
 .ranks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: stretch }
 .rank { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 24px; display: flex; flex-direction: column; gap: 16px; position: relative; box-shadow: 0 14px 34px -24px rgba(0,0,0,.6); overflow: hidden }
 .rank.star { border: 2px solid var(--gold); box-shadow: 0 18px 44px -22px rgba(242,192,74,.45) }
@@ -366,6 +385,10 @@ aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 1
     </div>
   </section>
 
+  <section class="wrap shop" id="shop">
+    <div class="sec-head"><div><div class="eyebrow">Shop</div><h2>What are you after?</h2><p>Pick a category. Everything is one payment, delivered in game.</p></div></div>
+    <div class="cats" id="cats" role="tablist" aria-label="Store categories"></div>
+  </section>
   <div id="catalogue"></div>
 
   <section class="wrap block" id="custom">
@@ -590,8 +613,62 @@ function render() {
     }
   }
   $("#catalogue").innerHTML = out.join("");
-  updateTicket(); renderBasket();
+  updateTicket(); renderBasket(); buildShop();
 }
+/* the shop menu: one category on show at a time, picked from the tiles (or the top-bar links) */
+let SHOP_ACTIVE = null;
+function shopPanels() {
+  const list = [];
+  catalogue.forEach(cat => {
+    const id = cat.kind === "ranks" ? "ranks" : cat.kind === "claims" ? "claims" : cat.kind === "hats" ? "hats" : cat.kind === "custom" ? "custom" : "c" + cat.id;
+    const el = document.getElementById(id);
+    if (!el || list.some(p => p.id === id)) return;
+    const prices = cat.packages.map(p => +p.price).filter(n => n > 0);
+    const from = prices.length ? money(Math.min(...prices)) : "";
+    let ic = "", sub = "";
+    if (cat.kind === "ranks") { ic = `<img alt="" src="${FIGS.patron}">`; sub = `${cat.packages.length} ranks · from ${from}`; }
+    else if (cat.kind === "claims") { ic = `<span class="plotic"></span>`; sub = `More land · from ${from}`; }
+    else if (cat.kind === "hats") { ic = `<img alt="" src="${ICONS.sinners_halo_big || ICONS.wizard_hat || ""}">`; sub = `${cat.packages.length} hats · from ${from}`; }
+    else if (cat.kind === "custom") { ic = `<span class="newic">+</span>`; sub = `Your own design · from ${from}`; }
+    else { sub = from ? `from ${from}` : ""; }
+    list.push({ id, el, name: cat.kind === "custom" ? "Custom Hat" : cat.name, ic, sub });
+  });
+  // the custom hat form lives outside the catalogue; keep it last
+  const ci = list.findIndex(p => p.id === "custom");
+  if (ci >= 0) list.push(list.splice(ci, 1)[0]);
+  return list;
+}
+function buildShop() {
+  const panels = shopPanels();
+  if (!panels.length) return;
+  const want = (location.hash || "").slice(1);
+  if (!SHOP_ACTIVE || !panels.some(p => p.id === SHOP_ACTIVE)) SHOP_ACTIVE = panels.some(p => p.id === want) ? want : panels[0].id;
+  $("#cats").innerHTML = panels.map(p => `<button class="cat" role="tab" type="button" data-cat="${p.id}" aria-controls="${p.id}" aria-selected="${p.id === SHOP_ACTIVE}">
+    <span class="ic">${p.ic}</span><span><b>${esc(p.name)}</b><small>${esc(p.sub)}</small></span></button>`).join("");
+  panels.forEach(p => {
+    p.el.classList.add("panel-sec");
+    p.el.hidden = p.id !== SHOP_ACTIVE;
+    let more = p.el.querySelector(":scope > .more");
+    if (!more) { more = document.createElement("div"); more.className = "more"; p.el.appendChild(more); }
+    more.innerHTML = `<span>Keep browsing:</span>` + panels.filter(o => o.id !== p.id).map(o => `<a href="#${o.id}">${esc(o.name)}</a>`).join("");
+  });
+}
+function showShop(id, scroll) {
+  if (!document.getElementById(id) || !document.querySelector(`[data-cat="${id}"]`)) return false;
+  SHOP_ACTIVE = id;
+  document.querySelectorAll("[data-cat]").forEach(b => b.setAttribute("aria-selected", b.dataset.cat === id));
+  document.querySelectorAll(".panel-sec").forEach(s => s.hidden = s.id !== id);
+  try { history.replaceState(null, "", "#" + id); } catch {}
+  if (scroll) $("#shop").scrollIntoView({ behavior: "smooth", block: "start" });
+  return true;
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-cat]");
+  if (t) { showShop(t.dataset.cat, false); return; }
+  const a = e.target.closest('a[href^="#"]');
+  if (a && showShop(a.getAttribute("href").slice(1), true)) e.preventDefault();
+});
+
 const addBtn = p => { const inB = basket.some(b => b.id === p.id); return `<button class="add ${inB ? "in" : ""}" data-add="${p.id}">${inB ? "In basket" : "Add to basket"}</button>`; };
 
 function renderBasket() {
