@@ -81,7 +81,7 @@ final class BloodPriest implements Listener {
         axeInhumanOnly = c.getBoolean("priest.axe-inhuman-only", false);
         seedPrice = Math.max(1, Math.min(64, c.getInt("priest.price.tumour-seeds-gold", 3)));
         seedCount = Math.max(1, Math.min(64, c.getInt("priest.price.tumour-seeds-count", 4)));
-        seedLines = lines(c, "tumour-seeds", "Soul soil. Rotten flesh. Patience.", "Don't eat them raw. Or do.", "They grow faster under a red moon.");
+        seedLines = lines(c, "tumour-seeds", "Soul soil. Flesh or sugar. Patience.", "Don't eat them raw. Or do.", "They grow faster under a red moon.");
         axeLines = lines(c, "axe",
                 "Villagers first. Take the head, climb to the fire, give him one. Just one. He eats once a day.",
                 "Their heads, into his fire. One each sunrise. He pays in emeralds the colour of what you spilled.",

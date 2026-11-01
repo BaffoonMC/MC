@@ -74,6 +74,10 @@ final class LoreFixer implements Listener {
             Component name = Component.text(EdenMask.NAME, NamedTextColor.AQUA, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false);
             if (!Objects.equals(m.displayName(), name)) { m.displayName(name); changed = true; }
         }
+        if (plugin.tumourCrop() != null && plugin.tumourCrop().isSeed(it)) {   // older seeds pick up today's tooltip, so they still stack with new ones
+            List<Component> now = plugin.tumourCrop().seed(1).getItemMeta().lore();
+            if (!Objects.equals(m.lore(), now) && !Objects.equals(m.lore(), wrap(now))) { m.lore(now); changed = true; }
+        }
         if (m.hasLore()) {
             List<Component> lore = m.lore(), w = wrap(lore);
             if (w != lore) { m.lore(w); changed = true; }

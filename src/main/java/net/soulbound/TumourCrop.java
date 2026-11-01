@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Drawn over the tripwire states with attached=false (see {@link TripwireCrop}).
  *
  * A ripe mass drops 2-4 Tumours and 1-2 Tumour Seeds, an unripe one its seed. Rotten flesh on a crop pushes it a
- * stage. Left ripe, a mass sometimes spreads to bare soul soil next to it, and you can hear it beating nearby.
+ * stage, and so does sugar (it feeds on it). Left ripe, a mass sometimes spreads to bare soul soil next to it, and you can hear it beating nearby.
  */
 final class TumourCrop extends TripwireCrop {
     private final NamespacedKey seedKey, tumourKey;
@@ -43,7 +43,8 @@ final class TumourCrop extends TripwireCrop {
         ItemMeta m = it.getItemMeta();
         m.displayName(Component.text("Tumour Seed", TextColor.color(0xD9707E), TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
         m.lore(List.of(Component.text("Plant on soul soil or soul sand.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                Component.text("Rotten flesh makes it grow.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false)));
+                Component.text("Feed it rotten flesh or sugar to make it grow.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false),
+                Component.text("It loves sugar.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true)));
         m.setItemModel(new NamespacedKey("soulbound", "tumour_seed"));
         m.getPersistentDataContainer().set(seedKey, PersistentDataType.BYTE, (byte) 1);
         it.setItemMeta(m);
@@ -74,7 +75,11 @@ final class TumourCrop extends TripwireCrop {
 
     @Override boolean soil(Material m) { return m == Material.SOUL_SOIL || m == Material.SOUL_SAND; }
     @Override String wrongSoilMessage() { return "Tumours only take root in soul soil or soul sand."; }
-    @Override boolean isFertiliser(ItemStack it) { return it != null && it.getType() == Material.ROTTEN_FLESH; }
+    /** rotten flesh, or plain sugar (tumours feed on it); only the vanilla items, never something renamed or custom */
+    @Override boolean isFertiliser(ItemStack it) {
+        if (it == null || (it.getType() != Material.ROTTEN_FLESH && it.getType() != Material.SUGAR)) return false;
+        return !it.hasItemMeta() || it.getItemMeta().getPersistentDataContainer().isEmpty();
+    }
 
     @Override
     void fertilised(Block b) {
