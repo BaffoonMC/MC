@@ -44,6 +44,22 @@ jobs:
           echo "::notice title=add-package::$(echo "$R" | python3 -c 'import json,sys; d=json.load(sys.stdin); x=d.get("data",d); print({k: x.get(k) for k in ("total_price","currency","links","packages")} if isinstance(x,dict) else d)' 2>&1 | head -c 900)"
           A=$(curl -sS "https://headless.tebex.io/api/accounts/$T/baskets/$B/auth?returnUrl=https://store.playbaffoonmc.net/" | head -c 400)
           echo "::notice title=auth::$A"
+      - name: Add a Custom Hat with the design form's answers, exactly as the store site sends them
+        run: |
+          T=1560v-3e98abbf684fe7d070513a6896f8e23dbe3ad840
+          B=$(curl -sS -X POST "https://headless.tebex.io/api/accounts/$T/baskets" -H 'Content-Type: application/json' \
+            -d '{"username":"Notch","complete_url":"https://store.playbaffoonmc.net/","cancel_url":"https://store.playbaffoonmc.net/","complete_auto_redirect":true}' | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["ident"])')
+          CATS=$(curl -sS "https://headless.tebex.io/api/accounts/$T/categories?includePackages=1")
+          for NAME in "Custom Hat" "Hat Token" "Supporter to Patron"; do
+            PID=$(echo "$CATS" | NAME="$NAME" python3 -c 'import json,sys,os; d=json.load(sys.stdin)["data"]; print([p["id"] for c in d for p in c["packages"] if p["name"]==os.environ["NAME"]][0])')
+            if [ "$NAME" = "Custom Hat" ]; then
+              BODY="{\"package_id\": $PID, \"quantity\": 1, \"variable_data\": {\"hat_name\": \"Moon Moth Crown\", \"hat_description\": \"A pale moth sitting on my head, wings open, glowing a bit at night.\", \"hat_vibe\": \"cute, animated\", \"hat_colours\": \"#f4e9c8 #9fb7ff #2a2a3a\", \"hat_reference\": \"none\"}}"
+            else
+              BODY="{\"package_id\": $PID, \"quantity\": 1}"
+            fi
+            R=$(curl -sS -X POST "https://headless.tebex.io/api/baskets/$B/packages" -H 'Content-Type: application/json' -d "$BODY")
+            echo "::notice title=add $NAME::$(echo "$R" | head -c 700 | tr '\n' ' ')"
+          done
       - name: Sidebar modules (goal, recent payments)
         run: |
           T=1560v-3e98abbf684fe7d070513a6896f8e23dbe3ad840
