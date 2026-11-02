@@ -20,6 +20,9 @@ commands:
     description: Your Hat Wardrobe. Store hats, put them on, unlock new ones with Hat Tokens, and sell them to other players.
     usage: /wardrobe [sell <player> <price>|accept|decline|tokens]
     aliases: [hats]
+  claimfly:
+    description: Turn your claim flight off or back on (Patron perk).
+    usage: /claimfly
   god:
     description: Answer God when he asks why you're here.
     usage: /god <challenge|lost|forgive|look>
@@ -44,4 +47,10 @@ permissions:
     default: op
   soulbound.realm.build:
     description: Can build and break on the four roads of Moloch's realm (everyone else can't).
+    default: op
+  soulbound.claimfly:
+    description: Can fly inside claims they own or are trusted to build in (the Patron perk).
+    default: false
+  soulbound.fly.bypass:
+    description: Flight is never switched off for fights or in the no-fly zones.
     default: op

@@ -740,3 +740,12 @@ wardrobe:
   sell-currency: DIAMOND
   offer-seconds: 60
   store-url: store.playbaffoonmc.net
+
+# Flying. Claim flight (soulbound.claimfly, the Patron perk): fly inside your own claims and ones you're trusted to
+# build in, no command needed. Anyone flying in survival (claim flight or /fly) loses it for combat-seconds after
+# hitting or being hit by a player or monster, and nobody flies in Moloch's realm or on God's island.
+# Taking someone's flight away in mid-air always gives them a free landing (no fall damage).
+flight:
+  enabled: true
+  combat-seconds: 10
+  leave-seconds: 3

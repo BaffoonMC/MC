@@ -418,6 +418,10 @@ public final class Soulbound extends JavaPlugin {
         pm.registerEvents(grace, this);
         wardrobe = new HatWardrobe(this);
         pm.registerEvents(wardrobe, this);
+        Flight flight = new Flight(this);
+        pm.registerEvents(flight, this);
+        flight.start();
+        if (getCommand("claimfly") != null) getCommand("claimfly").setExecutor(flight);
         if (getCommand("wardrobe") != null) { getCommand("wardrobe").setExecutor(wardrobe); getCommand("wardrobe").setTabCompleter(wardrobe); }
         SbCommand sb = new SbCommand(this);
         pm.registerEvents(sb, this);
