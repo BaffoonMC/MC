@@ -20,6 +20,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
@@ -41,6 +42,9 @@ import java.util.UUID;
  * Fights (everyone flying in survival, claim flight or /fly): hit a player or a monster, or get hit by one, and flight
  * is off for combat-seconds. No-fly zones: Moloch's realm and God's island.
  *
+ * Teleport commands (/home, /tpa, /spawn, /warp, /back...) don't work for combat-seconds after a player-vs-player
+ * hit, so nobody escapes a fight that way. Fleeing a monster by /home is still fine (combat.teleport-pvp-only).
+ *
  * Whenever this takes someone's flight away in mid-air, their next landing does no fall damage.
  *
  * soulbound.fly.bypass (ops) is left alone. Players who can already /fly (essentials.fly, the Chosen perk) don't need
@@ -51,6 +55,7 @@ final class Flight implements Listener, CommandExecutor {
     private final NamespacedKey optOutKey, fallKey;
     private final Set<UUID> granted = new HashSet<>();          // flight this class switched on
     private final Map<UUID, Long> combatUntil = new HashMap<>();
+    private final Map<UUID, Long> pvpUntil = new HashMap<>();    // player-vs-player only: no teleporting out
     private final Map<UUID, Integer> leaving = new HashMap<>(); // ticks left on the "leaving your claim" countdown
     private final Map<UUID, Long> fallSafe = new HashMap<>();   // when their flight was taken, for the free landing
 
@@ -202,6 +207,24 @@ final class Flight implements Listener, CommandExecutor {
         long until = System.currentTimeMillis() + combatMillis();
         if (victim instanceof Player v && (hitter instanceof Player || hitter instanceof Enemy) && hitter != v) combatUntil.put(v.getUniqueId(), until);
         if (hitter instanceof Player a && (victim instanceof Player || victim instanceof Enemy) && victim != a) combatUntil.put(a.getUniqueId(), until);
+        boolean pvp = victim instanceof Player && hitter instanceof Player && hitter != victim;
+        boolean pvpOnly = plugin.getConfig().getBoolean("combat.teleport-pvp-only", true);
+        if (pvp || (!pvpOnly && (hitter instanceof Enemy || victim instanceof Enemy))) {
+            if (victim instanceof Player v) pvpUntil.put(v.getUniqueId(), until);
+            if (hitter instanceof Player a) pvpUntil.put(a.getUniqueId(), until);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onTeleport(PlayerTeleportEvent e) {
+        if (e.getCause() != PlayerTeleportEvent.TeleportCause.COMMAND) return;
+        if (!plugin.getConfig().getBoolean("combat.no-teleport", true)) return;
+        Player p = e.getPlayer();
+        if (p.hasPermission("soulbound.fly.bypass")) return;
+        long left = pvpUntil.getOrDefault(p.getUniqueId(), 0L) - System.currentTimeMillis();
+        if (left <= 0) return;
+        e.setCancelled(true);
+        p.sendMessage(Component.text("You can't teleport mid-fight. " + ((left + 999) / 1000) + "s left.", NamedTextColor.RED));
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -221,6 +244,7 @@ final class Flight implements Listener, CommandExecutor {
         leaving.remove(id);
         fallSafe.remove(id);
         combatUntil.remove(id);
+        pvpUntil.remove(id);
     }
 
     @EventHandler

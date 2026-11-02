@@ -749,3 +749,9 @@ flight:
   enabled: true
   combat-seconds: 10
   leave-seconds: 3
+
+# No teleporting out of a fight: /home, /tpa, /spawn, /warp, /back and the rest don't work for flight.combat-seconds
+# after a hit. teleport-pvp-only: true means only player-vs-player hits count (running from a zombie by /home is fine).
+combat:
+  no-teleport: true
+  teleport-pvp-only: true
