@@ -60,6 +60,10 @@ jobs:
             R=$(curl -sS -X POST "https://headless.tebex.io/api/baskets/$B/packages" -H 'Content-Type: application/json' -d "$BODY")
             echo "::notice title=add $NAME::$(echo "$R" | head -c 700 | tr '\n' ' ')"
           done
+      - name: Which package descriptions are formatted as code blocks
+        run: |
+          T=1560v-3e98abbf684fe7d070513a6896f8e23dbe3ad840
+          echo "::notice title=descriptions::$(curl -sS "https://headless.tebex.io/api/accounts/$T/categories?includePackages=1" | python3 -c 'import json,sys; d=json.load(sys.stdin)["data"]; print(" | ".join(p["name"] + (" = CODE BLOCK" if "<pre" in (p.get("description") or "") or "<code" in (p.get("description") or "") else (" = empty" if not (p.get("description") or "").strip() else " = ok")) for c in d for p in c["packages"]))')"
       - name: Sidebar modules (goal, recent payments)
         run: |
           T=1560v-3e98abbf684fe7d070513a6896f8e23dbe3ad840
