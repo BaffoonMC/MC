@@ -283,6 +283,22 @@ aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 1
 .hat.bundle h3 { font: 700 28px/1.1 var(--display); color: var(--gold) }
 .hats { grid-template-columns: repeat(3, minmax(0, 1fr)) }
 .fx-note { color: var(--muted); font-size: 13px; margin: 8px 0 0 }
+.upgrades { margin-top: 26px }
+.upgrades h4 { font: 700 22px/1.2 var(--display); color: var(--navy); margin: 0 0 4px }
+.upgrades > p { color: var(--muted); margin: 0 0 14px; font-size: 14px }
+.upg-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px }
+.upg { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: grid; gap: 8px }
+.upg.chosen { border-color: var(--gold) }
+.upg .figs { display: flex; align-items: center; justify-content: center; gap: 10px; height: 92px }
+.upg .figs img { height: 88px; width: auto; image-rendering: pixelated; filter: drop-shadow(0 6px 6px rgba(0,0,0,.4)) }
+.upg .figs img:first-child { height: 70px; opacity: .8 }
+.upg .arrow { font: 800 26px/1 var(--body); color: var(--gold) }
+.upg h3 { font: 700 19px/1.2 var(--display); color: var(--navy); margin: 0 }
+.upg h3 span { color: var(--muted); font-weight: 600; font-size: 15px }
+.upg .was { color: var(--muted); font-size: 13px }
+.upg .was s { color: var(--muted) }
+.upg .price { font-size: 22px }
+@media (max-width: 900px) { .upg-row { grid-template-columns: 1fr } }
 .hero-fx { margin-top: 6px }
 img.px { image-rendering: pixelated }
 .hats.tokens { grid-template-columns: 3fr 2fr }
@@ -558,6 +574,11 @@ const DEMO = [
     { id: 2, name: "Patron", price: 28.88, cls: "patron", tag: "Fly in your claim", perks: ["Everything in Supporter", "9,000 bonus claim blocks (about 95×95)", "Fly inside your own claim", "4 extra homes", "/craft portable crafting table", "Use colours in chat", "Red [Patron] tag"] },
     { id: 3, name: "Chosen", price: 49.88, cls: "chosen", tag: "Blessed by both", star: true, perks: ["Everything in Patron", "Fly anywhere (off during combat)", "20,000 bonus claim blocks (about 140×140)", "6 extra homes", "/hdb: the player heads menu", "/ec ender chest anywhere", "Reserved slot when the server is full", "Ember particle trail", "Includes the Sinner's Halo", "Gold [Chosen] tag"] }
   ]},
+  { id: "upgrades", name: "Rank Upgrades", kind: "upgrades", packages: [
+    { id: 70, name: "Supporter to Patron", price: 15.88, from: "supporter", to: "patron" },
+    { id: 71, name: "Patron to Chosen", price: 20.88, from: "patron", to: "chosen" },
+    { id: 72, name: "Supporter to Chosen", price: 36.88, from: "supporter", to: "chosen" }
+  ]},
   { id: "claims", name: "Claim Blocks", kind: "claims", packages: [
     { id: 50, name: "Small Plot", price: 2.88, blocks: 1000 },
     { id: 51, name: "Homestead", price: 6.88, blocks: 3000 },
@@ -635,10 +656,26 @@ function render() {
         return `<div class="claim" style="--c:${CLAIM_COL[p.cls]}"><div class="sq" style="width:${px}px;height:${px}px"></div><div><div class="who">${esc(p.name)}</div><div class="n">${n.toLocaleString("en-GB")}</div><div class="size">about ${side} × ${side} blocks</div></div></div>`; }).join("") +
       `</div></div>`;
   }
+  const UPG = catalogue.find(c => c.kind === "upgrades");
+  const RANKNAME = { supporter: "Supporter", patron: "Patron", chosen: "Chosen" };
+  function upgradeStrip(ranks) {
+    if (!UPG || !UPG.packages.length) return "";
+    const full = {}; ranks.forEach(r => { if (r.cls) full[r.cls] = r; });
+    const btn = p => p.soon ? `<button class="add" disabled>Coming soon</button>` : addBtn(p);
+    return `<div class="upgrades"><h4>Already have a rank? Upgrade for the difference.</h4><p>Pay only the gap to the next rank. Buy it with the same Minecraft name that has your current rank.</p><div class="upg-row">` +
+      UPG.packages.map(p => {
+        let from = p.from, to = p.to;
+        if (!from || !to) { const m = (p.name.toLowerCase().match(/supporter|patron|chosen/g) || []); from = m[0]; to = m[1]; }
+        const was = full[to] ? `<s>${money(full[to].price)}</s> ` : "";
+        return `<article class="upg ${to || ""}"><div class="figs">${FIGS[from] ? `<img alt="" src="${FIGS[from]}">` : ""}<span class="arrow">→</span>${FIGS[to] ? `<img alt="" src="${FIGS[to]}">` : ""}</div>
+          <h3>${esc(RANKNAME[from] || "")} <span>to</span> ${esc(RANKNAME[to] || p.name)}</h3><div class="was">${was}instead of the full ${esc(RANKNAME[to] || "")} price</div>
+          <div class="price-row"><div class="price">${money(p.price)}</div>${btn(p)}</div></article>`; }).join("") + `</div></div>`;
+  }
   byId = {}; CUSTOM = null;
   const out = [];
   for (const cat of catalogue) {
     cat.packages.forEach(p => byId[p.id] = p);
+    if (cat.kind === "upgrades") continue;
     if (cat.kind === "custom") { CUSTOM = { std: cat.packages[0], anim: cat.packages[1] || cat.packages[0] }; continue; }
     if (cat.kind === "claims") {
       const most = Math.max(...cat.packages.map(p => p.blocks || 0)) || 1;
@@ -655,7 +692,7 @@ function render() {
         cat.packages.map(p => `<article class="rank ${p.cls || ""} ${p.star ? "star" : ""}">${p.star ? '<div class="badge">Best value</div>' : ""}
           <div class="rhead"><div><h3>${esc(p.name)}</h3>${p.tag ? `<div class="tag">${esc(p.tag)}</div>` : ""}</div>${FIGS[p.cls] ? `<img class="fig" alt="" src="${FIGS[p.cls]}">` : ""}</div>
           ${p.perks ? `<ul>${p.perks.map(x => `<li class="${/^Everything/.test(x) ? "inh" : ""}">${esc(x)}</li>`).join("")}</ul>` : `<div class="desc">${p.description || ""}</div>`}
-          <div class="price-row"><div class="price">${money(p.price)}</div>${addBtn(p)}</div></article>`).join("") + `</div>${claimStrip(cat.packages)}</section>`);
+          <div class="price-row"><div class="price">${money(p.price)}</div>${addBtn(p)}</div></article>`).join("") + `</div>${upgradeStrip(cat.packages)}${claimStrip(cat.packages)}</section>`);
     } else if (cat.kind === "hats") {
       const btn = p => p.soon ? `<button class="add" disabled>Coming soon</button>` : addBtn(p);
       const toks = cat.packages.slice().sort((a, b) => (+a.price) - (+b.price));
@@ -863,7 +900,7 @@ async function loadLive() {
     const norm = s => slug(s).replace(/^the_/, "");
     const looks = {}; DEMO.forEach(c => c.packages.forEach(p => looks[norm(p.name)] = p));
     const fromTebex = cats.filter(c => c.packages && c.packages.length).map(c => {
-      const kind = /custom/i.test(c.name) ? "custom" : /rank/i.test(c.name) ? "ranks" : /claim/i.test(c.name) ? "claims" : /hat/i.test(c.name) ? "hats" : "grid";
+      const kind = /custom/i.test(c.name) ? "custom" : /upgrade/i.test(c.name) ? "upgrades" : /rank/i.test(c.name) ? "ranks" : /claim/i.test(c.name) ? "claims" : /hat/i.test(c.name) ? "hats" : "grid";
       return { id: c.id, name: c.name, kind, packages: c.packages.map((p, i) => {
         const d = looks[norm(p.name)] || {};
         return Object.assign({}, d, { id: p.id, name: p.name, price: p.total_price, description: p.description, image: p.image,
@@ -875,6 +912,10 @@ async function loadLive() {
       const h = DEMO.find(c => c.kind === "hats");
       const at = fromTebex.findIndex(c => c.kind === "custom");
       fromTebex.splice(at < 0 ? fromTebex.length : at, 0, Object.assign({}, h, { packages: h.packages.map(p => Object.assign({}, p, { soon: true })) }));
+    }
+    if (fromTebex.length && !fromTebex.some(c => c.kind === "upgrades")) {
+      const u = DEMO.find(c => c.kind === "upgrades");
+      fromTebex.push(Object.assign({}, u, { packages: u.packages.map(p => Object.assign({}, p, { soon: true })) }));
     }
     if (fromTebex.length) catalogue = fromTebex;
     render();
