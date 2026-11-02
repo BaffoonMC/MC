@@ -103,7 +103,7 @@ final class InhumanPoison implements Listener {
         // milk and totems don't wash the green out
         if ((action == EntityPotionEffectEvent.Action.CLEARED || action == EntityPotionEffectEvent.Action.REMOVED)
                 && (cause == EntityPotionEffectEvent.Cause.MILK || cause == EntityPotionEffectEvent.Cause.TOTEM)) {
-            if (ours(e.getOldEffect())) { e.setCancelled(true); return; }
+            if (ours(e.getOldEffect())) { realUntil.remove(p.getUniqueId()); e.setCancelled(true); return; }   // the real poison under it is cured
             // a real Poison is being washed off: put ours back straight after
             realUntil.remove(p.getUniqueId());
             Bukkit.getScheduler().runTask(plugin, () -> { if (p.isOnline() && inhuman(p)) apply(p); });
