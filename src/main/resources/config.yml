@@ -734,7 +734,7 @@ creative-world:
 # Store package command for one token:  sb give {username} hat_token     (three: sb give {username} hat_token 3)
 wardrobe:
   # The hats one token can unlock (ids from /sb items).
-  catalogue: [sinners_halo, cortex_leech, wizard_hat, crocodile_mask, baroque, flower_crown, bunny_ears, dunce_cap, furry_mask, goldfish_bowl, pigeon_pal, party_lampshade, the_visitor, bag_man, froggy, load_of_bull, head_first, hypno_helm, shroom_bloom, smug_troll, fat_steve_head, villager_head, umbrella_head, vindicator_head, villagerbrine, spartan_helm, caesars_laurels, pharaohs_nemes, guess_who]
+  catalogue: [sinners_halo, cortex_leech, wizard_hat, crocodile_mask, baroque, flower_crown, bunny_ears, dunce_cap, furry_mask, goldfish_bowl, pigeon_pal, party_lampshade, the_visitor, bag_man, froggy, load_of_bull, head_first, hypno_helm, shroom_bloom, smug_troll, fat_steve_head, villager_head, umbrella_head, vindicator_head, villagerbrine, spartan_helm, caesars_laurels, pharaohs_nemes, guess_who, flyllager]
   max-hats: 135
   # /wardrobe sell <player> <price>: what the price is paid in, and how long the buyer has to click [Buy].
   sell-currency: DIAMOND

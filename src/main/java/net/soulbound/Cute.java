@@ -84,7 +84,8 @@ final class Cute implements Listener {
         SPARTAN("Spartan Helm", "spartan_helm", null, "Come and take it."),
         LAURELS("Caesar's Laurels", "caesars_laurels", null, "I came, I saw, I wore a hat."),
         PHARAOH("Pharaoh's Nemes", "pharaohs_nemes", null, "Build a pyramid. Then another."),
-        GUESSWHO("Guess Who", "guess_who", null, "Guess who! (It's Steve. It's always Steve.)");
+        GUESSWHO("Guess Who", "guess_who", null, "Guess who! (It's Steve. It's always Steve.)"),
+        FLYLLAGER("Fly-llager", "flyllager", null, "Hrmm. Bzzzz. Hrmm.");
         final String title, model, alt, perk;
         final EquipmentSlot slot;
         final int armor;
@@ -105,7 +106,7 @@ final class Cute implements Listener {
             Kind.DUNCE, TextColor.color(0xECE6D4), Kind.FOX, TextColor.color(0xE9792B), Kind.BOWL, TextColor.color(0x7FD3EA),
             Kind.PIGEON, TextColor.color(0x9AA3B4), Kind.LAMPSHADE, TextColor.color(0xE36B8A), Kind.VISITOR, TextColor.color(0x9FD39A),
             Kind.BAG, TextColor.color(0xC49A63), Kind.FROG, TextColor.color(0x7CC56A), Kind.BULL, TextColor.color(0xB07A4E),
-            Kind.HEADFIRST, TextColor.color(0x3B4FA6), Kind.HYPNO, TextColor.color(0xA45BE6), Kind.SHROOM, TextColor.color(0xC42A2A), Kind.TROLL, TextColor.color(0x7E9A6A), Kind.FATSTEVE, TextColor.color(0x6FB6C8), Kind.VILLAGER, TextColor.color(0x5BA04A), Kind.UMBRELLA, TextColor.color(0xF28FB0), Kind.VINDICATOR, TextColor.color(0x8A9A9C), Kind.HATCEPTION, TextColor.color(0xB3122E), Kind.VILLAGERBRINE, TextColor.color(0xE8F4FF), Kind.SPARTAN, TextColor.color(0xDFA84E), Kind.LAURELS, TextColor.color(0xF2C24A), Kind.PHARAOH, TextColor.color(0x2A5CC0), Kind.GUESSWHO, TextColor.color(0x2FA7A3));
+            Kind.HEADFIRST, TextColor.color(0x3B4FA6), Kind.HYPNO, TextColor.color(0xA45BE6), Kind.SHROOM, TextColor.color(0xC42A2A), Kind.TROLL, TextColor.color(0x7E9A6A), Kind.FATSTEVE, TextColor.color(0x6FB6C8), Kind.VILLAGER, TextColor.color(0x5BA04A), Kind.UMBRELLA, TextColor.color(0xF28FB0), Kind.VINDICATOR, TextColor.color(0x8A9A9C), Kind.HATCEPTION, TextColor.color(0xB3122E), Kind.VILLAGERBRINE, TextColor.color(0xE8F4FF), Kind.SPARTAN, TextColor.color(0xDFA84E), Kind.LAURELS, TextColor.color(0xF2C24A), Kind.PHARAOH, TextColor.color(0x2A5CC0), Kind.GUESSWHO, TextColor.color(0x2FA7A3), Kind.FLYLLAGER, TextColor.color(0x9BD23A));
 
     private final Soulbound plugin;
     private final NamespacedKey key;
@@ -237,6 +238,7 @@ final class Cute implements Listener {
             case "caesarslaurels", "laurels", "laurel", "caesar", "wreath" -> Kind.LAURELS;
             case "pharaohsnemes", "pharaoh", "nemes" -> Kind.PHARAOH;
             case "guesswho", "peekaboo", "ministeve" -> Kind.GUESSWHO;
+            case "flyllager", "fly", "villagerfly" -> Kind.FLYLLAGER;
             case "lab" -> {
                 for (Kind each : new Kind[]{Kind.LAB_COAT, Kind.LAB_PANTS, Kind.LAB_SHOES}) t.getInventory().addItem(create(each));
                 yield null;
