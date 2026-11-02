@@ -185,6 +185,15 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-retire-oni", true);
             saveConfig();
         }
+        // one-off: Guess Who joins a saved token catalogue
+        if (!getConfig().getBoolean("migrated.wardrobe-guess-who", false)) {
+            List<String> cat = getConfig().getStringList("wardrobe.catalogue");
+            if (getConfig().isSet("wardrobe.catalogue") && cat.contains("pharaohs_nemes") && !cat.contains("guess_who")) {
+                List<String> l = new java.util.ArrayList<>(cat); l.add("guess_who"); getConfig().set("wardrobe.catalogue", l);
+            }
+            getConfig().set("migrated.wardrobe-guess-who", true);
+            saveConfig();
+        }
         // one-off: blood moons went from 24 hours to 1
         if (!getConfig().getBoolean("migrated.blood-moon-1h", false)) {
             if (getConfig().getInt("boss.blood-moon-hours", 24) == 24) getConfig().set("boss.blood-moon-hours", 1);
