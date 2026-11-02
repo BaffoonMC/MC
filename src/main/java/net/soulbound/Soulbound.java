@@ -203,6 +203,15 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-flyllager", true);
             saveConfig();
         }
+        // one-off: the Yeti, Balaclava and Bandana join a saved token catalogue
+        if (!getConfig().getBoolean("migrated.wardrobe-yeti-three", false)) {
+            List<String> cat = getConfig().getStringList("wardrobe.catalogue");
+            if (getConfig().isSet("wardrobe.catalogue") && cat.contains("guess_who") && !cat.contains("yeti_mask")) {
+                List<String> l = new java.util.ArrayList<>(cat); l.addAll(List.of("yeti_mask", "balaclava", "bandana")); getConfig().set("wardrobe.catalogue", l);
+            }
+            getConfig().set("migrated.wardrobe-yeti-three", true);
+            saveConfig();
+        }
         // one-off: blood moons went from 24 hours to 1
         if (!getConfig().getBoolean("migrated.blood-moon-1h", false)) {
             if (getConfig().getInt("boss.blood-moon-hours", 24) == 24) getConfig().set("boss.blood-moon-hours", 1);
