@@ -418,8 +418,8 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                 // U+E900 bronze, U+E901 silver, U+E902 gold (drawn by the resource pack); white so the medal colours show as they are
                 String[][] ranks = {{"supporter", "100", "\uE900"}, {"patron", "200", "\uE901\uE901"}, {"chosen", "300", "\uE902\uE902\uE902"}};
                 for (String[] r : ranks) {
-                    String cmd = "lp group " + r[0] + " meta setprefix " + r[1] + " \"&7[&f" + r[2] + "&7] \"";
-                    plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), cmd);
+                    String lpCmd = "lp group " + r[0] + " meta setprefix " + r[1] + " \"&7[&f" + r[2] + "&7] \"";
+                    plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), lpCmd);
                 }
                 s.sendMessage(ok("Rank tags set: bronze star for Supporter, two silver for Patron, three gold for Chosen. Players need the resource pack to see them."));
             }
