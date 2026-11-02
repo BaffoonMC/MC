@@ -75,10 +75,7 @@ final class Cute implements Listener {
         HEADFIRST("Head First", "head_first", null, "He went in head first. He's not coming out."),
         HYPNO("Hypno Helm", "hypno_helm", null, "You will wear this hat. You will like this hat."),
         SHROOM("Shroom Bloom", "shroom_bloom", null, "It's growing on you."),
-        HEHE("Hehe", "hehe_mask", null, "hehe."),
         TROLL("Smug Troll", "smug_troll", null, "u mad?"),
-        JUDGE("Judge's Wig", "judges_wig", null, "Order in the court. Guilty, obviously."),
-        STALKER("Star Stalker", "star_stalker", null, "It came a long way to hunt you. Mostly you."),
         FATSTEVE("Fat Steve Head", "fat_steve_head", null, "Big head. Bigger ideas."),
         VILLAGER("Villager Head", "villager_head", null, "Hrmm. Hrmmm."),
         UMBRELLA("Umbrella Head", "umbrella_head", null, "Never rains on you. Rains on everyone else."),
@@ -105,7 +102,7 @@ final class Cute implements Listener {
             Kind.DUNCE, TextColor.color(0xECE6D4), Kind.FOX, TextColor.color(0xE9792B), Kind.BOWL, TextColor.color(0x7FD3EA),
             Kind.PIGEON, TextColor.color(0x9AA3B4), Kind.LAMPSHADE, TextColor.color(0xE36B8A), Kind.VISITOR, TextColor.color(0x9FD39A),
             Kind.BAG, TextColor.color(0xC49A63), Kind.FROG, TextColor.color(0x7CC56A), Kind.BULL, TextColor.color(0xB07A4E), Kind.ONI, TextColor.color(0xD8322B),
-            Kind.HEADFIRST, TextColor.color(0x3B4FA6), Kind.HYPNO, TextColor.color(0xA45BE6), Kind.SHROOM, TextColor.color(0xC42A2A), Kind.HEHE, TextColor.color(0xF4EFE8), Kind.TROLL, TextColor.color(0x7E9A6A), Kind.JUDGE, TextColor.color(0xECE8DF), Kind.STALKER, TextColor.color(0x46F0E6), Kind.FATSTEVE, TextColor.color(0x6FB6C8), Kind.VILLAGER, TextColor.color(0x5BA04A), Kind.UMBRELLA, TextColor.color(0xF28FB0), Kind.VINDICATOR, TextColor.color(0x8A9A9C), Kind.HATCEPTION, TextColor.color(0xB3122E), Kind.VILLAGERBRINE, TextColor.color(0xE8F4FF));
+            Kind.HEADFIRST, TextColor.color(0x3B4FA6), Kind.HYPNO, TextColor.color(0xA45BE6), Kind.SHROOM, TextColor.color(0xC42A2A), Kind.TROLL, TextColor.color(0x7E9A6A), Kind.FATSTEVE, TextColor.color(0x6FB6C8), Kind.VILLAGER, TextColor.color(0x5BA04A), Kind.UMBRELLA, TextColor.color(0xF28FB0), Kind.VINDICATOR, TextColor.color(0x8A9A9C), Kind.HATCEPTION, TextColor.color(0xB3122E), Kind.VILLAGERBRINE, TextColor.color(0xE8F4FF));
 
     private final Soulbound plugin;
     private final NamespacedKey key;
@@ -227,10 +224,7 @@ final class Cute implements Listener {
             case "headfirst", "legs", "stuck" -> Kind.HEADFIRST;
             case "hypnohelm", "hypno", "mindcontrol" -> Kind.HYPNO;
             case "shroombloom", "shroom", "fungus", "mushroom" -> Kind.SHROOM;
-            case "hehemask", "hehe", "grin" -> Kind.HEHE;
             case "smugtroll", "troll" -> Kind.TROLL;
-            case "judgeswig", "judge", "wig" -> Kind.JUDGE;
-            case "starstalker", "stalker", "hunter", "alienhunter" -> Kind.STALKER;
             case "fatstevehead", "fatsteve", "steve", "bighead" -> Kind.FATSTEVE;
             case "villagerhead", "villager", "longhead" -> Kind.VILLAGER;
             case "umbrellahead", "umbrella", "brolly" -> Kind.UMBRELLA;

@@ -157,6 +157,16 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-no-hatception", true);
             saveConfig();
         }
+        // one-off: Hehe, the Judge's Wig and the Star Stalker are retired, so they come off a saved token catalogue
+        if (!getConfig().getBoolean("migrated.wardrobe-retire-three", false)) {
+            List<String> cat = getConfig().getStringList("wardrobe.catalogue");
+            if (getConfig().isSet("wardrobe.catalogue")) {
+                List<String> l = new java.util.ArrayList<>(cat);
+                if (l.removeAll(List.of("hehe_mask", "judges_wig", "star_stalker"))) getConfig().set("wardrobe.catalogue", l);
+            }
+            getConfig().set("migrated.wardrobe-retire-three", true);
+            saveConfig();
+        }
         // one-off: blood moons went from 24 hours to 1
         if (!getConfig().getBoolean("migrated.blood-moon-1h", false)) {
             if (getConfig().getInt("boss.blood-moon-hours", 24) == 24) getConfig().set("boss.blood-moon-hours", 1);
