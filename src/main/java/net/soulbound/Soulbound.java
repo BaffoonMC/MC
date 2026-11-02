@@ -178,6 +178,13 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-classics", true);
             saveConfig();
         }
+        // one-off: the Oni Mask is retired, so it comes off a saved token catalogue
+        if (!getConfig().getBoolean("migrated.wardrobe-retire-oni", false)) {
+            List<String> l = new java.util.ArrayList<>(getConfig().getStringList("wardrobe.catalogue"));
+            if (getConfig().isSet("wardrobe.catalogue") && l.remove("oni_mask")) getConfig().set("wardrobe.catalogue", l);
+            getConfig().set("migrated.wardrobe-retire-oni", true);
+            saveConfig();
+        }
         // one-off: blood moons went from 24 hours to 1
         if (!getConfig().getBoolean("migrated.blood-moon-1h", false)) {
             if (getConfig().getInt("boss.blood-moon-hours", 24) == 24) getConfig().set("boss.blood-moon-hours", 1);

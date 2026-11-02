@@ -125,7 +125,7 @@ final class HatWardrobe implements Listener, CommandExecutor, TabCompleter {
     private List<String> catalogue() {
         List<String> ids = plugin.getConfig().getStringList("wardrobe.catalogue");
         if (ids.isEmpty()) ids = List.of("sinners_halo", "cortex_leech", "wizard_hat", "crocodile_mask", "baroque", "flower_crown", "bunny_ears",
-                "dunce_cap", "furry_mask", "goldfish_bowl", "pigeon_pal", "party_lampshade", "the_visitor", "bag_man", "froggy", "load_of_bull", "oni_mask",
+                "dunce_cap", "furry_mask", "goldfish_bowl", "pigeon_pal", "party_lampshade", "the_visitor", "bag_man", "froggy", "load_of_bull",
                 "head_first", "hypno_helm", "shroom_bloom", "smug_troll", "fat_steve_head", "villager_head", "umbrella_head", "vindicator_head", "villagerbrine", "spartan_helm", "caesars_laurels", "pharaohs_nemes");
         List<String> ok = new ArrayList<>();
         for (String id : ids) if (registry.get().containsKey(id.toLowerCase(Locale.ROOT))) ok.add(id.toLowerCase(Locale.ROOT));

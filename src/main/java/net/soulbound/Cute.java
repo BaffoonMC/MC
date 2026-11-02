@@ -71,7 +71,6 @@ final class Cute implements Listener {
         BAG("Bag Man", "bag_man", null, "He's smiling. He's always smiling."),
         FROG("Froggy", "froggy", null, "Ribbit. (He means it.)"),
         BULL("Load of Bull", "load_of_bull", null, "Everything he says is a lie. Including this."),
-        ONI("Oni Mask", "oni_mask", null, "Wear it to the festival. Or to a fight."),
         HEADFIRST("Head First", "head_first", null, "He went in head first. He's not coming out."),
         HYPNO("Hypno Helm", "hypno_helm", null, "You will wear this hat. You will like this hat."),
         SHROOM("Shroom Bloom", "shroom_bloom", null, "It's growing on you."),
@@ -104,7 +103,7 @@ final class Cute implements Listener {
     private static final Map<Kind, TextColor> NAME_COLOURS = colours(
             Kind.DUNCE, TextColor.color(0xECE6D4), Kind.FOX, TextColor.color(0xE9792B), Kind.BOWL, TextColor.color(0x7FD3EA),
             Kind.PIGEON, TextColor.color(0x9AA3B4), Kind.LAMPSHADE, TextColor.color(0xE36B8A), Kind.VISITOR, TextColor.color(0x9FD39A),
-            Kind.BAG, TextColor.color(0xC49A63), Kind.FROG, TextColor.color(0x7CC56A), Kind.BULL, TextColor.color(0xB07A4E), Kind.ONI, TextColor.color(0xD8322B),
+            Kind.BAG, TextColor.color(0xC49A63), Kind.FROG, TextColor.color(0x7CC56A), Kind.BULL, TextColor.color(0xB07A4E),
             Kind.HEADFIRST, TextColor.color(0x3B4FA6), Kind.HYPNO, TextColor.color(0xA45BE6), Kind.SHROOM, TextColor.color(0xC42A2A), Kind.TROLL, TextColor.color(0x7E9A6A), Kind.FATSTEVE, TextColor.color(0x6FB6C8), Kind.VILLAGER, TextColor.color(0x5BA04A), Kind.UMBRELLA, TextColor.color(0xF28FB0), Kind.VINDICATOR, TextColor.color(0x8A9A9C), Kind.HATCEPTION, TextColor.color(0xB3122E), Kind.VILLAGERBRINE, TextColor.color(0xE8F4FF), Kind.SPARTAN, TextColor.color(0xDFA84E), Kind.LAURELS, TextColor.color(0xF2C24A), Kind.PHARAOH, TextColor.color(0x2A5CC0));
 
     private final Soulbound plugin;
@@ -223,7 +222,6 @@ final class Cute implements Listener {
             case "bagman", "bag", "paperbag" -> Kind.BAG;
             case "froggy", "frog" -> Kind.FROG;
             case "loadofbull", "bull" -> Kind.BULL;
-            case "onimask", "oni" -> Kind.ONI;
             case "headfirst", "legs", "stuck" -> Kind.HEADFIRST;
             case "hypnohelm", "hypno", "mindcontrol" -> Kind.HYPNO;
             case "shroombloom", "shroom", "fungus", "mushroom" -> Kind.SHROOM;
