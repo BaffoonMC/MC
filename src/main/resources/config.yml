@@ -579,6 +579,9 @@ inhuman:
   raw-meat-bonus-saturation: 4.0
   # Their food bar is the green one the Hunger effect shows (a hidden Hunger that makes them no hungrier).
   green-hunger: true
+  # The inhuman's hearts are the green Poison ones: a hidden, harmless Poison only they can see.
+  # Real Poison still hurts them while it lasts.
+  poison-hearts: true
   # The inhuman see their own hearts bruised purple (the pack's hardcore hearts, sent only to them).
   hearts:
     enabled: true
