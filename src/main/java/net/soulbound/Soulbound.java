@@ -167,6 +167,17 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-retire-three", true);
             saveConfig();
         }
+        // one-off: the Spartan Helm, Caesar's Laurels and Pharaoh's Nemes join a saved token catalogue
+        if (!getConfig().getBoolean("migrated.wardrobe-classics", false)) {
+            List<String> cat = getConfig().getStringList("wardrobe.catalogue");
+            if (getConfig().isSet("wardrobe.catalogue") && cat.contains("villagerbrine") && !cat.contains("spartan_helm")) {
+                List<String> l = new java.util.ArrayList<>(cat);
+                l.addAll(List.of("spartan_helm", "caesars_laurels", "pharaohs_nemes"));
+                getConfig().set("wardrobe.catalogue", l);
+            }
+            getConfig().set("migrated.wardrobe-classics", true);
+            saveConfig();
+        }
         // one-off: blood moons went from 24 hours to 1
         if (!getConfig().getBoolean("migrated.blood-moon-1h", false)) {
             if (getConfig().getInt("boss.blood-moon-hours", 24) == 24) getConfig().set("boss.blood-moon-hours", 1);
