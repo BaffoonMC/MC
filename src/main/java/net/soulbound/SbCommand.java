@@ -322,6 +322,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
         }
         if (group == null) {
             s.sendMessage(line("/sb reload", "reload config.yml"));
+            s.sendMessage(line("/sb rankstars", "set the rank tags to medal stars (bronze, silver, gold) in LuckPerms"));
             s.sendMessage(line("/sb release", "let your captive go"));
         }
     }
@@ -412,6 +413,16 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                 }
             }
             case "reload" -> plugin.legacyMoloch(s, new String[]{"reload"});
+            case "rankstars" -> {   // sets the rank tags to the resource pack's medal stars, through LuckPerms
+                if (plugin.getServer().getPluginManager().getPlugin("LuckPerms") == null) { s.sendMessage(bad("LuckPerms isn't installed.")); break; }
+                // U+E900 bronze, U+E901 silver, U+E902 gold (drawn by the resource pack); white so the medal colours show as they are
+                String[][] ranks = {{"supporter", "100", "\uE900"}, {"patron", "200", "\uE901\uE901"}, {"chosen", "300", "\uE902\uE902\uE902"}};
+                for (String[] r : ranks) {
+                    String cmd = "lp group " + r[0] + " meta setprefix " + r[1] + " \"&7[&f" + r[2] + "&7] \"";
+                    plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), cmd);
+                }
+                s.sendMessage(ok("Rank tags set: bronze star for Supporter, two silver for Patron, three gold for Chosen. Players need the resource pack to see them."));
+            }
             case "size" -> size(s, a);
             default -> help(s, null);
         }
@@ -477,7 +488,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
     @Override
     public List<String> onTabComplete(CommandSender s, Command cmd, String label, String[] a) {
         if (!s.hasPermission("soulbound.admin")) return a.length == 1 ? filter(List.of("release"), a[0]) : List.of();
-        if (a.length == 1) return filter(List.of("give", "items", "player", "moloch", "god", "world", "size", "reload", "release", "help"), a[0]);
+        if (a.length == 1) return filter(List.of("give", "items", "player", "moloch", "god", "world", "size", "reload", "rankstars", "release", "help"), a[0]);
         String sub = a[0].toLowerCase(Locale.ROOT);
         switch (sub) {
             case "give" -> {
