@@ -315,7 +315,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             s.sendMessage(line("/sb god heaven", "rebuild the throne, gates and pillars"));
         }
         if (group == null || group.equals("world")) {
-            s.sendMessage(line("/sb world wilddrop [radius|off]", "stand in it: anyone who falls in here goes somewhere random (/tpr)"));
+            s.sendMessage(line("/sb world wilddrop [radius|off]", "stand in it: anyone who falls in here lands somewhere random in the overworld"));
             s.sendMessage(line("/sb world priest [remove]", "place (or remove) the Blood Priest here"));
             s.sendMessage(line("/sb world gate [here]", "rebuild Moloch's Exit Gate (or move it here)"));
             s.sendMessage(line("/sb world temple", "rebuild the pyramid stairs and side gates"));

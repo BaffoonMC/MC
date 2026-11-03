@@ -803,6 +803,14 @@ homunculus:
 # Killed by the world (mobs, falls, lava, Moloch, God...): you keep everything, levels too.
 # Killed by another player: pvp-drops decides. "backpack" = the 27 slots above your hotbar drop (armour, hotbar and
 # off hand stay); "all" = everything drops; "none" = nothing does. Moloch's Curse still drops everything regardless.
+# Wild Drop (/sb world wilddrop, stand in the spot): anyone who falls in is sent to a random safe spot in the overworld.
+wild-drop:
+  world: ""          # empty = the main overworld ("world")
+  center-x: 0
+  center-z: 0
+  min-range: 500     # never closer than this to the centre (keeps people off spawn, the temple and God's island)
+  max-range: 5000
+  command: ""        # set e.g. "tpr" to use a command instead of the built-in drop
 death:
   enabled: true
   pvp-drops: backpack
