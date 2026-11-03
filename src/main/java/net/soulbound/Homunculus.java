@@ -232,6 +232,8 @@ final class Homunculus implements Listener {
             Bukkit.getScheduler().runTaskLater(plugin, () -> voice.say(h, "flask_out", name(h), 0), 25L);
         p.getPersistentDataContainer().set(mineKey, PersistentDataType.STRING, h.getUniqueId().toString());
         if (p.getGameMode() != GameMode.CREATIVE) p.getInventory().setItemInMainHand(null);
+        org.bukkit.advancement.Advancement little = Bukkit.getAdvancement(new org.bukkit.NamespacedKey("baffoon", "little_life"));
+        if (little != null) { var pr = p.getAdvancementProgress(little); for (String c : pr.getRemainingCriteria()) pr.awardCriteria(c); }
         at.getWorld().playSound(at, Sound.BLOCK_GLASS_BREAK, 1f, 1.2f);
         at.getWorld().playSound(at, Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 1f, .6f);
         at.getWorld().spawnParticle(Particle.ITEM_SLIME, at.clone().add(0, .4, 0), 20, .3, .2, .3, .05);
