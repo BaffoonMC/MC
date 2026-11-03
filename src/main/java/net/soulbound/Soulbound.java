@@ -38,6 +38,7 @@ public final class Soulbound extends JavaPlugin {
     private WildDrop wildDrop;
     private VoteShop voteShop;
     private AccountReset accountReset;
+    private Sleeper sleeper;
     private FesteringFlesh festering;
     private ThiefKey thiefKey;
     private KrakenBeard kraken;
@@ -408,6 +409,9 @@ public final class Soulbound extends JavaPlugin {
         voteShop.start();
         accountReset = new AccountReset(this);
         pm.registerEvents(accountReset, this);
+        sleeper = new Sleeper(this);
+        pm.registerEvents(sleeper, this);
+        sleeper.start();
         if (getCommand("voteshop") != null) { getCommand("voteshop").setExecutor(voteShop); getCommand("voteshop").setTabCompleter(voteShop); }
         festering = new FesteringFlesh(this);
         pm.registerEvents(festering, this);
@@ -576,6 +580,7 @@ public final class Soulbound extends JavaPlugin {
     Homunculus homunculus() { return homunculus; }
     VoteShop voteShop() { return voteShop; }
     AccountReset accountReset() { return accountReset; }
+    Sleeper sleeper() { return sleeper; }
     LoreFixer lore() { return loreFixer; }
     Grace grace() { return grace; }
     EdenMask eden() { return eden; }

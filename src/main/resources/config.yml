@@ -823,6 +823,13 @@ account-reset:
     - "deleteallclaims {player}"            # GriefPrevention: their claims
     - "setaccruedclaimblocks {player} 0"     # GriefPrevention: back to the starting claim blocks
     # - "lp user {player} parent set default"  # LuckPerms: back to Newcomer (this also takes away bought ranks!)
+# The Sleeper (/sb world sleeper): a homeless man asleep at spawn. Poke him and he gets grumpier; the 4th time he gets up
+# and shoves you away (no damage), then lies back down.
+sleeper:
+  skin: ""                     # a player name whose skin he wears when spawned fresh (or run the command looking at your own mannequin)
+  forget-seconds: 30           # he forgets how much you've annoyed him after this long
+  shove-cooldown-seconds: 120  # he only gets up for the same person this often
+  shove-strength: 1.6
 wild-drop:
   world: ""          # empty = the main overworld ("world")
   center-x: 0
