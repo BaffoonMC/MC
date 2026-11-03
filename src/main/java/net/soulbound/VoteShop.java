@@ -108,6 +108,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     }
 
     int points(UUID id) { return points.getOrDefault(id, 0); }
+    void forget(UUID id) { if (points.remove(id) != null) save(); }
     void setPoints(UUID id, int n) { points.put(id, Math.max(0, n)); save(); }
 
     // ---------------------------------------------------------------- votes

@@ -167,6 +167,12 @@ final class Homunculus implements Listener {
 
     boolean is(Entity e) { return e instanceof Husk && e.getPersistentDataContainer().has(ownerKey, PersistentDataType.STRING); }
 
+    /** Whose homunculus this is, or null if it isn't one. */
+    UUID ownerOf(Entity e) { return is(e) ? owner(e) : null; }
+
+    /** When it last came out of its flask (0 for ones from before this was kept). */
+    long bornOf(Entity e) { Long b = e.getPersistentDataContainer().get(new NamespacedKey(plugin, "homunculus_born"), PersistentDataType.LONG); return b == null ? 0 : b; }
+
     private UUID owner(Entity e) {
         try { return UUID.fromString(e.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING)); } catch (RuntimeException x) { return null; }
     }
@@ -224,6 +230,7 @@ final class Homunculus implements Listener {
             pdc.set(ownerKey, PersistentDataType.STRING, p.getUniqueId().toString());
             pdc.set(jobKey, PersistentDataType.STRING, Job.POCKET.name());
             pdc.set(fedKey, PersistentDataType.LONG, System.currentTimeMillis());
+            pdc.set(new NamespacedKey(plugin, "homunculus_born"), PersistentDataType.LONG, System.currentTimeMillis());
             if (name != null) pdc.set(nameKey, PersistentDataType.STRING, name);
         });
         if (!h.isValid()) {

@@ -295,6 +295,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
         }
         if (group == null || group.equals("player")) {
             s.sendMessage(line("/sb player <player> info", "curse, inhuman, sacrifices, Priest unlocks"));
+            s.sendMessage(line("/sb player <player> reset", "wipe their whole account back to brand new (asks to confirm)"));
             s.sendMessage(line("/sb player <player> curse [minutes]", "Moloch's curse"));
             s.sendMessage(line("/sb player <player> uncurse", "lift it (and they can be offered again)"));
             s.sendMessage(line("/sb player <player> inhuman [on|off]", "the Heart of Darkness, without eating it"));
@@ -472,6 +473,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
         if (a.length < 3) { help(s, "player"); return; }
         String name = a[1], what = a[2].toLowerCase(Locale.ROOT);
         if (what.equals("resetlimits")) { plugin.legacyMoloch(s, new String[]{"resetlimits", name}); return; }
+        if (what.equals("reset")) { plugin.accountReset().command(s, name, a.length > 3 && a[3].equalsIgnoreCase("confirm")); return; }
         Player t = Bukkit.getPlayerExact(name);
         if (t == null) { s.sendMessage(bad("No player online called " + name + ".")); return; }
         switch (what) {
@@ -524,7 +526,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             }
             case "player" -> {
                 if (a.length == 2) return null;
-                if (a.length == 3) return filter(List.of("info", "curse", "uncurse", "inhuman", "grace", "deeper", "resetlimits"), a[2]);
+                if (a.length == 3) return filter(List.of("info", "curse", "uncurse", "inhuman", "grace", "deeper", "resetlimits", "reset"), a[2]);
                 if (a.length == 4 && (a[2].equalsIgnoreCase("inhuman") || a[2].equalsIgnoreCase("grace"))) return filter(List.of("on", "off"), a[3]);
                 if (a.length == 4 && a[2].equalsIgnoreCase("deeper")) return filter(List.of("off", "on"), a[3]);
                 if (a.length == 4 && a[2].equalsIgnoreCase("curse")) return filter(List.of("15", "45", "120"), a[3]);

@@ -46,6 +46,15 @@ final class CurseManager implements Listener {
         }
     }
 
+    /** Forget everything about this player's curse (account reset). */
+    void forget(UUID id) {
+        left.remove(id); served.remove(id);
+        BossBar b = bars.remove(id);
+        Player p = Bukkit.getPlayer(id);
+        if (b != null && p != null) p.hideBossBar(b);
+        persist();
+    }
+
     void loadSettings() {
         FileConfiguration c = plugin.getConfig();
         slowSeconds = c.getInt("curse.slowness-minutes", 10) * 60;

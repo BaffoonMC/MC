@@ -70,6 +70,11 @@ final class InhumanHearts implements Listener {
 
     // ---------------------------------------------------------------- who gets them
 
+    /** Account reset: off the list for good. */
+    void forget(UUID id) {
+        if (marked.remove(id)) { plugin.store().set("inhuman-hearts", marked.stream().map(UUID::toString).sorted().toList()); plugin.store().save(); }
+    }
+
     /** Keep the list of inhuman players up to date; returns true if it changed. */
     boolean update(Player p, boolean inhuman) {
         boolean changed = inhuman ? marked.add(p.getUniqueId()) : marked.remove(p.getUniqueId());

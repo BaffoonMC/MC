@@ -37,6 +37,7 @@ public final class Soulbound extends JavaPlugin {
     private DeeperStill deeperStill;
     private WildDrop wildDrop;
     private VoteShop voteShop;
+    private AccountReset accountReset;
     private FesteringFlesh festering;
     private ThiefKey thiefKey;
     private KrakenBeard kraken;
@@ -399,6 +400,8 @@ public final class Soulbound extends JavaPlugin {
         voteShop = new VoteShop(this);
         pm.registerEvents(voteShop, this);
         voteShop.start();
+        accountReset = new AccountReset(this);
+        pm.registerEvents(accountReset, this);
         if (getCommand("voteshop") != null) { getCommand("voteshop").setExecutor(voteShop); getCommand("voteshop").setTabCompleter(voteShop); }
         festering = new FesteringFlesh(this);
         pm.registerEvents(festering, this);
@@ -565,6 +568,8 @@ public final class Soulbound extends JavaPlugin {
     InhumanPoison inhumanPoison() { return inhumanPoison; }
     QuantumStand quantumStand() { return quantumStand; }
     Homunculus homunculus() { return homunculus; }
+    VoteShop voteShop() { return voteShop; }
+    AccountReset accountReset() { return accountReset; }
     LoreFixer lore() { return loreFixer; }
     Grace grace() { return grace; }
     EdenMask eden() { return eden; }
