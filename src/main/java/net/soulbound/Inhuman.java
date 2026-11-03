@@ -200,6 +200,9 @@ final class Inhuman implements Listener {
         Bukkit.getScheduler().runTaskLater(plugin, () -> p.playSound(p.getLocation(), "minecraft:entity.warden.heartbeat", 0.8f, 0.6f), 34L);
         Bukkit.getScheduler().runTaskLater(plugin, () -> p.playSound(p.getLocation(), "minecraft:block.beacon.deactivate", 1f, 0.5f), 60L);
         whisper(p, "Shh. Let it stop. Let it all stop.", 10L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {   // after the third heartbeat, as the hearts go green
+            if (p.isOnline()) p.sendMessage(Component.text("Your heart swells with green bile and poison. You’ve never felt so full.", NamedTextColor.DARK_GREEN, TextDecoration.ITALIC));
+        }, 44L);
         whisper(p, "Welcome home, brother.", 80L);
         p.getWorld().spawnParticle(Particle.DUST, p.getLocation().add(0, 1, 0), 60, 0.4, 0.8, 0.4, 0, DARK);
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
