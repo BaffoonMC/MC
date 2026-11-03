@@ -688,7 +688,7 @@ final class Homunculus implements Listener {
             String last = HomunculusVoice.pick("death");
             if (last != null && plugin.getConfig().getBoolean("homunculus.speech", true))
                 p.sendMessage(Component.text((name(h) == null ? "Your homunculus" : name(h)) + ": ", PINK).append(Component.text(last, TextColor.color(0xFFE3EA), TextDecoration.ITALIC)));
-            p.sendMessage(Component.text((name(h) == null ? "Your homunculus" : name(h)) + " is dead. Something in you feels lighter.", NamedTextColor.DARK_RED, TextDecoration.ITALIC));
+            p.sendMessage(Component.text((name(h) == null ? "Your homunculus" : name(h)) + " is gone. Something small is missing from you.", NamedTextColor.DARK_RED, TextDecoration.ITALIC));
             String mine = p.getPersistentDataContainer().get(mineKey, PersistentDataType.STRING);
             if (h.getUniqueId().toString().equals(mine)) p.getPersistentDataContainer().remove(mineKey);
         }
