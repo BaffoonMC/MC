@@ -819,3 +819,15 @@ cloud-candy:
   hunger: 10
   saturation: 16.0
   float-seconds: 30
+
+# The Rapture Crossbow: sold by the Peacekeeper (peacekeeper.price.rapture-tears Tears of God + rapture-cotton Cloud
+# Cotton; 3 and 32 by default). Only the Graced can load it. Quick Charge built in, faster and harder-hitting bolts, and
+# whatever a bolt hits floats up for a moment (undead longer; inhumans glow). Nobody's lifted twice within the cooldown.
+rapture-crossbow:
+  quick-charge: 2
+  speed-multiplier: 1.3
+  damage-multiplier: 1.5
+  levitation-seconds: 1
+  undead-levitation-seconds: 2
+  inhuman-glow-seconds: 5
+  relift-cooldown-seconds: 3

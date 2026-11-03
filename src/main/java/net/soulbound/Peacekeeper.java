@@ -204,6 +204,11 @@ final class Peacekeeper implements Listener {
         if (plugin.cloudCotton() != null)
             list.add(deal(plugin.cloudCotton().seed(Math.max(1, Math.min(64, c.getInt("peacekeeper.cotton-seeds-count", 4)))),
                     new ItemStack(Material.DIAMOND, Math.max(1, Math.min(64, c.getInt("peacekeeper.price.cotton-seeds-diamonds", 2))))));
+        // the Rapture Crossbow (only the Graced can use it)
+        if (plugin.raptureCrossbow() != null && plugin.cloudCotton() != null) {
+            ItemStack rt = tear.clone(); rt.setAmount(Math.max(1, Math.min(64, c.getInt("peacekeeper.price.rapture-tears", 3))));
+            list.add(deal(plugin.raptureCrossbow().create(), rt, plugin.cloudCotton().cotton(Math.max(1, Math.min(64, c.getInt("peacekeeper.price.rapture-cotton", 32))))));
+        }
         // last of all, the Angel Engine
         list.add(deal(plugin.grace().heart(), new ItemStack(Material.DRAGON_EGG, Math.max(1, c.getInt("peacekeeper.price.heart-of-light-eggs", 1)))));
         Merchant m = Bukkit.createMerchant();

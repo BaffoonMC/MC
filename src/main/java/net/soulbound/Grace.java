@@ -196,7 +196,7 @@ final class Grace implements Listener {
 
     // ---------------------------------------------------------------- Holy Light: the dead fear your hand
 
-    private boolean undead(Entity e) {
+    boolean undead(Entity e) {
         if (!tagLooked) {
             tagLooked = true;
             try { undeadTag = Bukkit.getTag(Tag.REGISTRY_ENTITY_TYPES, NamespacedKey.minecraft("undead"), EntityType.class); }
