@@ -1745,7 +1745,9 @@ final class MolochBoss implements Listener {
         if (boss != null && boss.isValid()) fx(Particle.LAVA, boss.getLocation(), 60, 2, 0, null);
         cleanup();
         plugin.hunger().reset();
-        bloodMoonUntil = System.currentTimeMillis() + bloodMoonHours * 3600_000L;
+        // a blood moon only sometimes: most failures, he just sinks back down
+        boolean moon = java.util.concurrent.ThreadLocalRandom.current().nextDouble() < plugin.getConfig().getDouble("boss.blood-moon-chance", 0.10);
+        if (moon) bloodMoonUntil = System.currentTimeMillis() + bloodMoonHours * 3600_000L;
         store.set("blood-moon-until", bloodMoonUntil);
         store.save();
         Bukkit.broadcast(Component.text("Moloch has fed, and sinks back into the dark.", NamedTextColor.DARK_RED, TextDecoration.BOLD));
@@ -1755,7 +1757,8 @@ final class MolochBoss implements Listener {
             plugin.curses().curse(p, mins);
             p.sendMessage(Component.text("You failed him. Moloch's Curse is on you for " + mins + " minutes.", NamedTextColor.DARK_RED, TextDecoration.ITALIC));
         }
-        Bukkit.broadcast(Component.text("A blood moon rises over the world and his realm for " + bloodMoonHours + (bloodMoonHours == 1 ? " hour." : " hours.") + " Monsters come stronger, armed and armoured.", NamedTextColor.RED));
+        if (moon) Bukkit.broadcast(Component.text("A blood moon rises over the world and his realm for " + bloodMoonHours + (bloodMoonHours == 1 ? " hour." : " hours.") + " Monsters come stronger, armed and armoured.", NamedTextColor.RED));
+        else Bukkit.broadcast(Component.text("The moon stays pale. This time.", NamedTextColor.GRAY, TextDecoration.ITALIC));
         if (c != null) playNear(c, "moloch:awaken", 1f, 0.8f);
     }
 

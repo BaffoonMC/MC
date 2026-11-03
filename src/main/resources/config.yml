@@ -286,7 +286,9 @@ boss:
   # than netherite); everyone else who fought has this chance at a piece. Wear all four and you grow this much bigger.
   regalia-drop-chance: 0.35
   regalia-set-scale: 1.5
-  # If he survives the fight: a blood moon over his realm AND the main world for this long. Monsters that spawn
+  # If he survives the fight there's this chance (0.10 = 1 in 10) of a blood moon. The rest of the time the moon stays pale.
+  blood-moon-chance: 0.10
+  # A blood moon covers his realm AND the main world for this long. Monsters that spawn
   # under it get Strength I and Speed I, and wear full gold armour trimmed in red (it never drops).
   blood-moon-hours: 1
   # Hold the main world at midnight for the whole blood moon (and nobody can sleep it away).
