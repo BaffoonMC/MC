@@ -355,10 +355,11 @@ final class Homunculus implements Listener {
     private static final EquipmentSlot[] WEAR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.HAND};
     private static final String[] WEAR_NAME = {"Head", "Chest", "Legs", "Feet", "Hand"};
     // the layout (9 wide, 5 tall): clothes down column 0 (hand under the picture), picture in columns 1-2,
-    // health / hunger / name / flask in column 3, the four orders across columns 4-8, pockets along the bottom row
+    // health / hunger / name / flask in column 3, the four orders in a 2x2 on the right, pockets along the bottom row
     private static final int[] WEAR_SLOT = {0, 9, 18, 27, 28};
     private static final int HEALTH = 3, HUNGER = 12, NAME = 21, BOTTLE = 30, FEED = 29, POCKET0 = 36;
     private static final int[] PICTURE = {1, 2, 10, 11, 19, 20};
+    private static final int[] ORDER_SLOT = {14, 16, 23, 25};   // a 2x2 on the right
     private static final Key FONT = Key.key("soulbound", "homunculus");
     private static final String[][] ORDERS = {{"Follow me", "Comes with you.", "Its pockets come too."},
                                               {"Wait here", "Sits right where it is.", ""},
@@ -424,7 +425,7 @@ final class Homunculus implements Listener {
         ItemStack pic = widget("hmg_blank", Material.PAPER, Component.text(n == null ? "Your homunculus" : n, PINK),
                 List.of(grey(health), grey("Order: " + ORDERS[job(h).ordinal()][0]), dim("Put clothes in the slots on the left.")), false);
         for (int s : PICTURE) m.inv.setItem(s, pic);
-        m.inv.setItem(HEALTH, widget("hmg_heart", Material.PAPER, Component.text(health, NamedTextColor.RED),
+        m.inv.setItem(HEALTH, icon(Material.PINK_DYE, Component.text(health, PINK),
                 List.of(dim("Tumours heal 3 hearts, eggs 1.")), false));
         m.inv.setItem(HUNGER, hungry
                 ? widget("hmg_hungry", Material.PAPER, Component.text("Hungry", NamedTextColor.RED), List.of(
@@ -437,7 +438,7 @@ final class Homunculus implements Listener {
                 List.of(grey("It climbs back in."), dim("Its pockets and clothes come back to you.")), false));
         m.inv.setItem(FEED, widget(hungry ? "hmg_bowl" : null, Material.BOWL, Component.text("Feed", PINK),
                 List.of(grey("Drop a tumour or an egg here."), dim("Or right-click it holding one.")), false));
-        // orders: the chosen row turns green (five 18x18 pieces); the others show the icon and the drawn label
+        // orders: four items; the one it's doing glows
         Job j = job(h);
         for (int r = 0; r < 4; r++) {
             boolean on = j.ordinal() == r;
@@ -445,13 +446,9 @@ final class Homunculus implements Listener {
             lore.add(grey(ORDERS[r][1]));
             if (!ORDERS[r][2].isEmpty()) lore.add(grey(ORDERS[r][2]));
             lore.add(on ? Component.text("Doing this now.", NamedTextColor.GREEN) : dim("Click to give this order."));
-            Component title = Component.text(ORDERS[r][0], on ? NamedTextColor.GREEN : NamedTextColor.WHITE, TextDecoration.BOLD);
-            for (int k = 0; k < 5; k++) {
-                int slot = 4 + k + 9 * r;
-                if (on) m.inv.setItem(slot, widget("hmg_sel_" + r + "_" + k, Material.PAPER, title, lore, false));
-                else if (k == 0) m.inv.setItem(slot, icon(ORDER_ICON[r], title, lore, false));
-                else m.inv.setItem(slot, widget("hmg_blank", Material.PAPER, title, lore, false));
-            }
+            m.inv.setItem(ORDER_SLOT[r], icon(ORDER_ICON[r], Component.text((on ? "\u2714 " : "") + ORDERS[r][0], on ? NamedTextColor.GREEN : NamedTextColor.WHITE, TextDecoration.BOLD), lore, on));
+        }
+    }
         }
     }
 
@@ -539,9 +536,10 @@ final class Homunculus implements Listener {
             });
             return;
         }
-        int col = raw % 9, r = raw / 9;
-        if (col >= 4 && r < 4) {   // an order: anywhere on its row
-            Job to = Job.values()[r];
+        int order = -1;
+        for (int i = 0; i < ORDER_SLOT.length; i++) if (ORDER_SLOT[i] == raw) order = i;
+        if (order >= 0) {   // an order
+            Job to = Job.values()[order];
             if (to == job(h)) return;
             h.getPersistentDataContainer().set(jobKey, PersistentDataType.STRING, to.name());
             Location l = h.getLocation();
