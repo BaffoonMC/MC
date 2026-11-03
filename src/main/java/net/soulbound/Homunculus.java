@@ -100,6 +100,8 @@ final class Homunculus implements Listener {
     private static final PlainTextComponentSerializer PLAIN = PlainTextComponentSerializer.plainText();
     private static final TextColor PINK = TextColor.color(0xF2A8B4);
     private int tick;
+    private HomunculusVoice voice;
+    private NamespacedKey returningKey;
 
     Homunculus(Soulbound plugin) {
         this.plugin = plugin;
@@ -111,6 +113,8 @@ final class Homunculus implements Listener {
         mineKey = new NamespacedKey(plugin, "my_homunculus");
         iconKey = new NamespacedKey(plugin, "homunculus_icon");
         nameKey = new NamespacedKey(plugin, "homunculus_name");
+        returningKey = new NamespacedKey(plugin, "homunculus_returning");
+        voice = new HomunculusVoice(plugin);
         for (int i = 0; i < 9; i++) slotKeys[i] = new NamespacedKey(plugin, "homunculus_slot_" + i);
     }
 
@@ -215,6 +219,8 @@ final class Homunculus implements Listener {
         });
         tame(h);
         showName(h);
+        if (e.getItem().getItemMeta().getPersistentDataContainer().has(returningKey, PersistentDataType.BYTE))
+            Bukkit.getScheduler().runTaskLater(plugin, () -> voice.say(h, "flask_out", name(h), 0), 25L);
         p.getPersistentDataContainer().set(mineKey, PersistentDataType.STRING, h.getUniqueId().toString());
         if (p.getGameMode() != GameMode.CREATIVE) p.getInventory().setItemInMainHand(null);
         at.getWorld().playSound(at, Sound.BLOCK_GLASS_BREAK, 1f, 1.2f);
@@ -258,6 +264,7 @@ final class Homunculus implements Listener {
         h.getWorld().playSound(h.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, 1f, 1.1f);
         h.getWorld().spawnParticle(Particle.HEART, h.getLocation().add(0, .9, 0), 3, .2, .1, .2);
         p.sendMessage(Component.text("It says \"" + n + "\" back to you, badly. It likes it.", PINK, TextDecoration.ITALIC));
+        Bukkit.getScheduler().runTaskLater(plugin, () -> voice.say(h, "named", n, 0), 30L);
         return true;
     }
 
@@ -298,6 +305,8 @@ final class Homunculus implements Listener {
         if (sp != null) sp.setBaseValue(.23);
         h.getWorld().playSound(h.getLocation(), Sound.ENTITY_GENERIC_EAT, 1f, 1.6f);
         h.getWorld().spawnParticle(Particle.HEART, h.getLocation().add(0, .9, 0), 2, .2, .1, .2);
+        boolean tumour = plugin.tumourCrop() != null && plugin.tumourCrop().isTumour(food);
+        voice.say(h, java.util.concurrent.ThreadLocalRandom.current().nextBoolean() ? (tumour ? "feed_tumour" : "feed_egg") : "feed", name(h), 0);
         return true;
     }
 
@@ -309,6 +318,13 @@ final class Homunculus implements Listener {
         Player p = e.getPlayer();
         if (!p.getUniqueId().equals(owner(h))) { p.sendActionBar(Component.text("It hides from you. It isn't yours.", NamedTextColor.GRAY)); return; }
         ItemStack hand = p.getInventory().getItemInMainHand();
+        if (p.isSneaking() && hand.getType().isAir()) {   // sneak + right-click with an empty hand: a pat on the head
+            h.getWorld().spawnParticle(Particle.HEART, h.getLocation().add(0, .9, 0), 3, .25, .15, .25);
+            h.getWorld().playSound(h.getLocation(), Sound.ENTITY_CAT_PURR, 1f, 1.4f);
+            h.lookAt(p);
+            voice.say(h, "pet", name(h), 0);
+            return;
+        }
         if (hand.getType() == Material.NAME_TAG && hand.hasItemMeta() && hand.getItemMeta().hasDisplayName()) {   // a name tag, like any mob
             if (rename(p, h, PLAIN.serialize(hand.getItemMeta().displayName())) && p.getGameMode() != GameMode.CREATIVE) hand.setAmount(hand.getAmount() - 1);
             return;
@@ -328,7 +344,13 @@ final class Homunculus implements Listener {
         List<ItemStack> back = new ArrayList<>();
         for (ItemStack it : load(h)) if (it != null) back.add(it);
         for (EquipmentSlot s : WEAR) { ItemStack it = h.getEquipment().getItem(s); if (!it.getType().isAir()) back.add(it); }
-        back.add(flask(name(h)));
+        ItemStack fl = flask(name(h));
+        ItemMeta fm = fl.getItemMeta(); fm.getPersistentDataContainer().set(returningKey, PersistentDataType.BYTE, (byte) 1); fl.setItemMeta(fm);
+        back.add(fl);
+        String bye = HomunculusVoice.pick("flask_in");
+        if (bye != null && plugin.getConfig().getBoolean("homunculus.speech", true))
+            p.sendMessage(Component.text(called(h).substring(0, 1).toUpperCase() + called(h).substring(1) + ": ", PINK).append(Component.text(bye, TextColor.color(0xFFE3EA), TextDecoration.ITALIC)));
+        voice.forget(h);
         for (ItemStack it : back) for (ItemStack left : p.getInventory().addItem(it).values()) p.getWorld().dropItemNaturally(p.getLocation(), left);
         h.remove();
         p.getPersistentDataContainer().remove(mineKey);
@@ -489,7 +511,7 @@ final class Homunculus implements Listener {
                         ItemStack one = it.clone(); one.setAmount(1);
                         h.getEquipment().setItem(to, one); h.getEquipment().setDropChance(to, 0f);
                         it.setAmount(it.getAmount() - 1);
-                        p.playSound(p.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, .8f, 1.3f);
+                        p.playSound(p.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, .8f, 1.3f); voice.say(h, "dressed", name(h), 600);
                     }
                     else for (int i = POCKET0; i < POCKET0 + 9 && it.getAmount() > 0; i++) {
                         ItemStack there = m.inv.getItem(i);
@@ -522,7 +544,7 @@ final class Homunculus implements Listener {
                 h.getEquipment().setDropChance(s, 0f);
                 if (rest == null) p.setItemOnCursor(back);
                 else { p.setItemOnCursor(rest); if (back != null) for (ItemStack left : p.getInventory().addItem(back).values()) p.getWorld().dropItemNaturally(p.getLocation(), left); }
-                p.playSound(p.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, .8f, 1.3f);
+                p.playSound(p.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, .8f, 1.3f); voice.say(h, "dressed", name(h), 600);
                 draw(m);
             });
             return;
@@ -618,7 +640,9 @@ final class Homunculus implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onHurt(EntityDamageEvent e) {
-        if (is(e.getEntity())) e.getEntity().getWorld().playSound(e.getEntity().getLocation(), Sound.ENTITY_ALLAY_HURT, 1f, .7f);
+        if (!is(e.getEntity())) return;
+        e.getEntity().getWorld().playSound(e.getEntity().getLocation(), Sound.ENTITY_ALLAY_HURT, 1f, .7f);
+        if (e.getEntity() instanceof Husk h && h.getHealth() - e.getFinalDamage() > 0) voice.say(h, "hurt", name(h), 8);
     }
 
     @EventHandler
@@ -632,7 +656,11 @@ final class Homunculus implements Listener {
         h.getWorld().playSound(h.getLocation(), Sound.ENTITY_ALLAY_DEATH, 1f, .6f);
         UUID o = owner(h);
         Player p = o == null ? null : Bukkit.getPlayer(o);
+        voice.forget(h);
         if (p != null) {
+            String last = HomunculusVoice.pick("death");
+            if (last != null && plugin.getConfig().getBoolean("homunculus.speech", true))
+                p.sendMessage(Component.text((name(h) == null ? "Your homunculus" : name(h)) + ": ", PINK).append(Component.text(last, TextColor.color(0xFFE3EA), TextDecoration.ITALIC)));
             p.sendMessage(Component.text((name(h) == null ? "Your homunculus" : name(h)) + " is dead. Something in you feels lighter.", NamedTextColor.DARK_RED, TextDecoration.ITALIC));
             String mine = p.getPersistentDataContainer().get(mineKey, PersistentDataType.STRING);
             if (h.getUniqueId().toString().equals(mine)) p.getPersistentDataContainer().remove(mineKey);
@@ -677,8 +705,64 @@ final class Homunculus implements Listener {
                 }
                 if (java.util.concurrent.ThreadLocalRandom.current().nextInt(160) == 0)
                     w.playSound(h.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, .7f, .55f);
+                if (tick % 4 == 0) chatter(h, p, hungry, starve);
             }
         }
+    }
+
+    /** Everyday talk, every couple of seconds' check: only when someone's near enough to hear it. */
+    private void chatter(Husk h, Player owner, long hungry, double starve) {
+        if (h.getLocation().getNearbyPlayers(14).isEmpty()) return;
+        String n = name(h);
+        World w = h.getWorld();
+        var rnd = java.util.concurrent.ThreadLocalRandom.current();
+        if (hungry > starve) { voice.say(h, "starving", n, 300); return; }
+        if (hungry > 86_400_000L && rnd.nextInt(20) == 0 && voice.say(h, "hungry", n, 900)) return;
+        for (Entity e : h.getNearbyEntities(6, 3, 6))
+            if (e instanceof org.bukkit.entity.Monster && !is(e) && voice.say(h, "monster", n, 90)) return;
+        if (plugin.boss() != null && plugin.boss().bloodMoon() && voice.say(h, "blood_moon", n, 600)) return;
+        if (w.isThundering() && voice.say(h, "storm", n, 900)) return;
+        long t = w.getTime();
+        if (w.getEnvironment() == World.Environment.NORMAL && t >= 13000 && t < 13600 && voice.say(h, "night", n, 1200)) return;
+        if (plugin.zones() != null && plugin.zones().inRealm(h.getLocation())) {
+            Location pit = plugin.zones().pitCentre();
+            if (pit != null && pit.getWorld().equals(w) && pit.distanceSquared(h.getLocation()) < 10 * 10 && voice.say(h, "fire_pit", n, 300)) return;
+            if (voice.say(h, "moloch_realm", n, 900)) return;
+        }
+        if (w.getEnvironment() == World.Environment.THE_END && voice.say(h, "heaven", n, 1800)) return;
+        if (job(h) == Job.POCKET && (owner == null || !owner.getWorld().equals(w)) && voice.say(h, "alone", n, 900)) return;
+        if (rnd.nextInt(240) == 0) {   // about once every eight minutes
+            boolean following = job(h) == Job.POCKET && owner != null && owner.getWorld().equals(w) && owner.getLocation().distanceSquared(h.getLocation()) < 16 * 16;
+            if (following && rnd.nextInt(3) == 0) voice.say(h, "follow", n, 0);
+            else if (job(h) == Job.DOORMAN && rnd.nextInt(3) == 0) voice.say(h, "guard", n, 0);
+            else voice.say(h, "idle", n, 0);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onOwnerDeath(org.bukkit.event.entity.PlayerDeathEvent e) {
+        Husk h = mine(e.getEntity());
+        if (h != null && h.getWorld().equals(e.getEntity().getWorld()) && h.getLocation().distanceSquared(e.getEntity().getLocation()) < 32 * 32)
+            Bukkit.getScheduler().runTaskLater(plugin, () -> { if (h.isValid()) voice.say(h, "owner_died", name(h), 0); }, 10L);
+    }
+
+    @EventHandler
+    public void onOwnerRespawn(org.bukkit.event.player.PlayerRespawnEvent e) {
+        Player p = e.getPlayer();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            Husk h = p.isOnline() ? mine(p) : null;
+            if (h != null && h.getWorld().equals(p.getWorld()) && h.getLocation().distanceSquared(p.getLocation()) < 24 * 24) voice.say(h, "owner_back", name(h), 60);
+        }, 60L);
+    }
+
+    /** Two players fighting near it: it doesn't understand. */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPvpNearby(EntityDamageByEntityEvent e) {
+        if (!(e.getEntity() instanceof Player v)) return;
+        Entity d = e.getDamager();
+        if (d instanceof org.bukkit.entity.Projectile pr && pr.getShooter() instanceof Entity sh) d = sh;
+        if (!(d instanceof Player) || d.equals(v)) return;
+        for (Entity x : v.getNearbyEntities(12, 6, 12)) if (x instanceof Husk h && is(h)) voice.say(h, "pvp", name(h), 300);
     }
 
     private void rotAway(Husk h) {
@@ -691,13 +775,14 @@ final class Homunculus implements Listener {
         UUID o = owner(h);
         Player p = o == null ? null : Bukkit.getPlayer(o);
         if (p != null) p.sendMessage(Component.text("You forgot to feed " + called(h) + ". It's just a tumour now.", NamedTextColor.DARK_RED, TextDecoration.ITALIC));
+        voice.forget(h);
         h.remove();
     }
 
     private void follow(Husk h, Player p) {
         if (p == null || !p.getWorld().equals(h.getWorld()) || p.getGameMode() == GameMode.SPECTATOR) return;
         double d = p.getLocation().distanceSquared(h.getLocation());
-        if (d > cfg("teleport-distance", 20) * cfg("teleport-distance", 20) && p.isOnGround()) { h.teleport(p.getLocation()); return; }
+        if (d > cfg("teleport-distance", 20) * cfg("teleport-distance", 20) && p.isOnGround()) { h.teleport(p.getLocation(), io.papermc.paper.entity.TeleportFlag.EntityState.RETAIN_PASSENGERS); return; }
         if (d > 9) h.getPathfinder().moveTo(p, 1.2);
         else h.getPathfinder().stopPathfinding();
     }
@@ -721,6 +806,7 @@ final class Homunculus implements Listener {
             h.getWorld().playSound(h.getLocation(), Sound.ENTITY_ALLAY_HURT, 1.2f, 1.7f);
             h.getWorld().playSound(h.getLocation(), Sound.ENTITY_ALLAY_HURT, 1.2f, 1.5f);
             h.lookAt(v);
+            voice.say(h, "stranger", name(h), 60);
             if (owner != null) owner.sendMessage(Component.text((name(h) == null ? "Your homunculus" : name(h)) + " squeals: ", PINK, TextDecoration.ITALIC)
                     .append(Component.text(v.getName() + " is at your home.", NamedTextColor.WHITE)));
         }
@@ -763,6 +849,7 @@ final class Homunculus implements Listener {
         target.setBlockData(a);
         h.getWorld().playSound(target.getLocation(), Sound.BLOCK_CROP_BREAK, .8f, 1.2f);
         h.swingMainHand();
+        if (java.util.concurrent.ThreadLocalRandom.current().nextInt(6) == 0) voice.say(h, "farm", name(h), 120);
         for (ItemStack d : drops) {
             boolean placed = false;
             for (int i = 0; i < basket.length && !placed; i++) {

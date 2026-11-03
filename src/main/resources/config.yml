@@ -788,6 +788,8 @@ homunculus:
   doorman-radius: 12
   doorman-cooldown-minutes: 5
   replace-wild-baby-husks: true
+  # It talks: little speech bubbles over its head (when petted, fed, hurt, scared, at night, now and then...). false = silent.
+  speech: true
 
 # ---------------------------------------------------------------- dying
 # What you keep when you die (this replaces the keepInventory game rule, so it doesn't matter what that's set to).
