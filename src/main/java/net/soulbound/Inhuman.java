@@ -210,6 +210,22 @@ final class Inhuman implements Listener {
         });
     }
 
+    /** Cake is human food too: an inhuman can't take a slice (lighting a candle on one still works). */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onCake(org.bukkit.event.player.PlayerInteractEvent e) {
+        if (e.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK || e.getClickedBlock() == null) return;
+        Material m = e.getClickedBlock().getType();
+        if (m != Material.CAKE && !m.name().endsWith("CANDLE_CAKE")) return;
+        Player p = e.getPlayer();
+        if (!is(p) || !plugin.getConfig().getBoolean("inhuman.raw-only", true)) return;
+        Material hand = e.getItem() == null ? Material.AIR : e.getItem().getType();
+        if (hand == Material.FLINT_AND_STEEL || hand == Material.FIRE_CHARGE) return;
+        if (p.getFoodLevel() >= 20 && p.getGameMode() != org.bukkit.GameMode.CREATIVE) return;   // can't eat it anyway
+        e.setUseInteractedBlock(org.bukkit.event.Event.Result.DENY);
+        if (e.getHand() == org.bukkit.inventory.EquipmentSlot.HAND)
+            p.sendActionBar(Component.text("Your body refuses it. Only raw flesh will do.", NamedTextColor.DARK_RED));
+    }
+
     private void transform(Player p) {
         if (!p.isOnline()) return;
         if (is(p)) { hold(p, Component.text("There's nothing left in you to lose.", NamedTextColor.DARK_RED)); return; }
