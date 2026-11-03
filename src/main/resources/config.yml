@@ -193,6 +193,8 @@ boss:
   # (His real health is always the game's cap of 1024; the scaling works by shrinking the damage he takes.)
   effective-health-base: 800
   effective-health-per-fighter: 700
+  # Show his health as a number on the boss bar ("Moloch · ❤ 3,612 / 4,400 · ..."), counted the same way as above.
+  show-health: true
   # His moves come quicker with bigger crowds (5% per extra fighter, up to 40% faster). Base gap between moves:
   seconds-between-moves: 7
   # He chases one fighter for about this long, then turns on someone else (everyone gets a turn).

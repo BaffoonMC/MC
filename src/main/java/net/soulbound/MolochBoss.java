@@ -653,7 +653,16 @@ final class MolochBoss implements Listener {
         else if (frenzy) state = "FRENZY";
         else state = crowd + " fighter" + (crowd == 1 ? "" : "s");
         bar.color(bc);
-        bar.name(Component.text("Moloch  ·  " + state + "  ·  " + CurseManager.clock((int) left), col, TextDecoration.BOLD));
+        Component name = Component.text("Moloch  ·  ", col);
+        if (plugin.getConfig().getBoolean("boss.show-health", true) && boss != null && !emerging) {
+            // his health as a number, in the same units the crowd scaling uses: "❤ 3,612 / 4,400"
+            double eff = effectiveHp();
+            long now = Math.max(0, (long) Math.ceil(boss.getHealth() / REAL_HP * eff)), max = Math.round(eff);
+            name = name.append(Component.text("\u2764 ", NamedTextColor.RED))
+                    .append(Component.text(String.format("%,d", now), NamedTextColor.WHITE))
+                    .append(Component.text(" / " + String.format("%,d", max) + "  ·  ", NamedTextColor.GRAY));
+        }
+        bar.name(name.append(Component.text(state + "  ·  " + CurseManager.clock((int) left), col)).decorate(TextDecoration.BOLD));
     }
 
     // ---------------------------------------------------------------- every tick: his moves and his ward
