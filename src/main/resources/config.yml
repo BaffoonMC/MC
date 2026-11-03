@@ -812,3 +812,10 @@ tumour-pie:
   delay-seconds: 30
   growth-seconds: 120
   poison-seconds: 20
+
+# Cloud Candy: 2 Cloud Cotton + sugar + a stick. Cotton only grows in Heaven, so it feeds you well (steak is 8 / 12.8),
+# then you float (Slow Falling) and any Tumour Pie swelling and poison are gone. Inhumans can't eat it.
+cloud-candy:
+  hunger: 10
+  saturation: 16.0
+  float-seconds: 30
