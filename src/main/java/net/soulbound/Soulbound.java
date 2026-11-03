@@ -31,6 +31,7 @@ public final class Soulbound extends JavaPlugin {
     private Parasite parasite;
     private BloodMoonBeasts beasts;
     private Tartare tartare;
+    private TumourPie tumourPie;
     private FesteringFlesh festering;
     private ThiefKey thiefKey;
     private KrakenBeard kraken;
@@ -363,6 +364,9 @@ public final class Soulbound extends JavaPlugin {
         tartare = new Tartare(this);
         pm.registerEvents(tartare, this);
         tartare.registerRecipe();
+        tumourPie = new TumourPie(this);
+        pm.registerEvents(tumourPie, this);
+        tumourPie.registerRecipe();
         festering = new FesteringFlesh(this);
         pm.registerEvents(festering, this);
         thiefKey = new ThiefKey(this);
@@ -512,6 +516,7 @@ public final class Soulbound extends JavaPlugin {
     MolochGear gear() { return gear; }
     BloodPriest priest() { return priest; }
     Tartare tartare() { return tartare; }
+    TumourPie tumourPie() { return tumourPie; }
     FesteringFlesh festering() { return festering; }
     ThiefKey thiefKey() { return thiefKey; }
     Store store() { return store; }

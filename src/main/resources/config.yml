@@ -802,3 +802,10 @@ death:
 pvp-off:
   temple: true
   gods-island: true
+
+# Tumour Pie (double stuffed): 2 tumours + nether wart + egg + sugar. A pumpkin pie's worth of food; inhumans get their
+# raw-flesh bonus on top and a little Regeneration, the living get Nausea for this long.
+tumour-pie:
+  hunger: 8
+  saturation: 9.6
+  nausea-seconds: 8
