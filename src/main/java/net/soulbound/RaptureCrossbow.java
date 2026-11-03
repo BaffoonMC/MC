@@ -58,14 +58,52 @@ final class RaptureCrossbow implements Listener {
         ItemStack it = new ItemStack(Material.CROSSBOW);
         ItemMeta m = it.getItemMeta();
         m.displayName(Component.text("Rapture Crossbow", NAME, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
-        m.lore(List.of(
-                Component.text("Whatever it strikes is lifted up.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                Component.text("Loads in a blink. Hits hard.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                Component.text("Only the Graced can draw it.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true)));
+        m.lore(lore());
         m.setItemModel(MODEL);
         m.getPersistentDataContainer().set(itemKey, PersistentDataType.BYTE, (byte) 1);
         it.setItemMeta(m);
         return it;
+    }
+
+    private static Component line(String icon, String text, String extra) {
+        Component c = Component.text(icon + " ", NAME).append(Component.text(text, NamedTextColor.WHITE));
+        if (extra != null) c = c.append(Component.text(" " + extra, NamedTextColor.DARK_GRAY));
+        return c.decoration(TextDecoration.ITALIC, false);
+    }
+
+    private static String num(double d) { return d == Math.rint(d) ? String.valueOf((long) d) : String.valueOf(Math.round(d * 100) / 100.0); }
+
+    /** The tooltip: what makes it different from a normal crossbow, from the current settings. */
+    private List<Component> lore() {
+        double load = Math.max(1, cfg("load-ticks", 5)) / 20.0;
+        int speed = (int) Math.round((cfg("speed-multiplier", 1.3) - 1) * 100), dmg = (int) Math.round((cfg("damage-multiplier", 1.5) - 1) * 100);
+        return List.of(
+                Component.text("Whatever it strikes is lifted up.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, true),
+                Component.empty(),
+                Component.text("Better than a crossbow:", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false),
+                line("\u26A1", "Loads in " + num(load) + "s", "(a crossbow takes 1.25s)"),
+                line("\u27B6", "Bolts fly " + speed + "% faster", null),
+                line("\u2694", dmg + "% more damage", null),
+                line("\u2601", "Lifts what it hits for " + num(cfg("levitation-seconds", 1)) + "s", "(undead " + num(cfg("undead-levitation-seconds", 2)) + "s)"),
+                line("\u2726", "The inhuman it hits glow for " + num(cfg("inhuman-glow-seconds", 5)) + "s", null),
+                Component.empty(),
+                Component.text("Only the Graced can draw it.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true));
+    }
+
+    /** Older ones get the new tooltip (and lose the Quick Charge they no longer need). */
+    private void refresh(ItemStack it) {
+        ItemMeta m = it.getItemMeta();
+        List<Component> want = lore();
+        boolean changed = false;
+        if (!want.equals(m.lore())) { m.lore(want); changed = true; }
+        if (m.hasEnchant(Enchantment.QUICK_CHARGE)) { m.removeEnchant(Enchantment.QUICK_CHARGE); changed = true; }
+        if (changed) it.setItemMeta(m);
+    }
+
+    @EventHandler
+    public void onHold(org.bukkit.event.player.PlayerItemHeldEvent e) {
+        ItemStack it = e.getPlayer().getInventory().getItem(e.getNewSlot());
+        if (is(it)) refresh(it);
     }
 
     boolean is(ItemStack it) {
