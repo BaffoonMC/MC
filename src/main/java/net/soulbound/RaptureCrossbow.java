@@ -75,7 +75,7 @@ final class RaptureCrossbow implements Listener {
 
     /** The tooltip: what makes it different from a normal crossbow, from the current settings. */
     private List<Component> lore() {
-        double load = Math.max(1, cfg("load-ticks", 5)) / 20.0;
+        double load = Math.max(1, cfg("load-ticks", 8)) / 20.0;
         int speed = (int) Math.round((cfg("speed-multiplier", 1.3) - 1) * 100), dmg = (int) Math.round((cfg("damage-multiplier", 1.5) - 1) * 100);
         return List.of(
                 Component.text("Whatever it strikes is lifted up.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, true),
@@ -149,7 +149,7 @@ final class RaptureCrossbow implements Listener {
             bow.setItemMeta(m);
             p.playSound(p.getLocation(), Sound.ITEM_CROSSBOW_LOADING_END, 1f, 1.5f);
             p.getWorld().spawnParticle(Particle.CLOUD, p.getEyeLocation().add(p.getLocation().getDirection().multiply(0.6)), 4, 0.1, 0.1, 0.1, 0.01);
-        }, Math.max(1L, (long) cfg("load-ticks", 5)));
+        }, Math.max(1L, (long) cfg("load-ticks", 8)));
     }
 
     private final java.util.Set<UUID> loading = new java.util.HashSet<>();

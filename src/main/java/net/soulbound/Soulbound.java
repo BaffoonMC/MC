@@ -220,6 +220,12 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-yeti-three", true);
             saveConfig();
         }
+        // one-off: the Rapture Crossbow loads in 0.4 s instead of 0.25 s
+        if (!getConfig().getBoolean("migrated.rapture-load-8", false)) {
+            if (getConfig().getInt("rapture-crossbow.load-ticks", 5) == 5) getConfig().set("rapture-crossbow.load-ticks", 8);
+            getConfig().set("migrated.rapture-load-8", true);
+            saveConfig();
+        }
         // one-off: the Umbrella Head and the Yeti were taken out of the game
         if (!getConfig().getBoolean("migrated.wardrobe-drop-umbrella-yeti", false)) {
             List<String> cat = new java.util.ArrayList<>(getConfig().getStringList("wardrobe.catalogue"));

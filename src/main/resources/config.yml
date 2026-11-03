@@ -844,7 +844,7 @@ cloud-candy:
 # whatever a bolt hits floats up for a moment (undead longer; inhumans glow). Nobody's lifted twice within the cooldown.
 rapture-crossbow:
   # How long loading takes, in ticks (20 = 1 second). A normal crossbow takes 25, Quick Charge III 10.
-  load-ticks: 5
+  load-ticks: 8      # 20 ticks = 1 s; 8 = 0.4 s (Quick Charge III is 10)
   speed-multiplier: 1.3
   damage-multiplier: 1.5
   levitation-seconds: 1
