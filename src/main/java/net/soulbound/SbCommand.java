@@ -146,6 +146,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
         m.put("ember_of_moloch", new Item("Quantum", () -> one(p.quantum().material(QuantumGear.Mat.EMBER))));
         m.put("tear_of_god", new Item("Quantum", () -> one(p.quantum().material(QuantumGear.Mat.TEAR))));
         m.put("quantum_stand", new Item("Quantum", () -> one(p.quantumStand().item())));
+        m.put("homunculus_flask", new Item("Alchemy", () -> one(p.homunculus().flask())));
         // the Egg of Potential's weapons
         m.put("blade_of_potential", new Item("Potential", () -> one(p.potentialBlade().item())));
         m.put("spiked_cultist_axe", new Item("Moloch", () -> one(p.cultistAxe().item())));

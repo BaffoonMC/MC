@@ -760,3 +760,19 @@ flight:
 combat:
   no-teleport: true
   teleport-pvp-only: true
+
+# Homunculi: crafted from a World Egg, a Tumour, a Tear of God and an Ember of Moloch. One per player. Baby husks
+# underneath (the resource pack draws baby husks as homunculi); wild baby husks are swapped for baby zombies.
+# Feed it leather (Pocket: follows you, 9 slots), a tumour (Gardener: tends crops in your claim, fills a chest) or a
+# bone (Doorman: stays put and tells you who comes by). Sugar just feeds it.
+homunculus:
+  health: 10
+  # Unfed this many days it grows slow; this many and it rots away to a tumour.
+  starve-days: 3
+  rot-days: 5
+  # A pocket homunculus left further behind than this teleports to you.
+  teleport-distance: 20
+  gardener-radius: 8
+  doorman-radius: 12
+  doorman-cooldown-minutes: 5
+  replace-wild-baby-husks: true

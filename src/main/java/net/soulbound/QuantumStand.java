@@ -56,7 +56,8 @@ import java.util.UUID;
  * few seconds, the centre filling up blue, then the result comes out on the right. Everything left in the stand goes
  * back to you when you close it.
  *
- * Recipes are deliberately few for now (see RECIPES): the Quantum Core from an Ember of Moloch and a Tear of God.
+ * Recipes are deliberately few for now (see RECIPES): the Quantum Core from an Ember of Moloch and a Tear of God, with a
+ * netherite ingot as the vessel (the same as the crafting recipe).
  */
 final class QuantumStand implements Listener {
     // menu slots (a 5-row chest)
@@ -344,8 +345,8 @@ final class QuantumStand implements Listener {
 
     private final List<Recipe> RECIPES = List.of(
             new Recipe("Quantum Core",
-                    m -> count(m, QuantumGear.Mat.EMBER) >= 1 && count(m, QuantumGear.Mat.TEAR) >= 1,
-                    m -> { takeOne(m, QuantumGear.Mat.EMBER); takeOne(m, QuantumGear.Mat.TEAR); },
+                    m -> count(m, QuantumGear.Mat.EMBER) >= 1 && count(m, QuantumGear.Mat.TEAR) >= 1 && vessel(m, Material.NETHERITE_INGOT),
+                    m -> { takeOne(m, QuantumGear.Mat.EMBER); takeOne(m, QuantumGear.Mat.TEAR); takeVessel(m); },
                     this::core));
 
     private ItemStack core() { return plugin.quantum().material(QuantumGear.Mat.CORE); }
@@ -362,6 +363,10 @@ final class QuantumStand implements Listener {
             if (!isEmpty(it) && plugin.quantum().matOf(it) == k) { it.setAmount(it.getAmount() - 1); m.inv.setItem(s, it.getAmount() > 0 ? it : null); return; }
         }
     }
+
+    private boolean vessel(Menu m, Material t) { ItemStack it = m.inv.getItem(VESSEL); return !isEmpty(it) && it.getType() == t && !it.hasItemMeta(); }
+
+    private void takeVessel(Menu m) { ItemStack it = m.inv.getItem(VESSEL); it.setAmount(it.getAmount() - 1); m.inv.setItem(VESSEL, it.getAmount() > 0 ? it : null); }
 
     private Recipe match(Menu m) {
         if (plugin.quantum() == null) return null;

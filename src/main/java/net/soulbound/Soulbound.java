@@ -56,6 +56,7 @@ public final class Soulbound extends JavaPlugin {
     private InhumanHunger inhumanHunger;
     private InhumanPoison inhumanPoison;
     private QuantumStand quantumStand;
+    private Homunculus homunculus;
     private LoreFixer loreFixer;
     private Grace grace;
     private EdenMask eden;
@@ -408,6 +409,9 @@ public final class Soulbound extends JavaPlugin {
         inhumanPoison.start();
         quantumStand = new QuantumStand(this);
         pm.registerEvents(quantumStand, this);
+        homunculus = new Homunculus(this);
+        pm.registerEvents(homunculus, this);
+        homunculus.start();
         grace = new Grace(this);
         eden = new EdenMask(this);
         zephyrs = new Zephyrs(this);
@@ -515,6 +519,7 @@ public final class Soulbound extends JavaPlugin {
     InhumanHunger inhumanHunger() { return inhumanHunger; }
     InhumanPoison inhumanPoison() { return inhumanPoison; }
     QuantumStand quantumStand() { return quantumStand; }
+    Homunculus homunculus() { return homunculus; }
     LoreFixer lore() { return loreFixer; }
     Grace grace() { return grace; }
     EdenMask eden() { return eden; }
