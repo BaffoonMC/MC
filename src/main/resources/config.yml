@@ -428,6 +428,9 @@ island:
 heaven-beds:
   carried-home: true
 god:
+  # When God falls, one fighter picked at random (from everyone who dealt at least this much damage) is given the Angel Engine.
+  angel-engine-reward: true
+  angel-engine-min-damage: 10
   # The angels he calls down on the fifth and sixth days: how many at most, how big, their health and their hit.
   angels:
     max: 7

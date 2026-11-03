@@ -1187,6 +1187,22 @@ final class GodManager implements Listener {
         plugin.godGear().reward(lastHit != null ? lastHit : top, new java.util.HashSet<>(damageBy.keySet()));
         // everyone who fought him takes a Tear of God, for the Quantum Core
         for (UUID id : damageBy.keySet()) { Player p = Bukkit.getPlayer(id); if (p != null) plugin.quantum().give(p, QuantumGear.Mat.TEAR); }
+        // and one fighter, picked at random from everyone who really fought, is given the Angel Engine
+        if (plugin.getConfig().getBoolean("god.angel-engine-reward", true) && plugin.grace() != null) {
+            double min = plugin.getConfig().getDouble("god.angel-engine-min-damage", 10);
+            List<Player> pool = new ArrayList<>();
+            for (Map.Entry<UUID, Double> en : damageBy.entrySet()) { Player p = Bukkit.getPlayer(en.getKey()); if (p != null && en.getValue() >= min) pool.add(p); }
+            if (!pool.isEmpty()) {
+                Player chosen = pool.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(pool.size()));
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    if (!chosen.isOnline()) return;
+                    for (ItemStack left : chosen.getInventory().addItem(plugin.grace().heart()).values()) chosen.getWorld().dropItem(chosen.getLocation(), left);
+                    chosen.playSound(chosen.getLocation(), "minecraft:block.beacon.power_select", 1f, 1.4f);
+                    chosen.getWorld().spawnParticle(org.bukkit.Particle.END_ROD, chosen.getLocation().add(0, 1, 0), 40, 0.4, 0.8, 0.4, 0.05);
+                    Bukkit.broadcast(Component.text("Heaven chose " + chosen.getName() + ". They are given the Angel Engine.", NamedTextColor.YELLOW, TextDecoration.BOLD));
+                }, 160L);
+            }
+        }
         String n = name;
         Bukkit.getScheduler().runTaskLater(plugin, () -> Bukkit.broadcast(Component.text(n + " struck God the hardest, and takes his Halo.", NamedTextColor.GOLD, TextDecoration.BOLD)), 100L);
     }
