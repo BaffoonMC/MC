@@ -1185,6 +1185,17 @@ final class GodManager implements Listener {
         if (name == null) name = "someone";
         plugin.halo().award(top, name);
         plugin.godGear().reward(lastHit != null ? lastHit : top, new java.util.HashSet<>(damageBy.keySet()));
+        // one more fighter, picked at random from everyone who really fought (not the one who struck last), takes a piece too
+        if (plugin.getConfig().getBoolean("god.random-vestment-reward", true)) {
+            UUID last = lastHit != null ? lastHit : top;
+            double minV = plugin.getConfig().getDouble("god.angel-engine-min-damage", 10);
+            List<UUID> vpool = new ArrayList<>();
+            for (Map.Entry<UUID, Double> en : damageBy.entrySet()) if (!en.getKey().equals(last) && en.getValue() >= minV) vpool.add(en.getKey());
+            if (!vpool.isEmpty()) {
+                UUID lucky = vpool.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(vpool.size()));
+                Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.godGear().giveRandomPiece(lucky), 120L);
+            }
+        }
         // everyone who fought him takes a Tear of God, for the Quantum Core
         for (UUID id : damageBy.keySet()) { Player p = Bukkit.getPlayer(id); if (p != null) plugin.quantum().give(p, QuantumGear.Mat.TEAR); }
         // and one fighter, picked at random from everyone who really fought, is given the Angel Engine

@@ -114,6 +114,9 @@ final class GodGear implements Listener {
         for (UUID id : fought) if (!id.equals(top) && rnd.nextDouble() < chance) give(id, piece(randomPiece()));
     }
 
+    /** A piece of the Vestments for one more fighter. */
+    void giveRandomPiece(UUID id) { give(id, piece(randomPiece())); }
+
     private Piece randomPiece() { return Piece.values()[rnd.nextInt(Piece.values().length)]; }
 
     private void give(UUID id, ItemStack item) {
