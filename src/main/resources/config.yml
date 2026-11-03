@@ -483,6 +483,8 @@ god:
   # (1 player: 1600, 5: 4400, 10: 7900). His damage also grows 15% each day of the week.
   effective-health-base: 900
   effective-health-per-fighter: 700
+  # Show his health as a number on the boss bar ("God  ❤ 1,840 / 2,300"), counted the same way as above.
+  show-health: true
   # On the seventh day he keeps dozing off for this long (double damage); this much damage wakes him up furious.
   nap-seconds: 7
   nap-wake-damage: 30

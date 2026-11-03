@@ -500,6 +500,21 @@ final class GodManager implements Listener {
         if (healthShare(d) > 0.1) lowSaid = false;
     }
 
+    /** His health as a number on the boss bar: "God  ❤ 1,840 / 2,300", in the same units the crowd scaling uses. */
+    private void showHealth(EnderDragon d) {
+        if (!plugin.getConfig().getBoolean("god.show-health", true)) { if (d.customName() != null) d.customName(null); return; }
+        var a = d.getAttribute(Attribute.MAX_HEALTH);
+        double t = toughness > 0 ? toughness : 1;
+        long now = Math.max(0, (long) Math.ceil(d.getHealth() / t)), max = Math.round((a != null ? a.getValue() : 200) / t);
+        if (dying(d)) now = 0;
+        Component name = Component.translatable("entity.minecraft.ender_dragon")
+                .append(Component.text("  \u2764 ", NamedTextColor.RED))
+                .append(Component.text(String.format("%,d", now), NamedTextColor.WHITE))
+                .append(Component.text(" / " + String.format("%,d", max), NamedTextColor.GRAY));
+        if (!name.equals(d.customName())) d.customName(name);
+        d.setCustomNameVisible(false);
+    }
+
     private double healthShare(EnderDragon d) {
         var a = d.getAttribute(Attribute.MAX_HEALTH);
         return d.getHealth() / (a != null ? a.getValue() : 200);
@@ -516,6 +531,7 @@ final class GodManager implements Listener {
         World w = d.getWorld();
 
         if (dying(d)) {
+            showHealth(d);
             if (!deathSaid) {
                 deathSaid = true;
                 Title fall = Title.title(Component.text("IT IS FINISHED", NamedTextColor.GOLD, TextDecoration.BOLD),
@@ -563,6 +579,7 @@ final class GodManager implements Listener {
         hadFighters = true;
 
         toughness = Math.min(1, 200.0 / (hpBase + hpPerFighter * f.size()));   // the dragon has 200 health: he lasts as if he had more
+        showHealth(d);
         double r = healthShare(d);
         int now = Math.max(1, Math.min(7, 1 + (int) Math.floor((1 - r) * 7)));
         if (now > day) newDay(now, d, g, f);
