@@ -327,13 +327,17 @@ final class Inhuman implements Listener {
     /**
      * The sun burns the inhuman, like the undead: out under the open sky in daylight with nothing on your head, you catch
      * fire. Anything worn on the head shades you (a Hood, a helmet, a pumpkin, a mob head...), and it never wears out.
-     * Shade, rain, water, night, and the worlds without a sun are all safe.
+     * Shade, rain, water, night, the worlds without a sun, and spawn (inhuman.sun-safe-spawn-radius blocks around the
+     * world's spawn point) are all safe.
      */
     private void sun(Player p, long now) {
         if (!plugin.getConfig().getBoolean("inhuman.sun-burns", true)) return;
         World w = p.getWorld();
         if (w.getEnvironment() != World.Environment.NORMAL || !w.isDayTime() || !w.isClearWeather()) return;
         if (p.isInWater() || p.isInRain() || p.isInPowderedSnow()) return;
+        double safe = plugin.getConfig().getDouble("inhuman.sun-safe-spawn-radius", 64);   // spawn is a safe place, sun or not
+        Location sp = w.getSpawnLocation();
+        if (safe > 0 && Math.abs(p.getX() - sp.getX()) <= safe && Math.abs(p.getZ() - sp.getZ()) <= safe) return;
         ItemStack head = p.getInventory().getHelmet();
         if (head != null && !head.getType().isAir()) return;
         if (p.getEyeLocation().getBlock().getLightFromSky() < 15) return;

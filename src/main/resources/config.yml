@@ -576,6 +576,8 @@ inhuman:
   snowball-damage: 1
   # The sun burns them like the undead: daylight, open sky and a bare head. Anything worn on the head shades them.
   sun-burns: true
+  # ...except at spawn: this many blocks around the world's spawn point (a square), the sun leaves them alone. 0 = burns there too.
+  sun-safe-spawn-radius: 64
   # Raw meat (and Beef Tartare) feeds the inhuman this much on top of its normal value.
   raw-meat-bonus-food: 3
   raw-meat-bonus-saturation: 4.0
