@@ -803,9 +803,12 @@ pvp-off:
   temple: true
   gods-island: true
 
-# Tumour Pie (double stuffed): 2 tumours + nether wart + egg + sugar. A pumpkin pie's worth of food; inhumans get their
-# raw-flesh bonus on top and a little Regeneration, the living get Nausea for this long.
+# Tumour Pie (double stuffed): 2 tumours + nether wart + egg + sugar. A pumpkin pie's worth of food. Inhumans: just food
+# (with their raw-flesh bonus). The living: fine at first, then after delay-seconds "Something doesn't feel right", and
+# they swell to 1.5x size for growth-seconds and are poisoned for poison-seconds.
 tumour-pie:
   hunger: 8
   saturation: 9.6
-  nausea-seconds: 8
+  delay-seconds: 30
+  growth-seconds: 120
+  poison-seconds: 20
