@@ -137,7 +137,7 @@ public final class Soulbound extends JavaPlugin {
             List<String> cat = getConfig().getStringList("wardrobe.catalogue");
             if (getConfig().isSet("wardrobe.catalogue") && cat.contains("villager_head") && !cat.contains("umbrella_head")) {
                 List<String> l = new java.util.ArrayList<>(cat);
-                l.addAll(List.of("umbrella_head", "vindicator_head", "hatception"));
+                l.addAll(List.of("vindicator_head", "hatception"));
                 getConfig().set("wardrobe.catalogue", l);
             }
             getConfig().set("migrated.wardrobe-three-more", true);
@@ -214,10 +214,17 @@ public final class Soulbound extends JavaPlugin {
         // one-off: the Yeti, Balaclava and Bandana join a saved token catalogue
         if (!getConfig().getBoolean("migrated.wardrobe-yeti-three", false)) {
             List<String> cat = getConfig().getStringList("wardrobe.catalogue");
-            if (getConfig().isSet("wardrobe.catalogue") && cat.contains("guess_who") && !cat.contains("yeti_mask")) {
-                List<String> l = new java.util.ArrayList<>(cat); l.addAll(List.of("yeti_mask", "balaclava", "bandana")); getConfig().set("wardrobe.catalogue", l);
+            if (getConfig().isSet("wardrobe.catalogue") && cat.contains("guess_who") && !cat.contains("balaclava")) {
+                List<String> l = new java.util.ArrayList<>(cat); l.addAll(List.of("balaclava", "bandana")); getConfig().set("wardrobe.catalogue", l);
             }
             getConfig().set("migrated.wardrobe-yeti-three", true);
+            saveConfig();
+        }
+        // one-off: the Umbrella Head and the Yeti were taken out of the game
+        if (!getConfig().getBoolean("migrated.wardrobe-drop-umbrella-yeti", false)) {
+            List<String> cat = new java.util.ArrayList<>(getConfig().getStringList("wardrobe.catalogue"));
+            if (getConfig().isSet("wardrobe.catalogue") && cat.removeAll(List.of("umbrella_head", "yeti_mask"))) getConfig().set("wardrobe.catalogue", cat);
+            getConfig().set("migrated.wardrobe-drop-umbrella-yeti", true);
             saveConfig();
         }
         // one-off: blood moons went from 24 hours to 1
