@@ -346,7 +346,9 @@ final class QuantumStand implements Listener {
             new Recipe("Quantum Core",
                     m -> count(m, QuantumGear.Mat.EMBER) >= 1 && count(m, QuantumGear.Mat.TEAR) >= 1,
                     m -> { takeOne(m, QuantumGear.Mat.EMBER); takeOne(m, QuantumGear.Mat.TEAR); },
-                    () -> plugin.quantum().material(QuantumGear.Mat.CORE)));
+                    this::core));
+
+    private ItemStack core() { return plugin.quantum().material(QuantumGear.Mat.CORE); }
 
     private int count(Menu m, QuantumGear.Mat k) {
         int n = 0;
