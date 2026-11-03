@@ -211,6 +211,23 @@ final class Inhuman implements Listener {
         });
     }
 
+    /** The living won't breed for them: feeding a grown animal its breeding food does nothing (babies can still be fed). */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBreedFeed(org.bukkit.event.player.PlayerInteractEntityEvent e) {
+        if (!(e.getRightClicked() instanceof org.bukkit.entity.Animals a) || !a.isAdult() || !is(e.getPlayer())) return;
+        if (!plugin.getConfig().getBoolean("inhuman.no-breeding", true)) return;
+        ItemStack hand = e.getHand() == org.bukkit.inventory.EquipmentSlot.OFF_HAND ? e.getPlayer().getInventory().getItemInOffHand() : e.getPlayer().getInventory().getItemInMainHand();
+        if (hand.getType().isAir() || !a.isBreedItem(hand)) return;
+        e.setCancelled(true);
+        e.getPlayer().sendActionBar(Component.text("It shies away from you. Nothing will breed for you now.", NamedTextColor.DARK_RED));
+    }
+
+    /** ...and if two animals fall in love some other way, one of them being bred by the inhuman still comes to nothing. */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBreed(org.bukkit.event.entity.EntityBreedEvent e) {
+        if (e.getBreeder() instanceof Player p && is(p) && plugin.getConfig().getBoolean("inhuman.no-breeding", true)) e.setCancelled(true);
+    }
+
     /** Cake is human food too: an inhuman can't take a slice (lighting a candle on one still works). */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onCake(org.bukkit.event.player.PlayerInteractEvent e) {

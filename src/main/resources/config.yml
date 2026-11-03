@@ -585,6 +585,8 @@ inhuman:
   # Raw meat (and Beef Tartare) feeds the inhuman this much on top of its normal value.
   # Raw only: ordinary food (bread, apples, carrots, stews...) won't go down at all. Golden apples and server items still can.
   raw-only: true
+  # Animals won't breed for the inhuman (feeding a grown one its breeding food does nothing; babies can still be fed).
+  no-breeding: true
   # Cooked meat or fish: no food from it, and this much damage (4 = two hearts).
   cooked-meat-damage: 4
   raw-meat-bonus-food: 3
