@@ -110,6 +110,15 @@ final class AccountReset implements Listener {
         }
         done.add(files + " game file" + (files == 1 ? "" : "s") + " (inventory, ender chest, XP, advancements, stats)");
 
+        // Essentials: homes, money, nickname, mail... (its own reset: deletes their userdata file and forgets them)
+        if (plugin.getConfig().getBoolean("account-reset.essentials", true)) {
+            var ess = Bukkit.getPluginManager().getPlugin("Essentials");
+            if (ess != null && ess.isEnabled()) try {
+                Object user = ess.getClass().getMethod("getUser", UUID.class).invoke(ess, id);
+                if (user != null) { user.getClass().getMethod("reset").invoke(user); done.add("Essentials (homes, money, nickname, mail)"); }
+            } catch (ReflectiveOperationException | RuntimeException ex) { plugin.getLogger().warning("Account reset: Essentials didn't reset " + name + ": " + ex); }
+        }
+
         // other plugins
         int ran = 0;
         for (String c : plugin.getConfig().getStringList("account-reset.commands")) {

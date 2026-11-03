@@ -823,10 +823,10 @@ voteshop:
 # Soulbound keeps on them). These console commands also run, for the other plugins ({player} = their name, {uuid} = their id).
 account-reset:
   keep-wardrobe: false     # true = they keep the hats in their wardrobe (e.g. ones bought with real money)
+  essentials: true         # wipe their Essentials data too: homes, money, nickname, mail
   commands:
     - "deleteallclaims {player}"            # GriefPrevention: their claims
     - "setaccruedclaimblocks {player} 0"     # GriefPrevention: back to the starting claim blocks
-    - "essentials:essentials reset {player}" # Essentials: homes, money, nickname, mail...
     # - "lp user {player} parent set default"  # LuckPerms: back to Newcomer (this also takes away bought ranks!)
 wild-drop:
   world: ""          # empty = the main overworld ("world")
