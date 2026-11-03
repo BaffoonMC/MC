@@ -61,7 +61,30 @@ final class DeeperStill implements Listener {
         minionKey = new NamespacedKey(plugin, "bell_zombie_of");
     }
 
-    void start() { Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 40L, 40L); }
+    private final java.util.Set<UUID> raised = new java.util.HashSet<>();
+
+    void start() {
+        Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 40L, 40L);
+        Bukkit.getScheduler().runTaskTimer(plugin, this::watchRaised, 20L, 10L);
+    }
+
+    /** The dead won't walk into Moloch's temple while he's awake: they crumble at the edge of it. */
+    private void watchRaised() {
+        if (raised.isEmpty()) return;
+        boolean awake = plugin.boss() != null && plugin.boss().active();
+        raised.removeIf(id -> {
+            Entity z = Bukkit.getEntity(id);
+            if (z == null || !z.isValid()) return true;
+            if (awake && plugin.zones() != null && plugin.zones().inTemple(z.getLocation())) {
+                z.getWorld().spawnParticle(Particle.LARGE_SMOKE, z.getLocation().add(0, 1, 0), 14, 0.3, 0.5, 0.3, 0.02);
+                z.getWorld().spawnParticle(Particle.FLAME, z.getLocation().add(0, 0.6, 0), 10, 0.3, 0.4, 0.3, 0.02);
+                z.getWorld().playSound(z.getLocation(), Sound.ENTITY_ZOMBIE_DEATH, 1f, 0.6f);
+                z.remove();
+                return true;
+            }
+            return false;
+        });
+    }
 
     private double cfg(String k, double d) { return plugin.getConfig().getDouble("deeper-still." + k, d); }
 
@@ -148,6 +171,7 @@ final class DeeperStill implements Listener {
                 x.customName(Component.text(p.getName() + "'s dead", ROT));
                 x.getPersistentDataContainer().set(minionKey, PersistentDataType.STRING, p.getUniqueId().toString());
             });
+            raised.add(z.getUniqueId());
             LivingEntity target = nearestFoe(p, 16);
             if (target != null) z.setTarget(target);
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
