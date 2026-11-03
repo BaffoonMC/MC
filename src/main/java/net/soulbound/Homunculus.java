@@ -33,7 +33,10 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -64,19 +67,19 @@ import java.util.UUID;
  * baby husks are swapped for baby zombies so the only ones in the world are these). It never attacks, monsters and
  * golems leave it alone, it doesn't drown into a zombie or burn, and it's silent except for its own little noises.
  *
- * Its job is what you last fed it (right-click it with the item):
- *   leather  - Pocket: follows you; right-click it for 9 extra slots
- *   tumour   - Gardener: stays where you fed it, harvests and replants ripe crops in your claim, puts the harvest in a chest
- *   bone     - Doorman: stays where you fed it; when anyone else comes near, it squeals and tells you who
- *   sugar    - just a meal
- * Any of them feeds it. Unfed for a few days it grows slow; longer and it rots away to a tumour.
- * Sneak and right-click it with an empty hand to put it back in its flask.
+ * Right-click it for its menu: clothes (head, chest, legs, feet, hand), a feeding bowl, its job, its nine pockets, and
+ * a button to put it back in its flask. Jobs:
+ *   Pocket   - follows you
+ *   Gardener - stays put, harvests and replants ripe crops in your claim, puts the harvest in the nearest chest
+ *   Doorman  - stays put; when anyone else comes near, it squeals and tells you who
+ * Tumours and eggs heal it and count as a meal (right-click it holding one, or use the bowl). Unfed for a few days it
+ * grows slow; longer and it rots away to a tumour.
  */
 final class Homunculus implements Listener {
     enum Job { POCKET, GARDENER, DOORMAN }
 
     private final Soulbound plugin;
-    private final NamespacedKey flaskKey, ownerKey, jobKey, fedKey, homeKey, mineKey;
+    private final NamespacedKey flaskKey, ownerKey, jobKey, fedKey, homeKey, mineKey, iconKey;
     private final NamespacedKey[] slotKeys = new NamespacedKey[9];
     private final Set<UUID> tamed = new HashSet<>();                // goals stripped this session
     private final Map<UUID, Long> seen = new HashMap<>();           // doorman: visitor -> when last reported
@@ -91,6 +94,7 @@ final class Homunculus implements Listener {
         fedKey = new NamespacedKey(plugin, "homunculus_fed");
         homeKey = new NamespacedKey(plugin, "homunculus_home");
         mineKey = new NamespacedKey(plugin, "my_homunculus");
+        iconKey = new NamespacedKey(plugin, "homunculus_icon");
         for (int i = 0; i < 9; i++) slotKeys[i] = new NamespacedKey(plugin, "homunculus_slot_" + i);
     }
 
@@ -203,7 +207,29 @@ final class Homunculus implements Listener {
         try { return Bukkit.getEntity(UUID.fromString(s)) instanceof Husk h && h.isValid() && is(h) ? h : null; } catch (RuntimeException x) { return null; }
     }
 
-    // ---------------------------------------------------------------- feeding, jobs, the pocket, bottling
+    // ---------------------------------------------------------------- feeding, its menu, clothes, bottling
+
+    /** Tumours and eggs: they heal it and count as a meal. */
+    private double healOf(ItemStack it) {
+        if (it == null || it.getType().isAir()) return 0;
+        if (plugin.tumourCrop() != null && plugin.tumourCrop().isTumour(it)) return 6;
+        String n = it.getType().name();
+        return (n.equals("EGG") || n.equals("BROWN_EGG") || n.equals("BLUE_EGG")) && !it.hasItemMeta() ? 2 : 0;
+    }
+
+    private boolean feed(Husk h, ItemStack food) {
+        double heal = healOf(food);
+        if (heal <= 0) return false;
+        food.setAmount(food.getAmount() - 1);
+        h.getPersistentDataContainer().set(fedKey, PersistentDataType.LONG, System.currentTimeMillis());
+        AttributeInstance hp = h.getAttribute(Attribute.MAX_HEALTH);
+        if (hp != null) h.setHealth(Math.min(hp.getValue(), h.getHealth() + heal));
+        AttributeInstance sp = h.getAttribute(Attribute.MOVEMENT_SPEED);
+        if (sp != null) sp.setBaseValue(.23);
+        h.getWorld().playSound(h.getLocation(), Sound.ENTITY_GENERIC_EAT, 1f, 1.6f);
+        h.getWorld().spawnParticle(Particle.HEART, h.getLocation().add(0, .9, 0), 2, .2, .1, .2);
+        return true;
+    }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onInteract(PlayerInteractEntityEvent e) {
@@ -213,42 +239,25 @@ final class Homunculus implements Listener {
         Player p = e.getPlayer();
         if (!p.getUniqueId().equals(owner(h))) { p.sendActionBar(Component.text("It hides from you. It isn't yours.", NamedTextColor.GRAY)); return; }
         ItemStack hand = p.getInventory().getItemInMainHand();
-        Material m = hand.getType();
-        boolean tumour = plugin.tumourCrop() != null && plugin.tumourCrop().isTumour(hand);
-        Job to = tumour ? Job.GARDENER : m == Material.BONE ? Job.DOORMAN : m == Material.LEATHER ? Job.POCKET : null;
-        if (to != null || m == Material.SUGAR) {
-            if (p.getGameMode() != GameMode.CREATIVE) hand.setAmount(hand.getAmount() - 1);
-            h.getPersistentDataContainer().set(fedKey, PersistentDataType.LONG, System.currentTimeMillis());
-            AttributeInstance sp = h.getAttribute(Attribute.MOVEMENT_SPEED);
-            if (sp != null) sp.setBaseValue(.23);
-            h.getWorld().playSound(h.getLocation(), Sound.ENTITY_GENERIC_EAT, 1f, 1.6f);
-            h.getWorld().spawnParticle(Particle.HEART, h.getLocation().add(0, .9, 0), 2, .2, .1, .2);
-            if (to != null) {
-                h.getPersistentDataContainer().set(jobKey, PersistentDataType.STRING, to.name());
-                Location l = h.getLocation();
-                h.getPersistentDataContainer().set(homeKey, PersistentDataType.STRING, l.getX() + "," + l.getY() + "," + l.getZ());
-                aim.remove(h.getUniqueId());
-                p.sendActionBar(Component.text(switch (to) {
-                    case POCKET -> "Pocket: it follows you. Right-click it to open its pockets.";
-                    case GARDENER -> "Gardener: it tends the crops in your claim around here, and fills the nearest chest.";
-                    case DOORMAN -> "Doorman: it stays right here, and tells you who comes by.";
-                }, TextColor.color(0xF2A8B4)));
-            } else p.sendActionBar(Component.text("It eats it, slowly, staring at you.", TextColor.color(0xF2A8B4)));
+        if (healOf(hand) > 0) {   // quick feed straight from your hand
+            ItemStack one = hand.clone();
+            if (feed(h, one) && p.getGameMode() != GameMode.CREATIVE) hand.setAmount(hand.getAmount() - 1);
+            p.sendActionBar(Component.text("It eats it, slowly, staring at you.", TextColor.color(0xF2A8B4)));
             return;
         }
-        if (p.isSneaking() && hand.getType().isAir()) { bottle(p, h); return; }
-        if (job(h) == Job.POCKET) { openPocket(p, h); return; }
-        long days = (System.currentTimeMillis() - fed(h)) / 86_400_000L;
-        p.sendActionBar(Component.text(job(h).name().charAt(0) + job(h).name().substring(1).toLowerCase() + ". Last fed " + (days == 0 ? "today." : days + (days == 1 ? " day ago." : " days ago.")), TextColor.color(0xF2A8B4)));
+        openMenu(p, h);
     }
 
     private long fed(Husk h) { Long t = h.getPersistentDataContainer().get(fedKey, PersistentDataType.LONG); return t == null ? System.currentTimeMillis() : t; }
 
     private void bottle(Player p, Husk h) {
-        for (ItemStack it : load(h)) if (it != null) for (ItemStack left : p.getInventory().addItem(it).values()) p.getWorld().dropItemNaturally(p.getLocation(), left);
+        List<ItemStack> back = new ArrayList<>();
+        for (ItemStack it : load(h)) if (it != null) back.add(it);
+        for (EquipmentSlot s : WEAR) { ItemStack it = h.getEquipment().getItem(s); if (!it.getType().isAir()) back.add(it); }
+        back.add(flask());
+        for (ItemStack it : back) for (ItemStack left : p.getInventory().addItem(it).values()) p.getWorld().dropItemNaturally(p.getLocation(), left);
         h.remove();
         p.getPersistentDataContainer().remove(mineKey);
-        for (ItemStack left : p.getInventory().addItem(flask()).values()) p.getWorld().dropItemNaturally(p.getLocation(), left);
         p.playSound(p.getLocation(), Sound.ITEM_BOTTLE_FILL, 1f, .8f);
     }
 
@@ -270,23 +279,176 @@ final class Homunculus implements Listener {
         }
     }
 
-    static final class Pocket implements InventoryHolder {
+    // ---- the menu: clothes along the top, a feeding bowl, its jobs, its pockets
+    private static final EquipmentSlot[] WEAR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.HAND};
+    private static final String[] WEAR_NAME = {"Head", "Chest", "Legs", "Feet", "Hand"};
+    private static final int FEED = 6, STATUS = 8, POCKET0 = 27, BOTTLE = 44;
+    private static final int[] JOB_SLOT = {20, 22, 24};
+
+    static final class Menu implements InventoryHolder {
         final Husk husk; Inventory inv;
-        Pocket(Husk husk) { this.husk = husk; }
+        Menu(Husk husk) { this.husk = husk; }
         @Override public Inventory getInventory() { return inv; }
     }
 
-    private void openPocket(Player p, Husk h) {
-        Pocket pk = new Pocket(h);
-        pk.inv = Bukkit.createInventory(pk, 9, Component.text("Its pockets"));
-        pk.inv.setContents(load(h));
-        p.openInventory(pk.inv);
-        h.getWorld().playSound(h.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, .8f, 1.4f);
+    private ItemStack icon(Material m, Component name, List<Component> lore, boolean glow) {
+        ItemStack it = new ItemStack(m);
+        ItemMeta im = it.getItemMeta();
+        im.displayName(name.decoration(TextDecoration.ITALIC, false));
+        im.lore(lore.stream().map(c -> c.decoration(TextDecoration.ITALIC, false)).toList());
+        if (glow) im.setEnchantmentGlintOverride(true);
+        im.getPersistentDataContainer().set(iconKey, PersistentDataType.BYTE, (byte) 1);
+        it.setItemMeta(im);
+        return it;
+    }
+
+    private boolean isIcon(ItemStack it) { return it != null && it.hasItemMeta() && it.getItemMeta().getPersistentDataContainer().has(iconKey, PersistentDataType.BYTE); }
+
+    private void openMenu(Player p, Husk h) {
+        Menu m = new Menu(h);
+        m.inv = Bukkit.createInventory(m, 45, Component.text(p.getName() + "'s Homunculus"));
+        draw(m);
+        ItemStack[] pocket = load(h);
+        for (int i = 0; i < 9; i++) m.inv.setItem(POCKET0 + i, pocket[i]);
+        p.openInventory(m.inv);
+        h.getWorld().playSound(h.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, .8f, .7f);
+    }
+
+    /** Everything but the pockets: redrawn whenever something changes. */
+    private void draw(Menu m) {
+        Husk h = m.husk;
+        ItemStack pane = icon(Material.GRAY_STAINED_GLASS_PANE, Component.text(" "), List.of(), false);
+        for (int i = 0; i < POCKET0; i++) m.inv.setItem(i, pane);
+        for (int i = 36; i < 45; i++) m.inv.setItem(i, pane);
+        for (int i = 0; i < WEAR.length; i++) {
+            ItemStack worn = h.getEquipment().getItem(WEAR[i]);
+            m.inv.setItem(i, worn.getType().isAir()
+                    ? icon(Material.LIGHT_GRAY_STAINED_GLASS_PANE, Component.text(WEAR_NAME[i], NamedTextColor.GRAY), List.of(Component.text("Put something here for it to wear.", NamedTextColor.DARK_GRAY)), false)
+                    : worn.clone());
+        }
+        m.inv.setItem(FEED, icon(Material.BOWL, Component.text("Feed", TextColor.color(0xF2A8B4)),
+                List.of(Component.text("Drop a tumour or an egg here.", NamedTextColor.GRAY), Component.text("It heals, and it's a meal.", NamedTextColor.DARK_GRAY)), false));
+        AttributeInstance hp = h.getAttribute(Attribute.MAX_HEALTH);
+        long days = (System.currentTimeMillis() - fed(h)) / 86_400_000L;
+        m.inv.setItem(STATUS, icon(Material.PINK_DYE, Component.text("How it's doing", TextColor.color(0xF2A8B4)), List.of(
+                Component.text("Health: " + (int) Math.ceil(h.getHealth()) + " / " + (int) (hp == null ? 10 : hp.getValue()), NamedTextColor.GRAY),
+                Component.text("Last fed: " + (days == 0 ? "today" : days + (days == 1 ? " day ago" : " days ago")), days >= cfg("starve-days", 3) ? NamedTextColor.RED : NamedTextColor.GRAY),
+                Component.text("It starves after " + (int) cfg("rot-days", 5) + " days.", NamedTextColor.DARK_GRAY)), false));
+        Job j = job(h);
+        Object[][] jobs = {{Job.POCKET, Material.BUNDLE, "Pocket", "Follows you around.", "Its pockets are below."},
+                           {Job.GARDENER, Material.WHEAT, "Gardener", "Stays here and tends the crops in your claim.", "Puts the harvest in the nearest chest."},
+                           {Job.DOORMAN, Material.BELL, "Doorman", "Stays here and watches.", "Tells you who comes by."}};
+        for (int i = 0; i < 3; i++) {
+            boolean on = jobs[i][0] == j;
+            m.inv.setItem(JOB_SLOT[i], icon((Material) jobs[i][1], Component.text((String) jobs[i][2], on ? NamedTextColor.GREEN : NamedTextColor.WHITE, TextDecoration.BOLD), List.of(
+                    Component.text((String) jobs[i][3], NamedTextColor.GRAY), Component.text((String) jobs[i][4], NamedTextColor.GRAY),
+                    Component.text(on ? "Doing this now." : "Click to give it this job.", on ? NamedTextColor.GREEN : NamedTextColor.DARK_GRAY)), on));
+        }
+        m.inv.setItem(BOTTLE, icon(Material.GLASS_BOTTLE, Component.text("Back in the flask", TextColor.color(0xF2A8B4)),
+                List.of(Component.text("It climbs back in. Its things and clothes come back to you.", NamedTextColor.GRAY)), false));
+    }
+
+    private static boolean fits(EquipmentSlot s, ItemStack it) {
+        if (s == EquipmentSlot.HEAD || s == EquipmentSlot.HAND) return true;   // anything on its head or in its hand
+        if (it.hasItemMeta() && it.getItemMeta().hasEquippable()) return it.getItemMeta().getEquippable().getSlot() == s;
+        return it.getType().getEquipmentSlot() == s;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onMenuClick(InventoryClickEvent e) {
+        if (!(e.getView().getTopInventory().getHolder() instanceof Menu m)) return;
+        Player p = (Player) e.getWhoClicked();
+        Husk h = m.husk;
+        if (!h.isValid()) { e.setCancelled(true); p.closeInventory(); return; }
+        if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR) { e.setCancelled(true); return; }
+        int raw = e.getRawSlot();
+        boolean top = raw >= 0 && raw < 45;
+        if (!top) {
+            if (e.isShiftClick() && e.getClickedInventory() == p.getInventory()) {   // from your inventory: food feeds it, everything else goes in its pockets
+                e.setCancelled(true);
+                int slot = e.getSlot();
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    ItemStack it = p.getInventory().getItem(slot);
+                    if (it == null || it.getType().isAir() || !h.isValid()) return;
+                    if (healOf(it) > 0) feed(h, it);
+                    else for (int i = POCKET0; i < POCKET0 + 9 && it.getAmount() > 0; i++) {
+                        ItemStack there = m.inv.getItem(i);
+                        if (there == null || there.getType().isAir()) { m.inv.setItem(i, it.clone()); it.setAmount(0); }
+                        else if (there.isSimilar(it)) { int mv = Math.min(there.getMaxStackSize() - there.getAmount(), it.getAmount()); there.setAmount(there.getAmount() + mv); it.setAmount(it.getAmount() - mv); }
+                    }
+                    p.getInventory().setItem(slot, it.getAmount() > 0 ? it : null);
+                    draw(m);
+                });
+            }
+            return;
+        }
+        if (raw >= POCKET0 && raw < POCKET0 + 9) return;   // its pockets work like any chest
+        e.setCancelled(true);
+        if (raw < WEAR.length) {   // clothes: swap what's on your cursor with what it's wearing
+            EquipmentSlot s = WEAR[raw];
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (!h.isValid()) return;
+                ItemStack cursor = p.getItemOnCursor();
+                boolean holding = !cursor.getType().isAir();
+                if (holding && !fits(s, cursor)) { p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, .7f, .7f); return; }
+                ItemStack worn = h.getEquipment().getItem(s);
+                ItemStack back = worn.getType().isAir() ? null : worn.clone();
+                if (!holding && back == null) return;
+                ItemStack put = null, rest = null;
+                if (holding) { put = cursor.clone(); put.setAmount(1); rest = cursor.clone(); rest.setAmount(cursor.getAmount() - 1); if (rest.getAmount() <= 0) rest = null; }
+                h.getEquipment().setItem(s, put);
+                h.getEquipment().setDropChance(s, 0f);
+                if (rest == null) p.setItemOnCursor(back);
+                else { p.setItemOnCursor(rest); if (back != null) for (ItemStack left : p.getInventory().addItem(back).values()) p.getWorld().dropItemNaturally(p.getLocation(), left); }
+                p.playSound(p.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, .8f, 1.3f);
+                draw(m);
+            });
+            return;
+        }
+        if (raw == FEED) {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                ItemStack cursor = p.getItemOnCursor();
+                if (cursor.getType().isAir() || !h.isValid()) return;
+                if (feed(h, cursor)) { p.setItemOnCursor(cursor.getAmount() > 0 ? cursor : null); draw(m); }
+                else p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, .7f, .7f);
+            });
+            return;
+        }
+        for (int i = 0; i < 3; i++) if (raw == JOB_SLOT[i]) {
+            Job to = Job.values()[i];
+            h.getPersistentDataContainer().set(jobKey, PersistentDataType.STRING, to.name());
+            Location l = h.getLocation();
+            h.getPersistentDataContainer().set(homeKey, PersistentDataType.STRING, l.getX() + "," + l.getY() + "," + l.getZ());
+            aim.remove(h.getUniqueId());
+            p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, .7f, 1.2f);
+            draw(m);
+            return;
+        }
+        if (raw == BOTTLE) { savePocket(m); p.closeInventory(); bottle(p, h); }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onMenuDrag(InventoryDragEvent e) {
+        if (!(e.getView().getTopInventory().getHolder() instanceof Menu)) return;
+        for (int raw : e.getRawSlots()) if (raw < 45 && (raw < POCKET0 || raw >= POCKET0 + 9)) { e.setCancelled(true); return; }
+    }
+
+    private void savePocket(Menu m) {
+        ItemStack[] items = new ItemStack[9];
+        for (int i = 0; i < 9; i++) items[i] = m.inv.getItem(POCKET0 + i);
+        if (m.husk.isValid()) save(m.husk, items);
+        for (int i = 0; i < 9; i++) m.inv.setItem(POCKET0 + i, null);
     }
 
     @EventHandler
-    public void onPocketClose(InventoryCloseEvent e) {
-        if (e.getInventory().getHolder() instanceof Pocket pk && pk.husk.isValid()) save(pk.husk, pk.inv.getContents());
+    public void onMenuClose(InventoryCloseEvent e) {
+        if (!(e.getInventory().getHolder() instanceof Menu m)) return;
+        if (m.husk.isValid()) { savePocket(m); return; }
+        // it died or vanished while the menu was open: hand its pockets back
+        for (int i = 0; i < 9; i++) {
+            ItemStack it = m.inv.getItem(POCKET0 + i);
+            if (it != null && !it.getType().isAir()) for (ItemStack left : e.getPlayer().getInventory().addItem(it).values()) e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), left);
+        }
     }
 
     // ---------------------------------------------------------------- keeping it gentle
@@ -316,6 +478,7 @@ final class Homunculus implements Listener {
         Husk h = (Husk) e.getEntity();
         e.getDrops().clear(); e.setDroppedExp(0);
         for (ItemStack it : load(h)) if (it != null) e.getDrops().add(it);
+        for (EquipmentSlot s : WEAR) { ItemStack it = h.getEquipment().getItem(s); if (!it.getType().isAir()) e.getDrops().add(it); }
         if (plugin.tumourCrop() != null) e.getDrops().add(plugin.tumourCrop().tumour(1));
         h.getWorld().playSound(h.getLocation(), Sound.ENTITY_ALLAY_DEATH, 1f, .6f);
         UUID o = owner(h);
@@ -371,6 +534,7 @@ final class Homunculus implements Listener {
     private void rotAway(Husk h) {
         Location l = h.getLocation();
         for (ItemStack it : load(h)) if (it != null) l.getWorld().dropItemNaturally(l, it);
+        for (EquipmentSlot s : WEAR) { ItemStack it = h.getEquipment().getItem(s); if (!it.getType().isAir()) l.getWorld().dropItemNaturally(l, it); }
         if (plugin.tumourCrop() != null) l.getWorld().dropItemNaturally(l, plugin.tumourCrop().tumour(1));
         l.getWorld().spawnParticle(Particle.ITEM_SLIME, l.add(0, .3, 0), 25, .3, .2, .3, .05);
         l.getWorld().playSound(l, Sound.BLOCK_HONEY_BLOCK_BREAK, 1f, .6f);
