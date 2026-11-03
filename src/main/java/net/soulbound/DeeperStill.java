@@ -118,6 +118,7 @@ final class DeeperStill implements Listener {
         if (e.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) return;
         if (!is(p)) { p.sendActionBar(Component.text("The bell is silent in your hand.", NamedTextColor.GRAY)); return; }
         if (safeZone(p.getLocation())) { p.sendActionBar(Component.text("The dead won't rise here.", NamedTextColor.GRAY)); return; }
+        if (bossNear(p.getLocation())) { p.sendActionBar(Component.text("The dead won't rise against him.", NamedTextColor.GRAY)); return; }
         long now = System.currentTimeMillis(), last = p.getPersistentDataContainer().getOrDefault(bellUsedKey, PersistentDataType.LONG, 0L);
         long cd = (long) (cfg("bell-cooldown-seconds", 300) * 1000);
         if (now - last < cd) {
@@ -169,6 +170,7 @@ final class DeeperStill implements Listener {
         for (Entity e : owner.getNearbyEntities(r, r / 2, r)) {
             if (!(e instanceof LivingEntity le) || e.equals(owner) || minionOwner(e) != null) continue;
             if (!(e instanceof Player) && !(e instanceof org.bukkit.entity.Monster)) continue;
+            if (bossSide(e)) continue;
             if (e instanceof Player q && (q.getGameMode() == org.bukkit.GameMode.SPECTATOR || q.getGameMode() == org.bukkit.GameMode.CREATIVE)) continue;
             if (plugin.homunculus() != null && plugin.homunculus().is(e)) continue;
             double d = e.getLocation().distanceSquared(owner.getLocation());
@@ -177,12 +179,32 @@ final class DeeperStill implements Listener {
         return best;
     }
 
-    /** They never turn on the one who rang the bell, or on each other. */
+    /** Moloch's fight (anywhere in his realm while he's awake) or God's (anywhere in Heaven while He fights). */
+    private boolean bossNear(Location l) {
+        if (plugin.boss() != null && plugin.boss().active() && plugin.zones() != null && plugin.zones().inRealm(l)) return true;
+        return plugin.god() != null && plugin.god().fighting() && l.getWorld().getEnvironment() == World.Environment.THE_END;
+    }
+
+    /** Moloch, God, or anything fighting for either of them. */
+    private boolean bossSide(Entity e) {
+        if (e == null) return false;
+        if (plugin.boss() != null && plugin.boss().isFoe(e)) return true;
+        if (e instanceof org.bukkit.entity.EnderDragon || e instanceof org.bukkit.entity.Boss) return true;
+        return plugin.god() != null && plugin.god().fighting() && e.getWorld().getEnvironment() == World.Environment.THE_END && !(e instanceof Player);
+    }
+
+    /** They never turn on the one who rang the bell, on each other, or on Moloch or God (or their own). */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onMinionTarget(EntityTargetEvent e) {
         UUID o = minionOwner(e.getEntity());
         if (o == null || e.getTarget() == null) return;
-        if (e.getTarget().getUniqueId().equals(o) || minionOwner(e.getTarget()) != null) e.setCancelled(true);
+        if (e.getTarget().getUniqueId().equals(o) || minionOwner(e.getTarget()) != null || bossSide(e.getTarget())) e.setCancelled(true);
+    }
+
+    /** ...and if one somehow lands a blow on them, it does nothing. */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onMinionHitBoss(EntityDamageByEntityEvent e) {
+        if (minionOwner(e.getDamager()) != null && bossSide(e.getEntity())) e.setCancelled(true);
     }
 
     /** Whatever their master hits, they go for. */
@@ -190,7 +212,7 @@ final class DeeperStill implements Listener {
     public void onMasterHits(EntityDamageByEntityEvent e) {
         Entity d = e.getDamager();
         if (d instanceof org.bukkit.entity.Projectile pr && pr.getShooter() instanceof Entity sh) d = sh;
-        if (!(d instanceof Player p) || !(e.getEntity() instanceof LivingEntity v) || minionOwner(v) != null) return;
+        if (!(d instanceof Player p) || !(e.getEntity() instanceof LivingEntity v) || minionOwner(v) != null || bossSide(v)) return;
         for (Entity x : p.getNearbyEntities(20, 10, 20))
             if (x instanceof Mob m && p.getUniqueId().equals(minionOwner(x))) m.setTarget(v);
     }
