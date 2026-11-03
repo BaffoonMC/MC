@@ -73,15 +73,14 @@ final class Sleeper implements Listener {
         Mannequin m;
         if (target instanceof Mannequin mq) {
             m = mq;
-            if (is(m)) return "He's already the Sleeper.";
+            if (is(m)) { m.setProfile(profile()); m.setPose(Pose.SLEEPING, true); return "He's already the Sleeper (skin refreshed)."; }
         } else {
             Location l = p.getLocation();
             l.setPitch(0);
-            String skin = plugin.getConfig().getString("sleeper.skin", "");
             placing = true;   // spawn's no-mob-spawning rule doesn't apply to him: an admin is putting him there on purpose
             try {
                 m = l.getWorld().spawn(l, Mannequin.class, x -> {
-                    if (skin != null && !skin.isBlank()) x.setProfile(ResolvableProfile.resolvableProfile().name(skin).build());
+                    x.setProfile(profile());
                     x.setPersistent(true);
                     x.setRemoveWhenFarAway(false);
                     x.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
@@ -90,11 +89,21 @@ final class Sleeper implements Listener {
             if (!m.isValid()) return "Something stopped him appearing here (another plugin cancelled it).";
         }
         m.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
+        m.setProfile(profile());
         m.setInvulnerable(true);
         m.setImmovable(true);
         m.setDescription(null);
         m.setPose(Pose.SLEEPING, true);
-        return target instanceof Mannequin ? "He lies down. Poke him and see what happens." : "A Sleeper lies where you stood. (Set sleeper.skin to a player name for his skin, or look at your own mannequin and run this.)";
+        return target instanceof Mannequin ? "He lies down. Poke him and see what happens." : "A Sleeper lies where you stood.";
+    }
+
+    /** His skin: the pack's soulbound:entity/sleeper, or a player's skin if sleeper.skin names one. */
+    private ResolvableProfile profile() {
+        String skin = plugin.getConfig().getString("sleeper.skin", "");
+        if (skin != null && !skin.isBlank()) return ResolvableProfile.resolvableProfile().name(skin).build();
+        return ResolvableProfile.resolvableProfile()
+                .skinPatch(s -> s.body(new NamespacedKey("soulbound", "entity/sleeper")).model(org.bukkit.profile.PlayerTextures.SkinModel.CLASSIC))
+                .build();
     }
 
     String removeNear(Player p) {
