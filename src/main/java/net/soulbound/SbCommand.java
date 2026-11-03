@@ -157,6 +157,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
         m.put("cloud_cotton_seeds", new Item("Heaven", () -> one(p.cloudCotton().seed(1))));
         m.put("cloud_candy", new Item("Heaven", () -> one(p.cloudCandy().create(1))));
         m.put("rapture_crossbow", new Item("Heaven", () -> one(p.raptureCrossbow().create())));
+        m.put("zombie_bell", new Item("Moloch", () -> one(p.deeperStill().bell())));
         m.put("cloud_cotton", new Item("Heaven", () -> one(p.cloudCotton().cotton(1))));
         m.put("sulfur_strawberry", new Item("Farming", () -> one(p.sulfurStrawberry().create(1))));
         m.put("bestiary", new Item("Guides", () -> one(p.bestiary().item())));

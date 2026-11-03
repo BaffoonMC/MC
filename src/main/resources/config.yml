@@ -795,6 +795,8 @@ homunculus:
   replace-wild-baby-husks: true
   # It talks: little speech bubbles over its head (when petted, fed, hurt, scared, at night, now and then...). false = silent.
   speech: true
+  # The Blood Priest whispers to anyone who brings their homunculus near him (once every 15 minutes).
+  priest-tempts: true
 
 # ---------------------------------------------------------------- dying
 # What you keep when you die (this replaces the keepInventory game rule, so it doesn't matter what that's set to).
@@ -841,3 +843,14 @@ rapture-crossbow:
   undead-levitation-seconds: 2
   inhuman-glow-seconds: 5
   relift-cooldown-seconds: 3
+
+# Deeper Still: push your own homunculus into the summit fire. Moloch's hunger goes to 100% (he wakes in a few minutes),
+# and you're marked for good: Speed at night in the Overworld, extra health in Moloch's realm, and the Zombie Bell.
+# The Angel Engine won't take you any more, you can never raise another homunculus, and it still talks to you for a while.
+deeper-still:
+  night-speed-level: 2
+  realm-extra-health: 4
+  bell-zombies: 3
+  bell-zombie-seconds: 60
+  bell-cooldown-seconds: 300
+  haunt-days: 3

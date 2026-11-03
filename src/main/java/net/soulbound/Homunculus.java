@@ -101,7 +101,8 @@ final class Homunculus implements Listener {
     private static final TextColor PINK = TextColor.color(0xF2A8B4);
     private int tick;
     private HomunculusVoice voice;
-    private NamespacedKey returningKey;
+    private NamespacedKey returningKey, flaskOwnerKey;
+    private final Map<UUID, Long> tempted = new HashMap<>();
 
     Homunculus(Soulbound plugin) {
         this.plugin = plugin;
@@ -114,6 +115,7 @@ final class Homunculus implements Listener {
         iconKey = new NamespacedKey(plugin, "homunculus_icon");
         nameKey = new NamespacedKey(plugin, "homunculus_name");
         returningKey = new NamespacedKey(plugin, "homunculus_returning");
+        flaskOwnerKey = new NamespacedKey(plugin, "homunculus_flask_owner");
         voice = new HomunculusVoice(plugin);
         for (int i = 0; i < 9; i++) slotKeys[i] = new NamespacedKey(plugin, "homunculus_slot_" + i);
     }
@@ -198,6 +200,13 @@ final class Homunculus implements Listener {
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getHand() != EquipmentSlot.HAND || !isFlask(e.getItem()) || e.getClickedBlock() == null) return;
         e.setCancelled(true);
         Player p = e.getPlayer();
+        if (plugin.deeperStill() != null && plugin.deeperStill().is(p)) {
+            p.sendActionBar(Component.text("It won't come out for you. It knows what you did.", NamedTextColor.DARK_RED)); return;
+        }
+        String bound = e.getItem().getItemMeta().getPersistentDataContainer().get(flaskOwnerKey, PersistentDataType.STRING);
+        if (bound != null && !bound.equals(p.getUniqueId().toString())) {
+            p.sendActionBar(Component.text("It won't come out for you. It isn't yours.", NamedTextColor.GRAY)); return;
+        }
         Husk old = mine(p);
         if (old != null) { p.sendActionBar(Component.text("You already have one. It's jealous.", NamedTextColor.RED)); return; }
         Location at = e.getClickedBlock().getRelative(e.getBlockFace()).getLocation().add(.5, 0, .5);
@@ -345,7 +354,9 @@ final class Homunculus implements Listener {
         for (ItemStack it : load(h)) if (it != null) back.add(it);
         for (EquipmentSlot s : WEAR) { ItemStack it = h.getEquipment().getItem(s); if (!it.getType().isAir()) back.add(it); }
         ItemStack fl = flask(name(h));
-        ItemMeta fm = fl.getItemMeta(); fm.getPersistentDataContainer().set(returningKey, PersistentDataType.BYTE, (byte) 1); fl.setItemMeta(fm);
+        ItemMeta fm = fl.getItemMeta(); fm.getPersistentDataContainer().set(returningKey, PersistentDataType.BYTE, (byte) 1);
+        fm.getPersistentDataContainer().set(flaskOwnerKey, PersistentDataType.STRING, p.getUniqueId().toString());
+        fm.lore(appendBound(fm.lore(), p.getName())); fl.setItemMeta(fm);
         back.add(fl);
         String bye = HomunculusVoice.pick("flask_in");
         if (bye != null && plugin.getConfig().getBoolean("homunculus.speech", true))
@@ -705,9 +716,77 @@ final class Homunculus implements Listener {
                 }
                 if (java.util.concurrent.ThreadLocalRandom.current().nextInt(160) == 0)
                     w.playSound(h.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, .7f, .55f);
+                if (plugin.zones() != null && plugin.zones().inPitFire(h.getLocation())) { sacrificed(h); continue; }
                 if (tick % 4 == 0) chatter(h, p, hungry, starve);
+                if (tick % 10 == 0 && job(h) == Job.POCKET) tempt(h, p);
             }
         }
+    }
+
+    private static List<Component> appendBound(List<Component> lore, String who) {
+        List<Component> out = lore == null ? new ArrayList<>() : new ArrayList<>(lore);
+        out.add(Component.text("Bound to " + who + ". It won't come out for anyone else.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true));
+        return out;
+    }
+
+    /** A homunculus only ever comes out for the one who made it: the flask is bound when it's crafted. */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onCraftFlask(org.bukkit.event.inventory.CraftItemEvent e) {
+        if (!isFlask(e.getRecipe().getResult()) || !(e.getWhoClicked() instanceof Player p)) return;
+        ItemStack out = e.getCurrentItem();
+        if (out == null || !isFlask(out)) return;
+        ItemStack bound = out.clone();
+        ItemMeta m = bound.getItemMeta();
+        m.getPersistentDataContainer().set(flaskOwnerKey, PersistentDataType.STRING, p.getUniqueId().toString());
+        m.lore(appendBound(m.lore(), p.getName()));
+        bound.setItemMeta(m);
+        e.setCurrentItem(bound);
+    }
+
+    private static final List<String> TEMPT = List.of(
+            "You made a little one. Look at it. It trusts you completely.",
+            "Do you know what Moloch loves more than strangers? Something that loves you back.",
+            "Bring it to the fire. It'll follow you. They always follow.",
+            "One little offering, and he wakes. Imagine that. All of it, from something so small.");
+
+    /** The Blood Priest notices it. */
+    private void tempt(Husk h, Player owner) {
+        if (owner == null || plugin.priest() == null || !plugin.getConfig().getBoolean("homunculus.priest-tempts", true)) return;
+        long now = System.currentTimeMillis();
+        if (now - tempted.getOrDefault(owner.getUniqueId(), 0L) < 15 * 60_000L) return;
+        for (Entity e : owner.getNearbyEntities(10, 5, 10)) {
+            if (!plugin.priest().isPriest(e)) continue;
+            tempted.put(owner.getUniqueId(), now);
+            owner.sendMessage(Component.text("The Blood Priest whispers: ", NamedTextColor.DARK_RED, TextDecoration.ITALIC)
+                    .append(Component.text(TEMPT.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(TEMPT.size())), NamedTextColor.RED, TextDecoration.ITALIC)));
+            owner.playSound(owner.getLocation(), "minecraft:entity.evoker.ambient", 0.7f, 0.55f);
+            return;
+        }
+    }
+
+    /** Into the summit fire: its owner has fed it to Moloch. He wakes; they go Deeper Still. */
+    private void sacrificed(Husk h) {
+        UUID o = owner(h);
+        Player p = o == null ? null : Bukkit.getPlayer(o);
+        String n = name(h) == null ? "their homunculus" : name(h);
+        Location l = h.getLocation();
+        voice.forget(h);
+        h.remove();
+        l.getWorld().spawnParticle(Particle.LAVA, l.clone().add(0, 1, 0), 40, 0.6, 0.6, 0.6, 0);
+        l.getWorld().spawnParticle(Particle.FLAME, l.clone().add(0, 1, 0), 60, 0.5, 1, 0.5, 0.05);
+        for (Player q : l.getWorld().getPlayers()) if (q.getLocation().distanceSquared(l) < 160 * 160) q.playSound(l, "moloch:furnace", 1.2f, 1.2f);
+        l.getWorld().playSound(l.clone().add(0, 3, 0), "minecraft:entity.warden.roar", 4f, 0.55f);
+        if (p == null) return;
+        p.getPersistentDataContainer().remove(mineKey);
+        if (plugin.getConfig().getBoolean("homunculus.speech", true))
+            p.sendMessage(Component.text((name(h) == null ? "Your homunculus" : name(h)) + ": ", PINK).append(Component.text("...it's okay. I still love you.", TextColor.color(0xFFE3EA), TextDecoration.ITALIC)));
+        Bukkit.broadcast(Component.text(p.getName() + " fed " + n + " to Moloch.", NamedTextColor.DARK_RED, TextDecoration.BOLD));
+        if (plugin.boss() != null && !plugin.boss().active() && plugin.hunger() != null) plugin.hunger().set(100);
+        if (plugin.deeperStill() != null) plugin.deeperStill().mark(p);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (p.isOnline()) p.sendMessage(Component.text("The Blood Priest whispers: ", NamedTextColor.DARK_RED, TextDecoration.ITALIC)
+                    .append(Component.text("You gave up the only thing that loved you. Now you're ready.", NamedTextColor.RED, TextDecoration.ITALIC)));
+        }, 80L);
     }
 
     /** Everyday talk, every couple of seconds' check: only when someone's near enough to hear it. */

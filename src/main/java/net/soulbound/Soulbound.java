@@ -34,6 +34,7 @@ public final class Soulbound extends JavaPlugin {
     private TumourPie tumourPie;
     private CloudCandy cloudCandy;
     private RaptureCrossbow raptureCrossbow;
+    private DeeperStill deeperStill;
     private FesteringFlesh festering;
     private ThiefKey thiefKey;
     private KrakenBeard kraken;
@@ -374,6 +375,9 @@ public final class Soulbound extends JavaPlugin {
         cloudCandy.registerRecipe();
         raptureCrossbow = new RaptureCrossbow(this);
         pm.registerEvents(raptureCrossbow, this);
+        deeperStill = new DeeperStill(this);
+        pm.registerEvents(deeperStill, this);
+        deeperStill.start();
         festering = new FesteringFlesh(this);
         pm.registerEvents(festering, this);
         thiefKey = new ThiefKey(this);
@@ -526,6 +530,7 @@ public final class Soulbound extends JavaPlugin {
     TumourPie tumourPie() { return tumourPie; }
     CloudCandy cloudCandy() { return cloudCandy; }
     RaptureCrossbow raptureCrossbow() { return raptureCrossbow; }
+    DeeperStill deeperStill() { return deeperStill; }
     FesteringFlesh festering() { return festering; }
     ThiefKey thiefKey() { return thiefKey; }
     Store store() { return store; }
