@@ -226,6 +226,13 @@ final class Homunculus implements Listener {
             pdc.set(fedKey, PersistentDataType.LONG, System.currentTimeMillis());
             if (name != null) pdc.set(nameKey, PersistentDataType.STRING, name);
         });
+        if (!h.isValid()) {
+            // something stopped it being born here (spawn's no-mob-spawning region, a protection plugin...): keep the flask
+            if (!h.isDead()) h.remove();
+            p.sendActionBar(Component.text("It won't come out here. Try somewhere else.", NamedTextColor.GRAY));
+            at.getWorld().playSound(at, Sound.BLOCK_GLASS_HIT, 1f, 1.4f);
+            return;
+        }
         tame(h);
         showName(h);
         if (e.getItem().getItemMeta().getPersistentDataContainer().has(returningKey, PersistentDataType.BYTE))
