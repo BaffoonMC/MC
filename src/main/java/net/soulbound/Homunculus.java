@@ -80,6 +80,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Tumours and eggs heal it and count as a meal (right-click it holding one, or use the bowl). Unfed for a few days it
  * grows slow; longer and it rots away to a tumour.
  *
+ * Inside its owner's own GriefPrevention claim nothing can hurt it; outside, it can be killed (and drops its things).
+ *
  * Naming: use a name tag on it like any mob, or the name tag in its menu and type the name in chat. The name floats
  * over its head, heads its menu, and stays with it in the flask.
  */
@@ -598,6 +600,21 @@ final class Homunculus implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBurn(EntityCombustEvent e) { if (is(e.getEntity())) e.setCancelled(true); }
+
+    /** Nothing hurts it inside its owner's own claim: players, mobs, lava, falls. (The void and /kill still do.) */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onProtect(EntityDamageEvent e) {
+        if (!is(e.getEntity())) return;
+        String cause = e.getCause().name();
+        if (cause.equals("VOID") || cause.equals("KILL")) return;
+        if (Bukkit.getPluginManager().getPlugin("GriefPrevention") == null || !ownersClaim(e.getEntity().getLocation(), owner(e.getEntity()))) return;
+        e.setCancelled(true);
+        if (e instanceof EntityDamageByEntityEvent by) {
+            Entity d = by.getDamager();
+            if (d instanceof org.bukkit.entity.Projectile pr && pr.getShooter() instanceof Entity sh) d = sh;
+            if (d instanceof Player p) p.sendActionBar(Component.text("It's safe here. This is its owner's land.", NamedTextColor.GRAY));
+        }
+    }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onHurt(EntityDamageEvent e) {
