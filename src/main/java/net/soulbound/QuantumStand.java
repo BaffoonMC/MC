@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * The Quantum Stand: alchemy past good and evil.
+ * The Quantum Transmuter (once the Quantum Stand): alchemy past good and evil.
  *
  * In the world it's an invisible barrier block with the lectern drawn on an item display (iron posts, brass decks, the
  * blue star panel, a fire inside), and a blue-and-gold codex floating over it on a second display. Like the enchanting
@@ -111,15 +111,31 @@ final class QuantumStand implements Listener {
     ItemStack item() {
         ItemStack it = new ItemStack(Material.PAPER);
         ItemMeta m = it.getItemMeta();
-        m.displayName(Component.text("Quantum Stand", TextColor.color(0x7FC4FF), TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
-        m.lore(List.of(
-                Component.text("Fire on one side, grace on the other.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                Component.text("Balance them, and fuse something new.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                Component.text("Neither his nor His.", NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, true)));
+        m.displayName(NAME);
+        m.lore(LORE);
         m.setItemModel(new NamespacedKey("soulbound", "quantum_stand"));
         m.getPersistentDataContainer().set(itemKey, PersistentDataType.BYTE, (byte) 1);
         it.setItemMeta(m);
         return it;
+    }
+
+    private static final Component NAME = Component.text("Quantum Transmuter", TextColor.color(0x7FC4FF), TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false);
+    private static final List<Component> LORE = List.of(
+            Component.text("Fire on one side, grace on the other.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+            Component.text("Balance them, and fuse something new.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+            Component.text("Neither his nor His.", NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, true),
+            Component.empty(),
+            Component.text("Place it like a block. Right-click to use it.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false),
+            Component.text("Hit it 3 times quickly to pick it back up.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false));
+
+    /** Ones made before the rename get the new name and tooltip as soon as they're held. */
+    @EventHandler
+    public void onHoldItem(org.bukkit.event.player.PlayerItemHeldEvent e) {
+        ItemStack it = e.getPlayer().getInventory().getItem(e.getNewSlot());
+        if (!isItem(it)) return;
+        ItemMeta m = it.getItemMeta();
+        if (NAME.equals(m.displayName()) && LORE.equals(m.lore())) return;
+        m.displayName(NAME); m.lore(LORE); it.setItemMeta(m);
     }
 
     boolean isItem(ItemStack it) {
@@ -323,7 +339,7 @@ final class QuantumStand implements Listener {
         Menu m = new Menu(b);
         Component title = Component.text().append(
                 Component.text("").font(FONT).color(NamedTextColor.WHITE),
-                Component.text("Quantum Stand", TextColor.color(0x9FD4FF))).build();
+                Component.text("Quantum Transmuter", TextColor.color(0x9FD4FF))).build();
         m.inv = Bukkit.createInventory(m, 45, title);
         refresh(m);
         p.openInventory(m.inv);
