@@ -373,6 +373,31 @@ img.px { image-rendering: pixelated }
   .hat .price-row { flex-direction: column; align-items: stretch }
   .cast figure:nth-child(1), .cast figure:nth-child(5) { display: none }
 }
+
+/* level-up ladder */
+.ladder { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden }
+.lv { display: grid; grid-template-columns: 34px minmax(150px, 1.1fr) minmax(90px, .7fr) minmax(76px, .5fr) minmax(0, 2fr); gap: 14px; align-items: center; padding: 12px 22px; border-top: 1px solid var(--line) }
+.lv:first-child { border-top: 0 }
+.lv-head { font: 700 12px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--mist); padding-block: 12px }
+.lv-n { font: 700 14px/1 var(--body); color: var(--muted); text-align: center }
+.lv-tag { font: 700 19px/1.1 var(--display); white-space: nowrap }
+.lv-tag i { font-style: normal; color: #555 }
+.lv-tag b { background: linear-gradient(90deg, var(--a), var(--b)); -webkit-background-clip: text; background-clip: text; color: transparent }
+.lv-tag.sm { font-size: 16px; margin-right: 6px }
+.lv-v { font-weight: 700; color: var(--gold) }
+.lv-h { color: var(--text) }
+.lv-p { color: var(--muted) }
+.lv-p em { font-style: normal; opacity: .75 }
+.lv-notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px }
+.lv-note { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px }
+.lv-note h3 { font: 700 20px/1.2 var(--display); color: var(--navy); margin: 0 0 6px }
+.lv-note p { color: var(--muted); margin: 0; font-size: 14.5px; line-height: 1.55 }
+@media (max-width: 760px) {
+  .lv { grid-template-columns: 26px minmax(0, 1fr) auto; grid-template-areas: "n t v" "n h h" "n p p"; gap: 4px 12px; padding: 12px 16px }
+  .lv-n { grid-area: n } .lv-tag { grid-area: t } .lv-v { grid-area: v; text-align: right } .lv-h { grid-area: h; font-size: 14px } .lv-p { grid-area: p; font-size: 14px }
+  .lv-head { display: none }
+  .lv-notes { grid-template-columns: 1fr }
+}
 </style>
 <style>
 @media (min-width: 901px) { .goal .wrap { padding-left: 28px; padding-right: 28px } }
@@ -382,7 +407,7 @@ img.px { image-rendering: pixelated }
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#top">Baffoon<span>MC</span></a>
-    <nav class="links"><a href="#ranks">Ranks</a><a href="#claims">Claims</a><a href="#hats">Hats</a><a href="#custom">Custom hat</a><a href="#goal">Server goal</a><a href="#rules">Rules</a><a href="encyclopedia.html">Encyclopedia</a><a href="items.html">Items</a></nav>
+    <nav class="links"><a href="#ranks">Ranks</a><a href="#claims">Claims</a><a href="#hats">Hats</a><a href="#custom">Custom hat</a><a href="#goal">Server goal</a><a href="#rules">Rules</a><a href="#levels">Levels</a><a href="encyclopedia.html">Encyclopedia</a><a href="items.html">Items</a></nav>
     <div class="spacer"></div>
     <div class="online off" id="online"><i></i><span>Server status</span></div>
     <button class="basket-btn" id="openBasket" aria-label="Open basket">Basket <b id="count">0</b></button>
@@ -497,7 +522,7 @@ img.px { image-rendering: pixelated }
       <div class="rulecard yes"><h3>Allowed</h3><ul>
         <li><div><b>Farms</b><span>Mob farms, crop farms and AFK farms, as long as they don't lag the server.</span></div></li>
         <li><div><b>Exploring and claiming</b><span>Go anywhere and claim any unclaimed land to call home. Only God's island can't be claimed.</span></div></li>
-        <li><div><b>PvP, anywhere</b><span>Fight anyone, any time. Watch your back.</span></div></li>
+        <li><div><b>PvP</b><span>Fight anyone, almost anywhere. Spawn, Moloch's temple and God's island are safe. Die to a player and your backpack drops; die to anything else and you keep it all.</span></div></li>
         <li><div><b>Stealing</b><span>Take from any chest you can get into, loot what people drop, pick a lock with a Thief Key.</span></div></li>
         <li><div><b>Kidnapping</b><span>Hood, cudgel and shackles are part of the game. So is escaping. <a href="encyclopedia.html#kidnapping" style="color:var(--gold)">How it works</a></span></div></li>
         <li><div><b>Deception</b><span>Lies, betrayals, fake alliances and sneaky trades. Trust carefully.</span></div></li>
@@ -522,12 +547,34 @@ img.px { image-rendering: pixelated }
     <p class="rules-short">Steal the loot, not the build. <em>Roast the play, not the person.</em></p>
     <p class="rules-note">Staff have the final say. Breaking a rule can mean a warning, a temporary ban or a permanent one.</p>
   </section>
+  <section class="wrap block" id="levels">
+    <div class="sec-head"><div><div class="eyebrow">Free · earned, never bought</div><h2>Level up</h2><p>Everyone starts as a Newcomer. Vote for BaffoonMC with <b>/vote</b> and you climb eleven ranks, each with its own coloured chat tag, another home, and now and then a handy command. Every rank keeps everything from the ones below it.</p></div></div>
+    <ol class="ladder">
+        <li class="lv lv-head" aria-hidden="true"><span class="lv-n">#</span><span>Rank</span><span>To reach it</span><span>Homes</span><span>What it adds</span></li>
+        <li class="lv"><span class="lv-n">1</span><span class="lv-tag"><i>[</i><b style="--a:#8C8C8C;--b:#B4B4B4">Newcomer</b><i>]</i></span><span class="lv-v">Start here</span><span class="lv-h">1 home</span><span class="lv-p">/home, /sethome, /spawn, /tpa, /tpr, /msg</span></li>
+        <li class="lv"><span class="lv-n">2</span><span class="lv-tag"><i>[</i><b style="--a:#4FE04F;--b:#8DEB8D">Beginner</b><i>]</i></span><span class="lv-v">1 vote</span><span class="lv-h">2 homes</span><span class="lv-p">/back: return to where you died</span></li>
+        <li class="lv"><span class="lv-n">3</span><span class="lv-tag"><i>[</i><b style="--a:#22A83A;--b:#6FC67F">Novice</b><i>]</i></span><span class="lv-v">5 votes</span><span class="lv-h">3 homes</span><span class="lv-p">/workbench: a crafting table anywhere</span></li>
+        <li class="lv"><span class="lv-n">4</span><span class="lv-tag"><i>[</i><b style="--a:#2ED6D6;--b:#77E4E4">Intermediate</b><i>]</i></span><span class="lv-v">10 votes</span><span class="lv-h">4 homes</span><span class="lv-p">/disposal: a bin for junk</span></li>
+        <li class="lv"><span class="lv-n">5</span><span class="lv-tag"><i>[</i><b style="--a:#4F6BFF;--b:#8D9FFF">Advanced</b><i>]</i></span><span class="lv-v">20 votes</span><span class="lv-h">5 homes</span><span class="lv-p">/hat: wear any block on your head</span></li>
+        <li class="lv"><span class="lv-n">6</span><span class="lv-tag"><i>[</i><b style="--a:#8A6BFF;--b:#B39FFF">Adept</b><i>]</i></span><span class="lv-v">30 votes</span><span class="lv-h">6 homes</span><span class="lv-p"><em>Another home and a new tag</em></span></li>
+        <li class="lv"><span class="lv-n">7</span><span class="lv-tag"><i>[</i><b style="--a:#D84FD8;--b:#E68DE6">Expert</b><i>]</i></span><span class="lv-v">45 votes</span><span class="lv-h">7 homes</span><span class="lv-p"><em>Another home and a new tag</em></span></li>
+        <li class="lv"><span class="lv-n">8</span><span class="lv-tag"><i>[</i><b style="--a:#F07A6A;--b:#F5A99E">Seasoned</b><i>]</i></span><span class="lv-v">60 votes</span><span class="lv-h">8 homes</span><span class="lv-p"><em>Another home and a new tag</em></span></li>
+        <li class="lv"><span class="lv-n">9</span><span class="lv-tag"><i>[</i><b style="--a:#2AA6A6;--b:#75C5C5">Veteran</b><i>]</i></span><span class="lv-v">80 votes</span><span class="lv-h">9 homes</span><span class="lv-p">/enderchest: your ender chest anywhere</span></li>
+        <li class="lv"><span class="lv-n">10</span><span class="lv-tag"><i>[</i><b style="--a:#E8C547;--b:#F0D987">Elder</b><i>]</i></span><span class="lv-v">110 votes</span><span class="lv-h">10 homes</span><span class="lv-p">/fly: survival flight (switches off in fights)</span></li>
+        <li class="lv"><span class="lv-n">11</span><span class="lv-tag"><i>[</i><b style="--a:#FFF6D8;--b:#E8C547">Ancient</b><i>]</i></span><span class="lv-v">150 votes</span><span class="lv-h">12 homes</span><span class="lv-p">Two extra homes and the rarest tag on the server</span></li>
+    </ol>
+    <div class="lv-notes">
+      <div class="lv-note"><h3>How voting works</h3><p>Type <b>/vote</b> in game for the links. Each site gives one vote a day, and every vote counts towards your next rank. You rank up by yourself the moment you hit the number.</p></div>
+      <div class="lv-note"><h3>Bought a rank too?</h3><p>Supporter, Patron and Chosen sit alongside your level, not instead of it. Your level tag stays, and your bronze, silver or gold stars appear next to it.</p></div>
+      <div class="lv-note"><h3>Staff tags</h3><p><span class="lv-tag sm"><i>[</i><b style="--a:#F2D43C;--b:#F7E380">Helper</b><i>]</i></span> <span class="lv-tag sm"><i>[</i><b style="--a:#3F6CFF;--b:#829FFF">Mod</b><i>]</i></span> <span class="lv-tag sm"><i>[</i><b style="--a:#F04848;--b:#F58888">Admin</b><i>]</i></span> <span class="lv-tag sm"><i>[</i><b style="--a:#B01818;--b:#CC6969">Owner</b><i>]</i></span><br>These are the people to ask when something's wrong. They can't be bought or voted for.</p></div>
+    </div>
+  </section>
 </main>
 
 <footer>
   <div class="wrap">
     <div class="row">
-      <a href="#ranks">Ranks</a><a href="#hats">Hats</a><a href="#how">How it works</a><a href="#rules">Rules</a><a href="encyclopedia.html">Encyclopedia</a><a href="items.html">Items</a>
+      <a href="#ranks">Ranks</a><a href="#hats">Hats</a><a href="#how">How it works</a><a href="#rules">Rules</a><a href="#levels">Levels</a><a href="encyclopedia.html">Encyclopedia</a><a href="items.html">Items</a>
       <a id="lTerms" href="#" target="_blank" rel="noopener">Terms</a><a id="lPrivacy" href="#" target="_blank" rel="noopener">Privacy</a><a id="lRefunds" href="#" target="_blank" rel="noopener">Refunds</a>
     </div>
     <p class="legal">BaffoonMC is not an official Minecraft product and is not approved by or associated with Mojang or Microsoft. All purchases are cosmetic or convenience only and give no competitive advantage.</p>
