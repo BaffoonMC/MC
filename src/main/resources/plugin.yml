@@ -4,7 +4,7 @@ main: net.soulbound.Soulbound
 api-version: '26.3'
 description: Capture, sacrifice and Moloch himself.
 authors: [BaffoonMC]
-softdepend: [PlaceholderAPI, GriefPrevention]
+softdepend: [PlaceholderAPI, GriefPrevention, Votifier, NuVotifier]
 commands:
   soulbound:
     description: Soulbound admin controls (/sb help), and /sb release to let your captive go.
@@ -23,6 +23,10 @@ commands:
   claimfly:
     description: Turn your claim flight off or back on (Patron perk).
     usage: /claimfly
+  voteshop:
+    description: The Vote Shop. Spend the points you get for voting (admins - /voteshop help).
+    usage: /voteshop [page|add <price> [page]|edit [page]|points <player> [add|take|set] <n>]
+    aliases: [vshop]
   god:
     description: Answer God when he asks why you're here.
     usage: /god <challenge|lost|forgive|look>

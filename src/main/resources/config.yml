@@ -813,6 +813,12 @@ welcome:
   enabled: true
   rules-url: "https://store.playbaffoonmc.net/#rules"
   store-url: "https://store.playbaffoonmc.net"
+# The Vote Shop (/voteshop). Stock it in game: hold something, /voteshop add <price> [page]; /voteshop edit to change it.
+# Points come from votes through NuVotifier; the items and everyone's points are kept in voteshop.yml.
+voteshop:
+  points-per-vote: 1
+  confirm-at: 100                 # things costing this much or more need a second click to buy
+  block-eggs-on-spawners: true    # spawn eggs can't change what a mob spawner spawns (admins still can)
 wild-drop:
   world: ""          # empty = the main overworld ("world")
   center-x: 0

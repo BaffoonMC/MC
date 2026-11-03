@@ -36,6 +36,7 @@ public final class Soulbound extends JavaPlugin {
     private RaptureCrossbow raptureCrossbow;
     private DeeperStill deeperStill;
     private WildDrop wildDrop;
+    private VoteShop voteShop;
     private FesteringFlesh festering;
     private ThiefKey thiefKey;
     private KrakenBeard kraken;
@@ -395,6 +396,10 @@ public final class Soulbound extends JavaPlugin {
         wildDrop = new WildDrop(this);
         wildDrop.start();
         pm.registerEvents(new Welcome(this), this);
+        voteShop = new VoteShop(this);
+        pm.registerEvents(voteShop, this);
+        voteShop.start();
+        if (getCommand("voteshop") != null) { getCommand("voteshop").setExecutor(voteShop); getCommand("voteshop").setTabCompleter(voteShop); }
         festering = new FesteringFlesh(this);
         pm.registerEvents(festering, this);
         thiefKey = new ThiefKey(this);
