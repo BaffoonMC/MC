@@ -449,8 +449,6 @@ final class Homunculus implements Listener {
             m.inv.setItem(ORDER_SLOT[r], icon(ORDER_ICON[r], Component.text((on ? "\u2714 " : "") + ORDERS[r][0], on ? NamedTextColor.GREEN : NamedTextColor.WHITE, TextDecoration.BOLD), lore, on));
         }
     }
-        }
-    }
 
     /** The armour slot an item is made for (helmet, chestplate, ...), or null. */
     private static EquipmentSlot armourFor(ItemStack it) {
