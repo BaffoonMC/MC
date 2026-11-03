@@ -33,8 +33,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * The Rapture Crossbow: Heaven's crossbow, sold by the Peacekeeper, and only the Graced can load it. It loads fast
- * (Quick Charge built in), its bolts fly faster and hit harder, and whatever they hit is lifted into the air for a
+ * The Rapture Crossbow: Heaven's crossbow, sold by the Peacekeeper, and only the Graced can load it. It loads in a
+ * blink (a quarter of a second, no drawing: faster than Quick Charge III), its bolts fly faster and hit harder, and whatever they hit is lifted into the air for a
  * moment (undead for longer; the inhuman are lit up too). Nobody can be lifted again for a few seconds. Safe zones
  * (spawn, the temple, God's island) stop the hit, so they stop the lift too.
  */
@@ -60,11 +60,9 @@ final class RaptureCrossbow implements Listener {
         m.displayName(Component.text("Rapture Crossbow", NAME, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
         m.lore(List.of(
                 Component.text("Whatever it strikes is lifted up.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                Component.text("Loads quick, hits hard.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+                Component.text("Loads in a blink. Hits hard.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                 Component.text("Only the Graced can draw it.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true)));
         m.setItemModel(MODEL);
-        int qc = (int) cfg("quick-charge", 2);
-        if (qc > 0) m.addEnchant(Enchantment.QUICK_CHARGE, qc, true);
         m.getPersistentDataContainer().set(itemKey, PersistentDataType.BYTE, (byte) 1);
         it.setItemMeta(m);
         return it;
@@ -84,13 +82,48 @@ final class RaptureCrossbow implements Listener {
         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.6f);
     }
 
-    /** Only the Graced can load it. */
+    /** Only the Graced can load it, and it loads far faster than any crossbow can: a flick of the wrist, no drawing.
+     *  (Right-click while it's empty: a quarter of a second later it's loaded. Loaded, right-click fires as usual.) */
     @EventHandler(priority = EventPriority.HIGH)
     public void onLoad(PlayerInteractEvent e) {
         if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-        if (!is(e.getItem()) || graced(e.getPlayer())) return;
-        e.setUseItemInHand(org.bukkit.event.Event.Result.DENY);
-        refuse(e.getPlayer());
+        if (!is(e.getItem())) return;
+        Player p = e.getPlayer();
+        if (!graced(p)) { e.setUseItemInHand(org.bukkit.event.Event.Result.DENY); refuse(p); return; }
+        if (!(e.getItem().getItemMeta() instanceof org.bukkit.inventory.meta.CrossbowMeta cm) || cm.hasChargedProjectiles()) return;   // loaded: let it fire
+        e.setUseItemInHand(org.bukkit.event.Event.Result.DENY);   // no slow draw
+        org.bukkit.inventory.EquipmentSlot hand = e.getHand();
+        if (hand == null || loading.contains(p.getUniqueId())) return;
+        if (ammo(p) == null) { p.playSound(p.getLocation(), Sound.BLOCK_DISPENSER_FAIL, 0.5f, 1.4f); return; }
+        loading.add(p.getUniqueId());
+        p.playSound(p.getLocation(), Sound.ITEM_CROSSBOW_LOADING_START, 1f, 1.6f);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            loading.remove(p.getUniqueId());
+            if (!p.isOnline()) return;
+            ItemStack bow = hand == org.bukkit.inventory.EquipmentSlot.OFF_HAND ? p.getInventory().getItemInOffHand() : p.getInventory().getItemInMainHand();
+            if (!is(bow) || !(bow.getItemMeta() instanceof org.bukkit.inventory.meta.CrossbowMeta m) || m.hasChargedProjectiles()) return;
+            ItemStack src = ammo(p);
+            if (src == null) return;
+            ItemStack one = src.clone(); one.setAmount(1);
+            if (p.getGameMode() != org.bukkit.GameMode.CREATIVE) src.setAmount(src.getAmount() - 1);
+            int n = m.hasEnchant(Enchantment.MULTISHOT) ? 3 : 1;
+            for (int i = 0; i < n; i++) m.addChargedProjectile(one.clone());
+            bow.setItemMeta(m);
+            p.playSound(p.getLocation(), Sound.ITEM_CROSSBOW_LOADING_END, 1f, 1.5f);
+            p.getWorld().spawnParticle(Particle.CLOUD, p.getEyeLocation().add(p.getLocation().getDirection().multiply(0.6)), 4, 0.1, 0.1, 0.1, 0.01);
+        }, Math.max(1L, (long) cfg("load-ticks", 5)));
+    }
+
+    private final java.util.Set<UUID> loading = new java.util.HashSet<>();
+
+    /** What it loads, the way a crossbow picks: a rocket in the off hand first, then the first arrow in the inventory. */
+    private static ItemStack ammo(Player p) {
+        ItemStack off = p.getInventory().getItemInOffHand();
+        if (off.getType() == Material.FIREWORK_ROCKET) return off;
+        for (ItemStack it : p.getInventory().getContents())
+            if (it != null && (it.getType() == Material.ARROW || it.getType() == Material.TIPPED_ARROW || it.getType() == Material.SPECTRAL_ARROW)) return it;
+        if (p.getGameMode() == org.bukkit.GameMode.CREATIVE) return new ItemStack(Material.ARROW);
+        return null;
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

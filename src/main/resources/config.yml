@@ -823,10 +823,11 @@ cloud-candy:
   float-seconds: 30
 
 # The Rapture Crossbow: sold by the Peacekeeper (peacekeeper.price.rapture-tears Tears of God + rapture-cotton Cloud
-# Cotton; 3 and 32 by default). Only the Graced can load it. Quick Charge built in, faster and harder-hitting bolts, and
+# Cotton; 3 and 32 by default). Only the Graced can load it. Loads in a blink (load-ticks), faster and harder-hitting bolts, and
 # whatever a bolt hits floats up for a moment (undead longer; inhumans glow). Nobody's lifted twice within the cooldown.
 rapture-crossbow:
-  quick-charge: 2
+  # How long loading takes, in ticks (20 = 1 second). A normal crossbow takes 25, Quick Charge III 10.
+  load-ticks: 5
   speed-multiplier: 1.3
   damage-multiplier: 1.5
   levitation-seconds: 1
