@@ -45,8 +45,10 @@ import java.util.UUID;
 /**
  * The Quantum Stand: alchemy past good and evil.
  *
- * In the world it's an invisible barrier block with the stand's model (stone plinth, Moloch's horns, God's halo, the
- * blue quantum core) drawn on an item display. Place it like a block; right-click to open it; hit it three times
+ * In the world it's an invisible barrier block with the lectern drawn on an item display (iron posts, brass decks, the
+ * blue star panel, a fire inside), and a blue-and-gold codex floating over it on a second display. Like the enchanting
+ * table's book, the codex bobs, turns to face whoever's nearest, opens when someone walks up (closed otherwise) and turns
+ * its pages now and then; while something's fusing it spins. Place it like a block; right-click to open it; hit it three times
  * quickly to pick it back up (creative: once). Placing and breaking go through the normal block events, so claims and
  * protection plugins get their say.
  *
@@ -67,14 +69,20 @@ final class QuantumStand implements Listener {
     private static final int FUSE_TICKS = 100;
 
     private final Soulbound plugin;
-    private final NamespacedKey itemKey, standKey;
+    private final NamespacedKey itemKey, standKey, bookKey;
+    private static final double BOOK_UP = (21.5 - 8) / 16.0;   // the codex's height over the block's centre (the pack's BOOK_Y)
+    private final Map<UUID, float[]> bookState = new HashMap<>();   // book -> {yaw, model (0 closed, 1 open, 2 flip), flip ticks left}
+    private int tick;
     private final Map<UUID, int[]> hits = new HashMap<>();   // player -> {x, y, z, count, tick}
 
     QuantumStand(Soulbound plugin) {
         this.plugin = plugin;
         this.itemKey = new NamespacedKey(plugin, "quantum_stand_item");
         this.standKey = new NamespacedKey(plugin, "quantum_stand");
+        this.bookKey = new NamespacedKey(plugin, "quantum_book");
     }
+
+    void start() { Bukkit.getScheduler().runTaskTimer(plugin, this::animate, 20L, 3L); }
 
     // ---------------------------------------------------------------- the item
 
@@ -103,6 +111,29 @@ final class QuantumStand implements Listener {
         for (ItemDisplay d : b.getWorld().getNearbyEntitiesByType(ItemDisplay.class, b.getLocation().add(.5, .5, .5), .45))
             if (d.getPersistentDataContainer().has(standKey, PersistentDataType.BYTE)) return d;
         return null;
+    }
+
+    private ItemDisplay bookAt(Block b) {
+        for (ItemDisplay d : b.getWorld().getNearbyEntitiesByType(ItemDisplay.class, b.getLocation().add(.5, .5 + BOOK_UP, .5), .6))
+            if (d.getPersistentDataContainer().has(bookKey, PersistentDataType.BYTE)) return d;
+        return null;
+    }
+
+    private static ItemStack look(String model) {
+        ItemStack it = new ItemStack(Material.PAPER);
+        ItemMeta m = it.getItemMeta(); m.setItemModel(new NamespacedKey("soulbound", model)); it.setItemMeta(m);
+        return it;
+    }
+
+    private ItemDisplay spawnBook(Block b) {
+        return b.getWorld().spawn(b.getLocation().add(.5, .5 + BOOK_UP, .5), ItemDisplay.class, d -> {
+            d.setItemStack(look("quantum_book_closed"));
+            d.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE);
+            d.setPersistent(true);
+            d.setInterpolationDuration(4);
+            d.setTeleportDuration(0);
+            d.getPersistentDataContainer().set(bookKey, PersistentDataType.BYTE, (byte) 1);
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -146,14 +177,13 @@ final class QuantumStand implements Listener {
         if (ev.isCancelled() || !ev.canBuild()) { before.update(true, false); return; }
         float yaw = Math.round(p.getYaw() / 90f) * 90f + 180f;
         target.getWorld().spawn(target.getLocation().add(.5, .5, .5), ItemDisplay.class, d -> {
-            ItemStack look = new ItemStack(Material.PAPER);
-            ItemMeta lm = look.getItemMeta(); lm.setItemModel(new NamespacedKey("soulbound", "quantum_stand")); look.setItemMeta(lm);
-            d.setItemStack(look);
+            d.setItemStack(look("quantum_stand_base"));
             d.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE);
             d.setRotation(yaw, 0);
             d.setPersistent(true);
             d.getPersistentDataContainer().set(standKey, PersistentDataType.BYTE, (byte) 1);
         });
+        spawnBook(target);
         if (p.getGameMode() != GameMode.CREATIVE) { ItemStack hand = p.getInventory().getItemInMainHand(); hand.setAmount(hand.getAmount() - 1); }
         target.getWorld().playSound(target.getLocation().add(.5, .5, .5), Sound.BLOCK_AMETHYST_BLOCK_PLACE, 1f, .7f);
         target.getWorld().playSound(target.getLocation().add(.5, .5, .5), Sound.BLOCK_BEACON_ACTIVATE, .4f, 1.6f);
@@ -172,11 +202,15 @@ final class QuantumStand implements Listener {
         if (e.getBlock().getType() != Material.BARRIER) return;
         ItemDisplay d = standAt(e.getBlock());
         if (d != null) d.remove();
+        ItemDisplay book = bookAt(e.getBlock());
+        if (book != null) { bookState.remove(book.getUniqueId()); book.remove(); }
     }
 
     private void remove(Block b, boolean drop) {
         ItemDisplay d = standAt(b);
         if (d != null) d.remove();
+        ItemDisplay book = bookAt(b);
+        if (book != null) { bookState.remove(book.getUniqueId()); book.remove(); }
         // anyone using it gets their things back first
         for (Player o : Bukkit.getOnlinePlayers())
             if (o.getOpenInventory().getTopInventory().getHolder() instanceof Menu m && m.block.equals(b)) o.closeInventory();
@@ -185,6 +219,72 @@ final class QuantumStand implements Listener {
         b.getWorld().playSound(c, Sound.BLOCK_AMETHYST_BLOCK_BREAK, 1f, .7f);
         b.getWorld().spawnParticle(Particle.END_ROD, c, 12, .3, .3, .3, .02);
         if (drop) b.getWorld().dropItemNaturally(c, item());
+    }
+
+    // ---------------------------------------------------------------- the floating codex
+
+    /** Every few ticks: each lectern near a player gets its codex bobbing, turning and opening. Stands placed before the
+     *  lectern existed are brought up to date here too (base model swapped, codex added). */
+    private void animate() {
+        tick += 3;
+        java.util.Set<Block> fusing = new java.util.HashSet<>();
+        for (Player o : Bukkit.getOnlinePlayers())
+            if (o.getOpenInventory().getTopInventory().getHolder() instanceof Menu m && m.fusing != null) fusing.add(m.block);
+        java.util.Set<UUID> done = new java.util.HashSet<>();
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            for (ItemDisplay base : p.getWorld().getNearbyEntitiesByType(ItemDisplay.class, p.getLocation(), 24)) {
+                if (!base.getPersistentDataContainer().has(standKey, PersistentDataType.BYTE) || !done.add(base.getUniqueId())) continue;
+                Block b = base.getLocation().getBlock();
+                ItemStack shown = base.getItemStack();
+                if (shown.hasItemMeta() && "quantum_stand".equals(shown.getItemMeta().getItemModel() == null ? null : shown.getItemMeta().getItemModel().getKey()))
+                    base.setItemStack(look("quantum_stand_base"));
+                ItemDisplay book = bookAt(b);
+                if (book == null) book = spawnBook(b);
+                animateBook(book, b, fusing.contains(b));
+            }
+        }
+        bookState.keySet().removeIf(id -> Bukkit.getEntity(id) == null);
+    }
+
+    private void animateBook(ItemDisplay book, Block b, boolean spinning) {
+        Location c = b.getLocation().add(.5, .5 + BOOK_UP, .5);
+        Player near = null; double best = 4.5 * 4.5;
+        for (Player o : c.getNearbyPlayers(4.5)) {
+            if (o.getGameMode() == GameMode.SPECTATOR) continue;
+            double dd = o.getLocation().distanceSquared(c);
+            if (dd < best) { best = dd; near = o; }
+        }
+        float[] st = bookState.computeIfAbsent(book.getUniqueId(), k -> new float[]{0f, 0f, 0f});
+        // which way it faces: towards whoever's nearest (its reading side is -z), a slow idle turn otherwise, fast while fusing
+        float yaw = st[0];
+        if (spinning) yaw += 0.45f;
+        else if (near != null) {
+            double dx = near.getX() - c.getX(), dz = near.getZ() - c.getZ();
+            float want = (float) Math.atan2(-dx, -dz);
+            float diff = (float) Math.IEEEremainder(want - yaw, Math.PI * 2);
+            yaw += diff * 0.35f;
+        } else yaw += 0.03f;
+        st[0] = (float) Math.IEEEremainder(yaw, Math.PI * 2);
+        // open when someone's there (or it's fusing); now and then a page turns
+        int want = (near != null || spinning) ? 1 : 0;
+        if (want == 1 && st[1] == 1 && st[2] <= 0 && java.util.concurrent.ThreadLocalRandom.current().nextInt(spinning ? 6 : 40) == 0) {
+            st[1] = 2; st[2] = 6;
+            book.setItemStack(look("quantum_book_flip"));
+            book.getWorld().playSound(c, Sound.ITEM_BOOK_PAGE_TURN, .7f, 1.1f);
+        } else if (st[1] == 2) {
+            st[2] -= 3;
+            if (st[2] <= 0 || want == 0) { st[1] = want; book.setItemStack(look(want == 1 ? "quantum_book_open" : "quantum_book_closed")); }
+        } else if (st[1] != want) {
+            st[1] = want;
+            book.setItemStack(look(want == 1 ? "quantum_book_open" : "quantum_book_closed"));
+            book.getWorld().playSound(c, want == 1 ? Sound.ITEM_BOOK_PAGE_TURN : Sound.ITEM_BOOK_PUT, .6f, want == 1 ? .8f : 1.2f);
+        }
+        float bob = (float) Math.sin(tick * 0.08 + (b.getX() * 7 + b.getZ() * 13)) * 0.06f;
+        org.joml.Quaternionf rot = new org.joml.Quaternionf().rotateY(st[0]).rotateX(st[1] == 0 ? 0f : -0.3f);
+        book.setInterpolationDelay(0);
+        book.setInterpolationDuration(4);
+        book.setTransformation(new org.bukkit.util.Transformation(new org.joml.Vector3f(0, bob, 0), rot, new org.joml.Vector3f(1, 1, 1), new org.joml.Quaternionf()));
+        if (spinning && tick % 6 == 0) book.getWorld().spawnParticle(Particle.ENCHANT, c, 6, .3, .2, .3, .6);
     }
 
     // ---------------------------------------------------------------- the menu
