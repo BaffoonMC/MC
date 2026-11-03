@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -166,6 +167,21 @@ final class Inhuman implements Listener {
             case BEEF, PORKCHOP, MUTTON, CHICKEN, RABBIT, COD, SALMON, TROPICAL_FISH -> true;
             default -> false;
         };
+        boolean monsterFood = t == Material.ROTTEN_FLESH || t == Material.SPIDER_EYE || t == Material.POISONOUS_POTATO;
+        boolean cooked = switch (t) {
+            case COOKED_BEEF, COOKED_PORKCHOP, COOKED_MUTTON, COOKED_CHICKEN, COOKED_RABBIT, COOKED_COD, COOKED_SALMON -> true;
+            default -> false;
+        };
+        boolean custom = food.hasItemMeta() && (food.getItemMeta().hasItemModel() || !food.getItemMeta().getPersistentDataContainer().isEmpty());
+        boolean magic = t == Material.GOLDEN_APPLE || t == Material.ENCHANTED_GOLDEN_APPLE;
+        // raw only: ordinary human food (bread, apples, carrots, stews, cookies...) won't go down at all
+        if (!raw && !monsterFood && !cooked && !custom && !magic && plugin.getConfig().getBoolean("inhuman.raw-only", true)) {
+            e.setCancelled(true);
+            p.sendActionBar(Component.text("Your body refuses it. Only raw flesh will do.", NamedTextColor.DARK_RED));
+            p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_BURP, 0.8f, 0.5f);
+            return;
+        }
+        int foodBefore = p.getFoodLevel(); float satBefore = p.getSaturation();
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (!p.isOnline()) return;
             if (raw) {
@@ -175,10 +191,18 @@ final class Inhuman implements Listener {
                 p.setSaturation(Math.min(p.getFoodLevel(), p.getSaturation() + bonusSat));
                 p.removePotionEffect(PotionEffectType.HUNGER);
                 p.removePotionEffect(PotionEffectType.POISON);
-            } else if (t == Material.ROTTEN_FLESH || t == Material.SPIDER_EYE || t == Material.POISONOUS_POTATO) {
+            } else if (monsterFood) {
                 // what sickens the living is just food to them
                 p.removePotionEffect(PotionEffectType.HUNGER);
                 p.removePotionEffect(PotionEffectType.POISON);
+            } else if (cooked) {
+                // cooked flesh burns them: no nourishment, and it hurts going down
+                p.setFoodLevel(foodBefore); p.setSaturation(satBefore);
+                double dmg = plugin.getConfig().getDouble("inhuman.cooked-meat-damage", 4);
+                if (dmg > 0) p.damage(dmg);
+                p.getWorld().spawnParticle(Particle.SMOKE, p.getEyeLocation(), 12, 0.2, 0.2, 0.2, 0.02);
+                p.playSound(p.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 0.7f, 1.4f);
+                hold(p, Component.text("The cooked meat burns going down. You need it raw.", NamedTextColor.DARK_RED));
             } else {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 30 * 20, 1, false, true, true));
                 hold(p, Component.text("It tastes of ash. You're hungrier than before.", NamedTextColor.DARK_RED));

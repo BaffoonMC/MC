@@ -583,6 +583,10 @@ inhuman:
   # ...except at spawn: this many blocks around the world's spawn point (a square), the sun leaves them alone. 0 = burns there too.
   sun-safe-spawn-radius: 64
   # Raw meat (and Beef Tartare) feeds the inhuman this much on top of its normal value.
+  # Raw only: ordinary food (bread, apples, carrots, stews...) won't go down at all. Golden apples and server items still can.
+  raw-only: true
+  # Cooked meat or fish: no food from it, and this much damage (4 = two hearts).
+  cooked-meat-damage: 4
   raw-meat-bonus-food: 3
   raw-meat-bonus-saturation: 4.0
   # Their food bar is the green one the Hunger effect shows (a hidden Hunger that makes them no hungrier).
