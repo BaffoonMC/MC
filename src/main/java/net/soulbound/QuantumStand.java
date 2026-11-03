@@ -82,7 +82,29 @@ final class QuantumStand implements Listener {
         this.bookKey = new NamespacedKey(plugin, "quantum_book");
     }
 
-    void start() { Bukkit.getScheduler().runTaskTimer(plugin, this::animate, 20L, 3L); }
+    void start() {
+        Bukkit.getScheduler().runTaskTimer(plugin, this::animate, 20L, 3L);
+        registerRecipe();
+    }
+
+    /** Gold over the top, iron posts, a book in the middle and a Quantum Core at its foot. */
+    private void registerRecipe() {
+        NamespacedKey key = new NamespacedKey(plugin, "quantum_stand");
+        Bukkit.removeRecipe(key);
+        if (plugin.quantum() == null) return;
+        org.bukkit.inventory.ShapedRecipe r = new org.bukkit.inventory.ShapedRecipe(key, item());
+        r.shape("GGG", "IBI", "ICI");
+        r.setIngredient('G', Material.GOLD_INGOT);
+        r.setIngredient('I', Material.IRON_INGOT);
+        r.setIngredient('B', Material.BOOK);
+        r.setIngredient('C', new org.bukkit.inventory.RecipeChoice.ExactChoice(plugin.quantum().material(QuantumGear.Mat.CORE)));
+        r.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.MISC);
+        Bukkit.addRecipe(r);
+        for (Player p : Bukkit.getOnlinePlayers()) p.discoverRecipe(key);
+    }
+
+    @EventHandler
+    public void onJoinRecipe(org.bukkit.event.player.PlayerJoinEvent e) { e.getPlayer().discoverRecipe(new NamespacedKey(plugin, "quantum_stand")); }
 
     // ---------------------------------------------------------------- the item
 
