@@ -105,6 +105,14 @@ final class DeeperStill implements Listener {
         tick();
     }
 
+    /** Admin: take the mark off (the extra hearts go at once; the bell stays silent for them). */
+    void clear(Player p) {
+        p.getPersistentDataContainer().remove(markKey);
+        p.getPersistentDataContainer().remove(whenKey);
+        AttributeInstance hp = p.getAttribute(Attribute.MAX_HEALTH);
+        if (hp != null && hp.getModifier(hpKey) != null) { hp.removeModifier(hpKey); if (p.getHealth() > hp.getValue()) p.setHealth(hp.getValue()); }
+    }
+
     // ---------------------------------------------------------------- the Zombie Bell
 
     ItemStack bell() {

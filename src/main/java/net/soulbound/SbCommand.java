@@ -298,6 +298,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             s.sendMessage(line("/sb player <player> curse [minutes]", "Moloch's curse"));
             s.sendMessage(line("/sb player <player> uncurse", "lift it (and they can be offered again)"));
             s.sendMessage(line("/sb player <player> inhuman [on|off]", "the Heart of Darkness, without eating it"));
+            s.sendMessage(line("/sb player <player> deeper [off|on]", "Deeper Still: off lets them raise a homunculus again"));
             s.sendMessage(line("/sb player <player> grace [on|off]", "the Angel Engine's blessing, without eating it"));
             s.sendMessage(line("/sb player <player> resetlimits", "sacrifice cooldown and daily count"));
         }
@@ -474,8 +475,14 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                 plugin.grace().set(t, !off);
                 s.sendMessage(ok(t.getName() + (off ? " is no longer Graced." : " is Graced.")));
             }
+            case "deeper" -> {
+                boolean on = a.length > 3 && a[3].equalsIgnoreCase("on");
+                if (on) plugin.deeperStill().mark(t); else plugin.deeperStill().clear(t);
+                s.sendMessage(ok(t.getName() + (on ? " has gone Deeper Still." : " is no longer Deeper Still: homunculi will come out for them again, and the Angel Engine works.")));
+            }
             case "info" -> {
                 s.sendMessage(Component.text("— " + t.getName() + " —", NamedTextColor.GOLD));
+                s.sendMessage(Component.text("Deeper Still: " + (plugin.deeperStill() != null && plugin.deeperStill().is(t) ? "yes" : "no"), NamedTextColor.GRAY));
                 int left = plugin.curses().secondsLeft(t);
                 s.sendMessage(Component.text("Curse: " + (left > 0 ? CurseManager.clock(left) + " left" : "none"), NamedTextColor.GRAY));
                 s.sendMessage(Component.text("Inhuman: " + (plugin.inhuman().is(t) ? "yes" : "no"), NamedTextColor.GRAY));
@@ -504,8 +511,9 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             }
             case "player" -> {
                 if (a.length == 2) return null;
-                if (a.length == 3) return filter(List.of("info", "curse", "uncurse", "inhuman", "grace", "resetlimits"), a[2]);
+                if (a.length == 3) return filter(List.of("info", "curse", "uncurse", "inhuman", "grace", "deeper", "resetlimits"), a[2]);
                 if (a.length == 4 && (a[2].equalsIgnoreCase("inhuman") || a[2].equalsIgnoreCase("grace"))) return filter(List.of("on", "off"), a[3]);
+                if (a.length == 4 && a[2].equalsIgnoreCase("deeper")) return filter(List.of("off", "on"), a[3]);
                 if (a.length == 4 && a[2].equalsIgnoreCase("curse")) return filter(List.of("15", "45", "120"), a[3]);
             }
             case "moloch" -> {
