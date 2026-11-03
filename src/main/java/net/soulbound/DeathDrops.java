@@ -13,8 +13,8 @@ import org.bukkit.inventory.PlayerInventory;
 /**
  * What you keep when you die, whatever the keepInventory game rule says:
  *   the world kills you (mobs, falls, lava, drowning, Moloch, God...)  - you keep everything, levels too
- *   another player kills you                                            - your backpack drops (the 27 slots above the
- *                                                                         hotbar); armour, hotbar and off hand stay
+ *   another player kills you                                            - everything drops (death.pvp-drops: all), or
+ *                                                                         just the backpack (the 27 slots above the hotbar)
  * Moloch's Curse still drops everything, and the sacrificed still keep theirs (their own handlers run after this one).
  */
 final class DeathDrops implements Listener {
@@ -31,8 +31,9 @@ final class DeathDrops implements Listener {
         e.setKeepLevel(true);
         e.setDroppedExp(0);
         Player killer = p.getKiller();
+        if (killer == null && e.getDamageSource().getCausingEntity() instanceof Player k) killer = k;   // arrows, bolts, tridents...
         if (killer == null || killer.equals(p)) return;
-        String mode = plugin.getConfig().getString("death.pvp-drops", "backpack").toLowerCase(java.util.Locale.ROOT);
+        String mode = plugin.getConfig().getString("death.pvp-drops", "all").toLowerCase(java.util.Locale.ROOT);
         if (mode.equals("none")) return;
         PlayerInventory inv = p.getInventory();
         int from = mode.equals("all") ? 0 : 9, to = mode.equals("all") ? inv.getSize() : 36;
@@ -42,7 +43,8 @@ final class DeathDrops implements Listener {
             if (it == null || it.getType().isAir()) continue;
             inv.setItem(i, null);
             if (it.containsEnchantment(org.bukkit.enchantments.Enchantment.VANISHING_CURSE)) continue;
-            e.getDrops().add(it);
+            // straight onto the floor ourselves: with keepInventory on, the game doesn't always drop the event's list
+            p.getWorld().dropItemNaturally(p.getLocation(), it);
             dropped = true;
         }
         if (dropped && e.deathMessage() != null)

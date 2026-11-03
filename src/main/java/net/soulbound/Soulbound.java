@@ -222,6 +222,12 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-yeti-three", true);
             saveConfig();
         }
+        // one-off: a player kill drops everything, not just the backpack
+        if (!getConfig().getBoolean("migrated.pvp-drops-all", false)) {
+            if ("backpack".equalsIgnoreCase(getConfig().getString("death.pvp-drops", "backpack"))) getConfig().set("death.pvp-drops", "all");
+            getConfig().set("migrated.pvp-drops-all", true);
+            saveConfig();
+        }
         // one-off: the Rapture Crossbow loads in 0.4 s instead of 0.25 s
         if (!getConfig().getBoolean("migrated.rapture-load-8", false)) {
             if (getConfig().getInt("rapture-crossbow.load-ticks", 5) == 5) getConfig().set("rapture-crossbow.load-ticks", 8);

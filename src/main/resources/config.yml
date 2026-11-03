@@ -802,11 +802,6 @@ homunculus:
   # The Blood Priest whispers to anyone who brings their homunculus near him (once every 15 minutes).
   priest-tempts: true
 
-# ---------------------------------------------------------------- dying
-# What you keep when you die (this replaces the keepInventory game rule, so it doesn't matter what that's set to).
-# Killed by the world (mobs, falls, lava, Moloch, God...): you keep everything, levels too.
-# Killed by another player: pvp-drops decides. "backpack" = the 27 slots above your hotbar drop (armour, hotbar and
-# off hand stay); "all" = everything drops; "none" = nothing does. Moloch's Curse still drops everything regardless.
 # Wild Drop (/sb world wilddrop, stand in the spot): anyone who falls in is sent to a random safe spot in the overworld.
 # A private hello on someone's very first join: a title and a few lines in chat, with a link to the rules.
 welcome:
@@ -835,9 +830,15 @@ wild-drop:
   min-range: 500     # never closer than this to the centre (keeps people off spawn, the temple and God's island)
   max-range: 5000
   command: ""        # set e.g. "tpr" to use a command instead of the built-in drop
+
+# ---------------------------------------------------------------- dying
+# What you keep when you die (this replaces the keepInventory game rule, so it doesn't matter what that's set to).
+# Killed by the world (mobs, falls, lava, Moloch, God...): you keep everything, levels too.
+# Killed by another player: pvp-drops decides. "backpack" = the 27 slots above your hotbar drop (armour, hotbar and
+# off hand stay); "all" = everything drops; "none" = nothing does. Moloch's Curse still drops everything regardless.
 death:
   enabled: true
-  pvp-drops: backpack
+  pvp-drops: all
 
 # ---------------------------------------------------------------- no-PvP places
 # No player-vs-player damage in Moloch's temple (moloch.temple-radius around the pyramid) or on God's main island
