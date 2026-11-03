@@ -58,6 +58,7 @@ final class Sleeper implements Listener {
     private final Map<UUID, TextDisplay> bubbles = new HashMap<>();
     private final Set<UUID> up = new HashSet<>();                       // standing up to shove someone
     private int tick;
+    private boolean placing;
 
     Sleeper(Soulbound plugin) { this.plugin = plugin; this.key = new NamespacedKey(plugin, "sleeper"); }
 
@@ -77,11 +78,16 @@ final class Sleeper implements Listener {
             Location l = p.getLocation();
             l.setPitch(0);
             String skin = plugin.getConfig().getString("sleeper.skin", "");
-            m = l.getWorld().spawn(l, Mannequin.class, x -> {
-                if (skin != null && !skin.isBlank()) x.setProfile(ResolvableProfile.resolvableProfile().name(skin).build());
-                x.setPersistent(true);
-                x.setRemoveWhenFarAway(false);
-            });
+            placing = true;   // spawn's no-mob-spawning rule doesn't apply to him: an admin is putting him there on purpose
+            try {
+                m = l.getWorld().spawn(l, Mannequin.class, x -> {
+                    if (skin != null && !skin.isBlank()) x.setProfile(ResolvableProfile.resolvableProfile().name(skin).build());
+                    x.setPersistent(true);
+                    x.setRemoveWhenFarAway(false);
+                    x.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
+                });
+            } finally { placing = false; }
+            if (!m.isValid()) return "Something stopped him appearing here (another plugin cancelled it).";
         }
         m.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
         m.setInvulnerable(true);
@@ -102,6 +108,12 @@ final class Sleeper implements Listener {
         clearBubble(best.getUniqueId());
         best.remove();
         return "The Sleeper is gone.";
+    }
+
+    /** Let him appear even where mobs can't spawn (WorldGuard's mob-spawning deny at spawn). Runs last, only for him. */
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlace(org.bukkit.event.entity.EntitySpawnEvent e) {
+        if (placing && e.isCancelled() && e.getEntity() instanceof Mannequin) e.setCancelled(false);
     }
 
     // ---------------------------------------------------------------- poking
