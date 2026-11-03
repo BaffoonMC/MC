@@ -60,20 +60,58 @@ final class Sleeper implements Listener {
     private int tick;
     private boolean placing;
 
-    Sleeper(Soulbound plugin) { this.plugin = plugin; this.key = new NamespacedKey(plugin, "sleeper"); }
+    private final NamespacedKey hitboxKey, hitboxOf;
+
+    Sleeper(Soulbound plugin) {
+        this.plugin = plugin; this.key = new NamespacedKey(plugin, "sleeper");
+        this.hitboxKey = new NamespacedKey(plugin, "sleeper_hitbox"); this.hitboxOf = new NamespacedKey(plugin, "sleeper_of");
+    }
 
     void start() { Bukkit.getScheduler().runTaskTimer(plugin, this::snore, 100L, 20L); }
 
     boolean is(Entity e) { return e instanceof Mannequin && e.getPersistentDataContainer().has(key, PersistentDataType.BYTE); }
 
+    /** The Sleeper behind a click: him, or the invisible hitbox lying over him (asleep, his own hitbox shrinks to a speck). */
+    private Mannequin of(Entity e) {
+        if (is(e)) return (Mannequin) e;
+        if (!(e instanceof org.bukkit.entity.Interaction)) return null;
+        String s = e.getPersistentDataContainer().get(hitboxOf, PersistentDataType.STRING);
+        if (s == null) return null;
+        try { return Bukkit.getEntity(UUID.fromString(s)) instanceof Mannequin m && is(m) ? m : null; } catch (IllegalArgumentException x) { return null; }
+    }
+
+    /** Make sure he has a hitbox over his body you can click. */
+    private void ensureHitbox(Mannequin m) {
+        String s = m.getPersistentDataContainer().get(hitboxKey, PersistentDataType.STRING);
+        if (s != null) try { if (Bukkit.getEntity(UUID.fromString(s)) instanceof org.bukkit.entity.Interaction i && i.isValid()) return; } catch (IllegalArgumentException ignored) {}
+        Location at = m.getLocation().clone(); at.setPitch(0);
+        placing = true;
+        try {
+            org.bukkit.entity.Interaction box = m.getWorld().spawn(at.add(0, -0.05, 0), org.bukkit.entity.Interaction.class, i -> {
+                i.setInteractionWidth(2.6f);
+                i.setInteractionHeight(0.75f);
+                i.setResponsive(true);
+                i.setPersistent(true);
+                i.getPersistentDataContainer().set(hitboxOf, PersistentDataType.STRING, m.getUniqueId().toString());
+            });
+            if (box.isValid()) m.getPersistentDataContainer().set(hitboxKey, PersistentDataType.STRING, box.getUniqueId().toString());
+        } finally { placing = false; }
+    }
+
+    private void removeHitbox(Mannequin m) {
+        String s = m.getPersistentDataContainer().get(hitboxKey, PersistentDataType.STRING);
+        if (s != null) try { Entity i = Bukkit.getEntity(UUID.fromString(s)); if (i != null) i.remove(); } catch (IllegalArgumentException ignored) {}
+    }
+
     // ---------------------------------------------------------------- setting him up
 
     String set(Player p) {
         Entity target = p.getTargetEntity(6);
+        if (of(target) != null) target = of(target);
         Mannequin m;
         if (target instanceof Mannequin mq) {
             m = mq;
-            if (is(m)) { m.setProfile(profile()); m.setPose(Pose.SLEEPING, true); return "He's already the Sleeper (skin refreshed)."; }
+            if (is(m)) { m.setProfile(profile()); m.setPose(Pose.SLEEPING, true); ensureHitbox(m); return "He's already the Sleeper (skin refreshed)."; }
         } else {
             Location l = p.getLocation();
             l.setPitch(0);
@@ -94,6 +132,7 @@ final class Sleeper implements Listener {
         m.setImmovable(true);
         m.setDescription(null);
         m.setPose(Pose.SLEEPING, true);
+        ensureHitbox(m);
         return target instanceof Mannequin ? "He lies down. Poke him and see what happens." : "A Sleeper lies where you stood.";
     }
 
@@ -115,6 +154,7 @@ final class Sleeper implements Listener {
         }
         if (best == null) return "No Sleeper within 8 blocks.";
         clearBubble(best.getUniqueId());
+        removeHitbox((Mannequin) best);
         best.remove();
         return "The Sleeper is gone.";
     }
@@ -122,16 +162,18 @@ final class Sleeper implements Listener {
     /** Let him appear even where mobs can't spawn (WorldGuard's mob-spawning deny at spawn). Runs last, only for him. */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlace(org.bukkit.event.entity.EntitySpawnEvent e) {
-        if (placing && e.isCancelled() && e.getEntity() instanceof Mannequin) e.setCancelled(false);
+        if (placing && e.isCancelled() && (e.getEntity() instanceof Mannequin || e.getEntity() instanceof org.bukkit.entity.Interaction)) e.setCancelled(false);
     }
 
     // ---------------------------------------------------------------- poking
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onClick(PlayerInteractEntityEvent e) {
-        if (!is(e.getRightClicked()) || e.getHand() != EquipmentSlot.HAND) return;
+        Mannequin m = of(e.getRightClicked());
+        if (m == null) return;
         e.setCancelled(true);
-        poke((Mannequin) e.getRightClicked(), e.getPlayer());
+        if (e.getHand() != EquipmentSlot.HAND) return;
+        poke(m, e.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -143,9 +185,10 @@ final class Sleeper implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onSwing(io.papermc.paper.event.player.PrePlayerAttackEntityEvent e) {
-        if (!is(e.getAttacked())) return;
+        Mannequin m = of(e.getAttacked());
+        if (m == null) return;
         e.setCancelled(true);
-        poke((Mannequin) e.getAttacked(), e.getPlayer());
+        poke(m, e.getPlayer());
     }
 
     private void poke(Mannequin m, Player p) {
@@ -240,7 +283,9 @@ final class Sleeper implements Listener {
         for (World w : Bukkit.getWorlds()) {
             if (w.getPlayers().isEmpty()) continue;
             for (Mannequin m : w.getEntitiesByClass(Mannequin.class)) {
-                if (!is(m) || up.contains(m.getUniqueId())) continue;
+                if (!is(m)) continue;
+                ensureHitbox(m);
+                if (up.contains(m.getUniqueId())) continue;
                 if (m.getLocation().getNearbyPlayers(10).isEmpty()) continue;
                 w.playSound(m.getLocation(), Sound.ENTITY_FOX_SLEEP, 0.7f, 0.55f);
                 w.spawnParticle(Particle.WHITE_ASH, m.getLocation().add(0, 0.6, 0), 4, 0.2, 0.1, 0.2, 0);
