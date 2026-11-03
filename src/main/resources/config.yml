@@ -782,3 +782,12 @@ homunculus:
   doorman-radius: 12
   doorman-cooldown-minutes: 5
   replace-wild-baby-husks: true
+
+# ---------------------------------------------------------------- dying
+# What you keep when you die (this replaces the keepInventory game rule, so it doesn't matter what that's set to).
+# Killed by the world (mobs, falls, lava, Moloch, God...): you keep everything, levels too.
+# Killed by another player: pvp-drops decides. "backpack" = the 27 slots above your hotbar drop (armour, hotbar and
+# off hand stay); "all" = everything drops; "none" = nothing does. Moloch's Curse still drops everything regardless.
+death:
+  enabled: true
+  pvp-drops: backpack

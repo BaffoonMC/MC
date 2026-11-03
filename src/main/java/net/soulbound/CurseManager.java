@@ -141,8 +141,7 @@ final class CurseManager implements Listener {
     public void onDeath(org.bukkit.event.entity.PlayerDeathEvent e) {
         Player p = e.getEntity();
         if (!plugin.getConfig().getBoolean("curse.drops-items", true) || left.getOrDefault(p.getUniqueId(), 0) <= 0 || !e.getKeepInventory()) return;
-        e.setKeepInventory(false);
-        e.getDrops().clear();
+        e.setKeepInventory(false);   // (anything already dropped, e.g. a pack lost to a player, stays dropped)
         for (org.bukkit.inventory.ItemStack it : p.getInventory().getContents()) {
             if (it == null || it.getType().isAir() || it.containsEnchantment(org.bukkit.enchantments.Enchantment.VANISHING_CURSE)) continue;
             e.getDrops().add(it.clone());
