@@ -134,6 +134,7 @@ final class CaptureManager implements Listener {
     }
 
     boolean isCaptive(Player p) { return byCaptive.containsKey(p.getUniqueId()); }
+    boolean isCaptor(Player p) { return byCaptor.containsKey(p.getUniqueId()); }
     Capture heldBy(Player captor) { return byCaptor.get(captor.getUniqueId()); }
     List<Capture> all() { return new ArrayList<>(byCaptive.values()); }
     boolean isActive(Capture cap) { return byCaptive.get(cap.captive) == cap; }

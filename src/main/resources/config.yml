@@ -791,3 +791,10 @@ homunculus:
 death:
   enabled: true
   pvp-drops: backpack
+
+# ---------------------------------------------------------------- no-PvP places
+# No player-vs-player damage in Moloch's temple (moloch.temple-radius around the pyramid) or on God's main island
+# (island.radius). Anyone dragging a captive can still be hit there, so a sacrifice can always be stopped.
+pvp-off:
+  temple: true
+  gods-island: true

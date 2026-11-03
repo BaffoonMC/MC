@@ -411,6 +411,7 @@ public final class Soulbound extends JavaPlugin {
         pm.registerEvents(quantumStand, this);
         quantumStand.start();
         pm.registerEvents(new DeathDrops(this), this);
+        pm.registerEvents(new SafeZones(this), this);
         homunculus = new Homunculus(this);
         pm.registerEvents(homunculus, this);
         homunculus.start();
