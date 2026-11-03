@@ -35,6 +35,7 @@ public final class Soulbound extends JavaPlugin {
     private CloudCandy cloudCandy;
     private RaptureCrossbow raptureCrossbow;
     private DeeperStill deeperStill;
+    private WildDrop wildDrop;
     private FesteringFlesh festering;
     private ThiefKey thiefKey;
     private KrakenBeard kraken;
@@ -378,6 +379,8 @@ public final class Soulbound extends JavaPlugin {
         deeperStill = new DeeperStill(this);
         pm.registerEvents(deeperStill, this);
         deeperStill.start();
+        wildDrop = new WildDrop(this);
+        wildDrop.start();
         festering = new FesteringFlesh(this);
         pm.registerEvents(festering, this);
         thiefKey = new ThiefKey(this);
@@ -531,6 +534,7 @@ public final class Soulbound extends JavaPlugin {
     CloudCandy cloudCandy() { return cloudCandy; }
     RaptureCrossbow raptureCrossbow() { return raptureCrossbow; }
     DeeperStill deeperStill() { return deeperStill; }
+    WildDrop wildDrop() { return wildDrop; }
     FesteringFlesh festering() { return festering; }
     ThiefKey thiefKey() { return thiefKey; }
     Store store() { return store; }

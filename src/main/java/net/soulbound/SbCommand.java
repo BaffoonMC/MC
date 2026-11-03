@@ -315,6 +315,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             s.sendMessage(line("/sb god heaven", "rebuild the throne, gates and pillars"));
         }
         if (group == null || group.equals("world")) {
+            s.sendMessage(line("/sb world wilddrop [radius|off]", "stand in it: anyone who falls in here goes somewhere random (/tpr)"));
             s.sendMessage(line("/sb world priest [remove]", "place (or remove) the Blood Priest here"));
             s.sendMessage(line("/sb world gate [here]", "rebuild Moloch's Exit Gate (or move it here)"));
             s.sendMessage(line("/sb world temple", "rebuild the pyramid stairs and side gates"));
@@ -399,6 +400,13 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                         if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
                         boolean remove = a.length > 2 && a[2].equalsIgnoreCase("remove");
                         s.sendMessage(ok(remove ? plugin.peacekeeper().removeNear(p) : plugin.peacekeeper().spawn(p)));
+                    }
+                    case "wilddrop" -> {
+                        if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
+                        if (a.length > 2 && a[2].equalsIgnoreCase("off")) { s.sendMessage(ok(plugin.wildDrop().off())); return true; }
+                        double r = 2;
+                        if (a.length > 2) try { r = Math.max(0.5, Math.min(16, Double.parseDouble(a[2]))); } catch (NumberFormatException ex) { s.sendMessage(bad("Usage: /sb world wilddrop [radius|off]")); return true; }
+                        s.sendMessage(ok(plugin.wildDrop().set(p, r)));
                     }
                     case "zephyr" -> {
                         if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
@@ -523,7 +531,8 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             }
             case "god" -> { if (a.length == 2) return filter(List.of("test", "heaven"), a[1]); }
             case "world" -> {
-                if (a.length == 2) return filter(List.of("priest", "peacekeeper", "gate", "temple", "setarrival", "zephyr", "brimstone"), a[1]);
+                if (a.length == 2) return filter(List.of("priest", "peacekeeper", "gate", "temple", "setarrival", "zephyr", "brimstone", "wilddrop"), a[1]);
+                if (a.length == 3 && a[1].equalsIgnoreCase("wilddrop")) return filter(List.of("2", "3", "off"), a[2]);
                 if (a.length == 3 && (a[1].equalsIgnoreCase("priest") || a[1].equalsIgnoreCase("peacekeeper"))) return filter(List.of("remove"), a[2]);
                 if (a.length == 3 && a[1].equalsIgnoreCase("gate")) return filter(List.of("here"), a[2]);
             }
