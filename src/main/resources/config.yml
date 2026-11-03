@@ -808,6 +808,11 @@ homunculus:
 # Killed by another player: pvp-drops decides. "backpack" = the 27 slots above your hotbar drop (armour, hotbar and
 # off hand stay); "all" = everything drops; "none" = nothing does. Moloch's Curse still drops everything regardless.
 # Wild Drop (/sb world wilddrop, stand in the spot): anyone who falls in is sent to a random safe spot in the overworld.
+# A private hello on someone's very first join: a title and a few lines in chat, with a link to the rules.
+welcome:
+  enabled: true
+  rules-url: "https://store.playbaffoonmc.net/#rules"
+  store-url: "https://store.playbaffoonmc.net"
 wild-drop:
   world: ""          # empty = the main overworld ("world")
   center-x: 0

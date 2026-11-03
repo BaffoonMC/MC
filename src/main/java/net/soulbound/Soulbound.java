@@ -394,6 +394,7 @@ public final class Soulbound extends JavaPlugin {
         deeperStill.start();
         wildDrop = new WildDrop(this);
         wildDrop.start();
+        pm.registerEvents(new Welcome(this), this);
         festering = new FesteringFlesh(this);
         pm.registerEvents(festering, this);
         thiefKey = new ThiefKey(this);
