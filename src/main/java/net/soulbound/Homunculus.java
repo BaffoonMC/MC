@@ -1,6 +1,7 @@
 package net.soulbound;
 
 import com.destroystokyo.paper.entity.ai.GoalType;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -69,11 +70,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * baby husks are swapped for baby zombies so the only ones in the world are these). It never attacks, monsters and
  * golems leave it alone, it doesn't drown into a zombie or burn, and it's silent except for its own little noises.
  *
- * Right-click it for its menu: clothes (head, chest, legs, feet, hand), a feeding bowl, its job, its nine pockets, and
- * a name tag to name it, and a button to put it back in its flask. Jobs:
- *   Pocket   - follows you
- *   Gardener - stays put, harvests and replants ripe crops in your claim, puts the harvest in the nearest chest
- *   Doorman  - stays put; when anyone else comes near, it squeals and tells you who
+ * Right-click it for its menu (a custom background, font soulbound:homunculus): clothes down the left like your own
+ * inventory, its picture, health / hunger / name tag / flask buttons, a feeding bowl, its orders, and its nine pockets
+ * along the bottom (they work whatever it's doing). Orders:
+ *   Follow me  - comes with you
+ *   Wait here  - sits where it is
+ *   Farm here  - stays put, harvests and replants ripe crops in your claim, puts the harvest in the nearest chest
+ *   Guard here - stays put; when anyone else comes near, it squeals and tells you who
  * Tumours and eggs heal it and count as a meal (right-click it holding one, or use the bowl). Unfed for a few days it
  * grows slow; longer and it rots away to a tumour.
  *
@@ -81,7 +84,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * over its head, heads its menu, and stays with it in the flask.
  */
 final class Homunculus implements Listener {
-    enum Job { POCKET, GARDENER, DOORMAN }
+    /** Its orders, in menu order. POCKET is "Follow me" (the name is kept so older homunculi load). */
+    enum Job { POCKET, WAIT, GARDENER, DOORMAN }
 
     private final Soulbound plugin;
     private final NamespacedKey flaskKey, ownerKey, jobKey, fedKey, homeKey, mineKey, iconKey, nameKey;
@@ -350,8 +354,17 @@ final class Homunculus implements Listener {
     // ---- the menu: clothes along the top, a feeding bowl, its jobs, its pockets
     private static final EquipmentSlot[] WEAR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.HAND};
     private static final String[] WEAR_NAME = {"Head", "Chest", "Legs", "Feet", "Hand"};
-    private static final int FEED = 6, STATUS = 8, POCKET0 = 27, NAME = 36, BOTTLE = 44;
-    private static final int[] JOB_SLOT = {20, 22, 24};
+    // the layout (9 wide, 5 tall): clothes down column 0 (hand under the picture), picture in columns 1-2,
+    // health / hunger / name / flask in column 3, the four orders across columns 4-8, pockets along the bottom row
+    private static final int[] WEAR_SLOT = {0, 9, 18, 27, 28};
+    private static final int HEALTH = 3, HUNGER = 12, NAME = 21, BOTTLE = 30, FEED = 29, POCKET0 = 36;
+    private static final int[] PICTURE = {1, 2, 10, 11, 19, 20};
+    private static final Key FONT = Key.key("soulbound", "homunculus");
+    private static final String[][] ORDERS = {{"Follow me", "Comes with you.", "Its pockets come too."},
+                                              {"Wait here", "Sits right where it is.", ""},
+                                              {"Farm here", "Harvests and replants ripe crops in your claim.", "Puts the harvest in the nearest chest."},
+                                              {"Guard here", "Stays here and watches.", "Tells you who comes by."}};
+    private static final Material[] ORDER_ICON = {Material.LEAD, Material.ARMOR_STAND, Material.IRON_HOE, Material.BELL};
 
     static final class Menu implements InventoryHolder {
         final Husk husk; Inventory inv;
@@ -374,7 +387,10 @@ final class Homunculus implements Listener {
 
     private void openMenu(Player p, Husk h) {
         Menu m = new Menu(h);
-        m.inv = Bukkit.createInventory(m, 45, Component.text(name(h) != null ? name(h) : p.getName() + "'s Homunculus"));
+        Component title = Component.text().append(
+                Component.text("\uF008\uE000\uF0A1").font(FONT).color(NamedTextColor.WHITE),
+                Component.text(name(h) != null ? name(h) : "Homunculus", TextColor.color(0x404040))).build();
+        m.inv = Bukkit.createInventory(m, 45, title);
         draw(m);
         ItemStack[] pocket = load(h);
         for (int i = 0; i < 9; i++) m.inv.setItem(POCKET0 + i, pocket[i]);
@@ -382,42 +398,68 @@ final class Homunculus implements Listener {
         h.getWorld().playSound(h.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, .8f, .7f);
     }
 
+    private ItemStack widget(String model, Material fallback, Component name, List<Component> lore, boolean glow) {
+        ItemStack it = icon(fallback, name, lore, glow);
+        if (model != null) { ItemMeta im = it.getItemMeta(); im.setItemModel(new NamespacedKey("soulbound", model)); it.setItemMeta(im); }
+        return it;
+    }
+
+    private static Component grey(String s) { return Component.text(s, NamedTextColor.GRAY); }
+    private static Component dim(String s) { return Component.text(s, NamedTextColor.DARK_GRAY); }
+
     /** Everything but the pockets: redrawn whenever something changes. */
     private void draw(Menu m) {
         Husk h = m.husk;
-        ItemStack pane = icon(Material.GRAY_STAINED_GLASS_PANE, Component.text(" "), List.of(), false);
-        for (int i = 0; i < POCKET0; i++) m.inv.setItem(i, pane);
-        for (int i = 36; i < 45; i++) m.inv.setItem(i, pane);
+        String n = name(h);
+        AttributeInstance hp = h.getAttribute(Attribute.MAX_HEALTH);
+        String health = "Health: " + (int) Math.ceil(h.getHealth()) + " / " + (int) (hp == null ? 10 : hp.getValue());
+        long days = (System.currentTimeMillis() - fed(h)) / 86_400_000L;
+        boolean hungry = days >= 1;
+        // clothes: empty slots show the faded outline drawn in the background
         for (int i = 0; i < WEAR.length; i++) {
             ItemStack worn = h.getEquipment().getItem(WEAR[i]);
-            m.inv.setItem(i, worn.getType().isAir()
-                    ? icon(Material.LIGHT_GRAY_STAINED_GLASS_PANE, Component.text(WEAR_NAME[i], NamedTextColor.GRAY), List.of(Component.text("Put something here for it to wear.", NamedTextColor.DARK_GRAY)), false)
-                    : worn.clone());
+            m.inv.setItem(WEAR_SLOT[i], worn.getType().isAir() ? null : worn.clone());
         }
-        m.inv.setItem(FEED, icon(Material.BOWL, Component.text("Feed", TextColor.color(0xF2A8B4)),
-                List.of(Component.text("Drop a tumour or an egg here.", NamedTextColor.GRAY), Component.text("It heals, and it's a meal.", NamedTextColor.DARK_GRAY)), false));
-        AttributeInstance hp = h.getAttribute(Attribute.MAX_HEALTH);
-        long days = (System.currentTimeMillis() - fed(h)) / 86_400_000L;
-        m.inv.setItem(STATUS, icon(Material.PINK_DYE, Component.text("How it's doing", TextColor.color(0xF2A8B4)), List.of(
-                Component.text("Health: " + (int) Math.ceil(h.getHealth()) + " / " + (int) (hp == null ? 10 : hp.getValue()), NamedTextColor.GRAY),
-                Component.text("Last fed: " + (days == 0 ? "today" : days + (days == 1 ? " day ago" : " days ago")), days >= cfg("starve-days", 3) ? NamedTextColor.RED : NamedTextColor.GRAY),
-                Component.text("It starves after " + (int) cfg("rot-days", 5) + " days.", NamedTextColor.DARK_GRAY)), false));
-        Job j = job(h);
-        Object[][] jobs = {{Job.POCKET, Material.BUNDLE, "Pocket", "Follows you around.", "Its pockets are below."},
-                           {Job.GARDENER, Material.WHEAT, "Gardener", "Stays here and tends the crops in your claim.", "Puts the harvest in the nearest chest."},
-                           {Job.DOORMAN, Material.BELL, "Doorman", "Stays here and watches.", "Tells you who comes by."}};
-        for (int i = 0; i < 3; i++) {
-            boolean on = jobs[i][0] == j;
-            m.inv.setItem(JOB_SLOT[i], icon((Material) jobs[i][1], Component.text((String) jobs[i][2], on ? NamedTextColor.GREEN : NamedTextColor.WHITE, TextDecoration.BOLD), List.of(
-                    Component.text((String) jobs[i][3], NamedTextColor.GRAY), Component.text((String) jobs[i][4], NamedTextColor.GRAY),
-                    Component.text(on ? "Doing this now." : "Click to give it this job.", on ? NamedTextColor.GREEN : NamedTextColor.DARK_GRAY)), on));
-        }
-        String n = name(h);
+        // the picture: invisible, but hovering it says who it is
+        ItemStack pic = widget("hmg_blank", Material.PAPER, Component.text(n == null ? "Your homunculus" : n, PINK),
+                List.of(grey(health), grey("Order: " + ORDERS[job(h).ordinal()][0]), dim("Put clothes in the slots on the left.")), false);
+        for (int s : PICTURE) m.inv.setItem(s, pic);
+        m.inv.setItem(HEALTH, widget("hmg_heart", Material.PAPER, Component.text(health, NamedTextColor.RED),
+                List.of(dim("Tumours heal 3 hearts, eggs 1.")), false));
+        m.inv.setItem(HUNGER, hungry
+                ? widget("hmg_hungry", Material.PAPER, Component.text("Hungry", NamedTextColor.RED), List.of(
+                        grey("Last fed " + days + (days == 1 ? " day ago." : " days ago.")),
+                        Component.text("It slows down after " + (int) cfg("starve-days", 3) + " days and rots after " + (int) cfg("rot-days", 5) + ".", days >= cfg("starve-days", 3) ? NamedTextColor.RED : NamedTextColor.DARK_GRAY)), false)
+                : icon(Material.COOKED_CHICKEN, Component.text("Fed today", NamedTextColor.GREEN), List.of(dim("Feed it at least every few days.")), false));
         m.inv.setItem(NAME, icon(Material.NAME_TAG, Component.text(n == null ? "Name it" : "Rename " + n, PINK), List.of(
-                Component.text(n == null ? "It doesn't have a name yet." : "Its name is " + n + ".", NamedTextColor.GRAY),
-                Component.text("Click, then type its name in chat.", NamedTextColor.DARK_GRAY)), false));
-        m.inv.setItem(BOTTLE, icon(Material.GLASS_BOTTLE, Component.text("Back in the flask", TextColor.color(0xF2A8B4)),
-                List.of(Component.text("It climbs back in. Its things and clothes come back to you.", NamedTextColor.GRAY)), false));
+                grey(n == null ? "It doesn't have a name yet." : "Its name is " + n + "."), dim("Click, then type its name in chat.")), false));
+        m.inv.setItem(BOTTLE, widget("homunculus_flask", Material.GLASS_BOTTLE, Component.text("Back in the flask", PINK),
+                List.of(grey("It climbs back in."), dim("Its pockets and clothes come back to you.")), false));
+        m.inv.setItem(FEED, widget(hungry ? "hmg_bowl" : null, Material.BOWL, Component.text("Feed", PINK),
+                List.of(grey("Drop a tumour or an egg here."), dim("Or right-click it holding one.")), false));
+        // orders: the chosen row turns green (five 18x18 pieces); the others show the icon and the drawn label
+        Job j = job(h);
+        for (int r = 0; r < 4; r++) {
+            boolean on = j.ordinal() == r;
+            List<Component> lore = new ArrayList<>();
+            lore.add(grey(ORDERS[r][1]));
+            if (!ORDERS[r][2].isEmpty()) lore.add(grey(ORDERS[r][2]));
+            lore.add(on ? Component.text("Doing this now.", NamedTextColor.GREEN) : dim("Click to give this order."));
+            Component title = Component.text(ORDERS[r][0], on ? NamedTextColor.GREEN : NamedTextColor.WHITE, TextDecoration.BOLD);
+            for (int k = 0; k < 5; k++) {
+                int slot = 4 + k + 9 * r;
+                if (on) m.inv.setItem(slot, widget("hmg_sel_" + r + "_" + k, Material.PAPER, title, lore, false));
+                else if (k == 0) m.inv.setItem(slot, icon(ORDER_ICON[r], title, lore, false));
+                else m.inv.setItem(slot, widget("hmg_blank", Material.PAPER, title, lore, false));
+            }
+        }
+    }
+
+    /** The armour slot an item is made for (helmet, chestplate, ...), or null. */
+    private static EquipmentSlot armourFor(ItemStack it) {
+        if (it.hasItemMeta() && it.getItemMeta().hasEquippable()) return it.getItemMeta().getEquippable().getSlot();
+        EquipmentSlot s = it.getType().getEquipmentSlot();
+        return s == EquipmentSlot.HEAD || s == EquipmentSlot.CHEST || s == EquipmentSlot.LEGS || s == EquipmentSlot.FEET ? s : null;
     }
 
     private static boolean fits(EquipmentSlot s, ItemStack it) {
@@ -442,7 +484,16 @@ final class Homunculus implements Listener {
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     ItemStack it = p.getInventory().getItem(slot);
                     if (it == null || it.getType().isAir() || !h.isValid()) return;
+                    EquipmentSlot to = null;   // armour it isn't wearing yet goes straight on
+                    for (int i = 0; i < 4 && to == null; i++)
+                        if (it.getType() != Material.CARVED_PUMPKIN && armourFor(it) == WEAR[i] && h.getEquipment().getItem(WEAR[i]).getType().isAir()) to = WEAR[i];
                     if (healOf(it) > 0) feed(h, it);
+                    else if (to != null) {
+                        ItemStack one = it.clone(); one.setAmount(1);
+                        h.getEquipment().setItem(to, one); h.getEquipment().setDropChance(to, 0f);
+                        it.setAmount(it.getAmount() - 1);
+                        p.playSound(p.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, .8f, 1.3f);
+                    }
                     else for (int i = POCKET0; i < POCKET0 + 9 && it.getAmount() > 0; i++) {
                         ItemStack there = m.inv.getItem(i);
                         if (there == null || there.getType().isAir()) { m.inv.setItem(i, it.clone()); it.setAmount(0); }
@@ -456,8 +507,10 @@ final class Homunculus implements Listener {
         }
         if (raw >= POCKET0 && raw < POCKET0 + 9) return;   // its pockets work like any chest
         e.setCancelled(true);
-        if (raw < WEAR.length) {   // clothes: swap what's on your cursor with what it's wearing
-            EquipmentSlot s = WEAR[raw];
+        int wear = -1;
+        for (int i = 0; i < WEAR_SLOT.length; i++) if (WEAR_SLOT[i] == raw) wear = i;
+        if (wear >= 0) {   // clothes: swap what's on your cursor with what it's wearing
+            EquipmentSlot s = WEAR[wear];
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (!h.isValid()) return;
                 ItemStack cursor = p.getItemOnCursor();
@@ -486,13 +539,17 @@ final class Homunculus implements Listener {
             });
             return;
         }
-        for (int i = 0; i < 3; i++) if (raw == JOB_SLOT[i]) {
-            Job to = Job.values()[i];
+        int col = raw % 9, r = raw / 9;
+        if (col >= 4 && r < 4) {   // an order: anywhere on its row
+            Job to = Job.values()[r];
+            if (to == job(h)) return;
             h.getPersistentDataContainer().set(jobKey, PersistentDataType.STRING, to.name());
             Location l = h.getLocation();
             h.getPersistentDataContainer().set(homeKey, PersistentDataType.STRING, l.getX() + "," + l.getY() + "," + l.getZ());
             aim.remove(h.getUniqueId());
+            h.getPathfinder().stopPathfinding();
             p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, .7f, 1.2f);
+            h.getWorld().playSound(h.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, .7f, 1.3f);
             draw(m);
             return;
         }
@@ -601,6 +658,7 @@ final class Homunculus implements Listener {
                 }
                 switch (job(h)) {
                     case POCKET -> follow(h, p);
+                    case WAIT -> stay(h);
                     case DOORMAN -> { stay(h); if (tick % 4 == 0) watch(h, p, o, now); }
                     case GARDENER -> { if (tick % 2 == 0) garden(h, o); }
                 }
