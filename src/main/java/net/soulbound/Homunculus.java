@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -58,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Homunculi: a little wide-eyed thing grown in a flask, one per player.
@@ -68,22 +70,29 @@ import java.util.UUID;
  * golems leave it alone, it doesn't drown into a zombie or burn, and it's silent except for its own little noises.
  *
  * Right-click it for its menu: clothes (head, chest, legs, feet, hand), a feeding bowl, its job, its nine pockets, and
- * a button to put it back in its flask. Jobs:
+ * a name tag to name it, and a button to put it back in its flask. Jobs:
  *   Pocket   - follows you
  *   Gardener - stays put, harvests and replants ripe crops in your claim, puts the harvest in the nearest chest
  *   Doorman  - stays put; when anyone else comes near, it squeals and tells you who
  * Tumours and eggs heal it and count as a meal (right-click it holding one, or use the bowl). Unfed for a few days it
  * grows slow; longer and it rots away to a tumour.
+ *
+ * Naming: use a name tag on it like any mob, or the name tag in its menu and type the name in chat. The name floats
+ * over its head, heads its menu, and stays with it in the flask.
  */
 final class Homunculus implements Listener {
     enum Job { POCKET, GARDENER, DOORMAN }
 
     private final Soulbound plugin;
-    private final NamespacedKey flaskKey, ownerKey, jobKey, fedKey, homeKey, mineKey, iconKey;
+    private final NamespacedKey flaskKey, ownerKey, jobKey, fedKey, homeKey, mineKey, iconKey, nameKey;
     private final NamespacedKey[] slotKeys = new NamespacedKey[9];
     private final Set<UUID> tamed = new HashSet<>();                // goals stripped this session
     private final Map<UUID, Long> seen = new HashMap<>();           // doorman: visitor -> when last reported
     private final Map<UUID, Block> aim = new HashMap<>();           // gardener: the crop or chest it's walking to
+    private record Naming(UUID husk, long until) { }
+    private final Map<UUID, Naming> naming = new ConcurrentHashMap<>();   // player -> the homunculus they're naming in chat
+    private static final PlainTextComponentSerializer PLAIN = PlainTextComponentSerializer.plainText();
+    private static final TextColor PINK = TextColor.color(0xF2A8B4);
     private int tick;
 
     Homunculus(Soulbound plugin) {
@@ -95,6 +104,7 @@ final class Homunculus implements Listener {
         homeKey = new NamespacedKey(plugin, "homunculus_home");
         mineKey = new NamespacedKey(plugin, "my_homunculus");
         iconKey = new NamespacedKey(plugin, "homunculus_icon");
+        nameKey = new NamespacedKey(plugin, "homunculus_name");
         for (int i = 0; i < 9; i++) slotKeys[i] = new NamespacedKey(plugin, "homunculus_slot_" + i);
     }
 
@@ -107,17 +117,21 @@ final class Homunculus implements Listener {
 
     // ---------------------------------------------------------------- the flask
 
-    ItemStack flask() {
+    ItemStack flask() { return flask(null); }
+
+    /** A flask; with a name, it's that homunculus back in its flask. */
+    ItemStack flask(String name) {
         ItemStack it = new ItemStack(Material.PAPER);
         ItemMeta m = it.getItemMeta();
-        m.displayName(Component.text("Homunculus in a Flask", TextColor.color(0xF2A8B4), TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
+        m.displayName(Component.text(name == null ? "Homunculus in a Flask" : name + " in a Flask", PINK, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
         m.lore(List.of(
-                Component.text("It's watching you through the glass.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, true),
+                Component.text(name == null ? "It's watching you through the glass." : name + " is watching you through the glass.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, true),
                 Component.text("Use it on the ground to let it out.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false),
-                Component.text("Feed it leather, a tumour or a bone to give it a job.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false)));
+                Component.text("Right-click it for its menu.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false)));
         m.setItemModel(new NamespacedKey("soulbound", "homunculus_flask"));
         m.setMaxStackSize(1);
         m.getPersistentDataContainer().set(flaskKey, PersistentDataType.BYTE, (byte) 1);
+        if (name != null) m.getPersistentDataContainer().set(nameKey, PersistentDataType.STRING, name);
         it.setItemMeta(m);
         return it;
     }
@@ -177,6 +191,7 @@ final class Homunculus implements Listener {
         Husk old = mine(p);
         if (old != null) { p.sendActionBar(Component.text("You already have one. It's jealous.", NamedTextColor.RED)); return; }
         Location at = e.getClickedBlock().getRelative(e.getBlockFace()).getLocation().add(.5, 0, .5);
+        String name = e.getItem().getItemMeta().getPersistentDataContainer().get(nameKey, PersistentDataType.STRING);
         Husk h = at.getWorld().spawn(at, Husk.class, x -> {
             x.setBaby();
             x.getEquipment().clear();
@@ -190,14 +205,16 @@ final class Homunculus implements Listener {
             pdc.set(ownerKey, PersistentDataType.STRING, p.getUniqueId().toString());
             pdc.set(jobKey, PersistentDataType.STRING, Job.POCKET.name());
             pdc.set(fedKey, PersistentDataType.LONG, System.currentTimeMillis());
+            if (name != null) pdc.set(nameKey, PersistentDataType.STRING, name);
         });
         tame(h);
+        showName(h);
         p.getPersistentDataContainer().set(mineKey, PersistentDataType.STRING, h.getUniqueId().toString());
         if (p.getGameMode() != GameMode.CREATIVE) p.getInventory().setItemInMainHand(null);
         at.getWorld().playSound(at, Sound.BLOCK_GLASS_BREAK, 1f, 1.2f);
         at.getWorld().playSound(at, Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 1f, .6f);
         at.getWorld().spawnParticle(Particle.ITEM_SLIME, at.clone().add(0, .4, 0), 20, .3, .2, .3, .05);
-        p.sendMessage(Component.text("It climbs out of the flask and looks up at you. It's yours.", TextColor.color(0xF2A8B4), TextDecoration.ITALIC));
+        p.sendMessage(Component.text(name == null ? "It climbs out of the flask and looks up at you. It's yours." : name + " climbs out of the flask and looks up at you.", PINK, TextDecoration.ITALIC));
     }
 
     /** The player's homunculus, if it's loaded. */
@@ -205,6 +222,53 @@ final class Homunculus implements Listener {
         String s = p.getPersistentDataContainer().get(mineKey, PersistentDataType.STRING);
         if (s == null) return null;
         try { return Bukkit.getEntity(UUID.fromString(s)) instanceof Husk h && h.isValid() && is(h) ? h : null; } catch (RuntimeException x) { return null; }
+    }
+
+    // ---------------------------------------------------------------- its name
+
+    /** Its name, or null if it hasn't been given one. */
+    private String name(Entity h) { return h.getPersistentDataContainer().get(nameKey, PersistentDataType.STRING); }
+
+    /** "Pip", or "your homunculus" if it has no name. */
+    private String called(Entity h) { String n = name(h); return n == null ? "your homunculus" : n; }
+
+    private void showName(Husk h) {
+        String n = name(h);
+        h.customName(Component.text(n == null ? "Homunculus" : n, PINK));
+        h.setCustomNameVisible(n != null);
+    }
+
+    /** Letters, numbers, spaces, ' - _ only; no colours; 16 characters at most. */
+    private static String clean(String raw) {
+        String s = raw.replaceAll("(?i)[\u00A7&][0-9a-fk-orx]", "").replaceAll("[^\\p{L}\\p{N} '_-]", "").trim().replaceAll(" +", " ");
+        return s.length() > 16 ? s.substring(0, 16).trim() : s;
+    }
+
+    private boolean rename(Player p, Husk h, String raw) {
+        String n = clean(raw);
+        if (n.isEmpty()) { p.sendActionBar(Component.text("That isn't a name it can say.", NamedTextColor.RED)); return false; }
+        h.getPersistentDataContainer().set(nameKey, PersistentDataType.STRING, n);
+        showName(h);
+        h.getWorld().playSound(h.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, 1f, 1.1f);
+        h.getWorld().spawnParticle(Particle.HEART, h.getLocation().add(0, .9, 0), 3, .2, .1, .2);
+        p.sendMessage(Component.text("It says \"" + n + "\" back to you, badly. It likes it.", PINK, TextDecoration.ITALIC));
+        return true;
+    }
+
+    /** After the menu's name tag: the next thing they say in chat is its name. */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onChat(io.papermc.paper.event.player.AsyncChatEvent e) {
+        Naming w = naming.remove(e.getPlayer().getUniqueId());
+        if (w == null || w.until() < System.currentTimeMillis()) return;
+        e.setCancelled(true);
+        String text = PLAIN.serialize(e.originalMessage()).trim();
+        Player p = e.getPlayer();
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!p.isOnline()) return;
+            if (text.equalsIgnoreCase("cancel")) { p.sendActionBar(Component.text("It stays as it is.", NamedTextColor.GRAY)); return; }
+            if (Bukkit.getEntity(w.husk()) instanceof Husk h && h.isValid() && is(h) && p.getUniqueId().equals(owner(h))) rename(p, h, text);
+            else p.sendActionBar(Component.text("It's too far away to hear you.", NamedTextColor.GRAY));
+        });
     }
 
     // ---------------------------------------------------------------- feeding, its menu, clothes, bottling
@@ -239,10 +303,14 @@ final class Homunculus implements Listener {
         Player p = e.getPlayer();
         if (!p.getUniqueId().equals(owner(h))) { p.sendActionBar(Component.text("It hides from you. It isn't yours.", NamedTextColor.GRAY)); return; }
         ItemStack hand = p.getInventory().getItemInMainHand();
+        if (hand.getType() == Material.NAME_TAG && hand.hasItemMeta() && hand.getItemMeta().hasDisplayName()) {   // a name tag, like any mob
+            if (rename(p, h, PLAIN.serialize(hand.getItemMeta().displayName())) && p.getGameMode() != GameMode.CREATIVE) hand.setAmount(hand.getAmount() - 1);
+            return;
+        }
         if (healOf(hand) > 0) {   // quick feed straight from your hand
             ItemStack one = hand.clone();
             if (feed(h, one) && p.getGameMode() != GameMode.CREATIVE) hand.setAmount(hand.getAmount() - 1);
-            p.sendActionBar(Component.text("It eats it, slowly, staring at you.", TextColor.color(0xF2A8B4)));
+            p.sendActionBar(Component.text(name(h) == null ? "It eats it, slowly, staring at you." : name(h) + " eats it, slowly, staring at you.", PINK));
             return;
         }
         openMenu(p, h);
@@ -254,7 +322,7 @@ final class Homunculus implements Listener {
         List<ItemStack> back = new ArrayList<>();
         for (ItemStack it : load(h)) if (it != null) back.add(it);
         for (EquipmentSlot s : WEAR) { ItemStack it = h.getEquipment().getItem(s); if (!it.getType().isAir()) back.add(it); }
-        back.add(flask());
+        back.add(flask(name(h)));
         for (ItemStack it : back) for (ItemStack left : p.getInventory().addItem(it).values()) p.getWorld().dropItemNaturally(p.getLocation(), left);
         h.remove();
         p.getPersistentDataContainer().remove(mineKey);
@@ -282,7 +350,7 @@ final class Homunculus implements Listener {
     // ---- the menu: clothes along the top, a feeding bowl, its jobs, its pockets
     private static final EquipmentSlot[] WEAR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.HAND};
     private static final String[] WEAR_NAME = {"Head", "Chest", "Legs", "Feet", "Hand"};
-    private static final int FEED = 6, STATUS = 8, POCKET0 = 27, BOTTLE = 44;
+    private static final int FEED = 6, STATUS = 8, POCKET0 = 27, NAME = 36, BOTTLE = 44;
     private static final int[] JOB_SLOT = {20, 22, 24};
 
     static final class Menu implements InventoryHolder {
@@ -306,7 +374,7 @@ final class Homunculus implements Listener {
 
     private void openMenu(Player p, Husk h) {
         Menu m = new Menu(h);
-        m.inv = Bukkit.createInventory(m, 45, Component.text(p.getName() + "'s Homunculus"));
+        m.inv = Bukkit.createInventory(m, 45, Component.text(name(h) != null ? name(h) : p.getName() + "'s Homunculus"));
         draw(m);
         ItemStack[] pocket = load(h);
         for (int i = 0; i < 9; i++) m.inv.setItem(POCKET0 + i, pocket[i]);
@@ -344,6 +412,10 @@ final class Homunculus implements Listener {
                     Component.text((String) jobs[i][3], NamedTextColor.GRAY), Component.text((String) jobs[i][4], NamedTextColor.GRAY),
                     Component.text(on ? "Doing this now." : "Click to give it this job.", on ? NamedTextColor.GREEN : NamedTextColor.DARK_GRAY)), on));
         }
+        String n = name(h);
+        m.inv.setItem(NAME, icon(Material.NAME_TAG, Component.text(n == null ? "Name it" : "Rename " + n, PINK), List.of(
+                Component.text(n == null ? "It doesn't have a name yet." : "Its name is " + n + ".", NamedTextColor.GRAY),
+                Component.text("Click, then type its name in chat.", NamedTextColor.DARK_GRAY)), false));
         m.inv.setItem(BOTTLE, icon(Material.GLASS_BOTTLE, Component.text("Back in the flask", TextColor.color(0xF2A8B4)),
                 List.of(Component.text("It climbs back in. Its things and clothes come back to you.", NamedTextColor.GRAY)), false));
     }
@@ -424,6 +496,13 @@ final class Homunculus implements Listener {
             draw(m);
             return;
         }
+        if (raw == NAME) {
+            naming.put(p.getUniqueId(), new Naming(h.getUniqueId(), System.currentTimeMillis() + 60_000L));
+            p.closeInventory();
+            p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, .7f, 1.2f);
+            p.sendMessage(Component.text("Type its name in chat. ", PINK).append(Component.text("(16 letters at most, or type cancel)", NamedTextColor.DARK_GRAY)));
+            return;
+        }
         if (raw == BOTTLE) { savePocket(m); p.closeInventory(); bottle(p, h); }
     }
 
@@ -484,7 +563,7 @@ final class Homunculus implements Listener {
         UUID o = owner(h);
         Player p = o == null ? null : Bukkit.getPlayer(o);
         if (p != null) {
-            p.sendMessage(Component.text("Your homunculus is dead. Something in you feels lighter.", NamedTextColor.DARK_RED, TextDecoration.ITALIC));
+            p.sendMessage(Component.text((name(h) == null ? "Your homunculus" : name(h)) + " is dead. Something in you feels lighter.", NamedTextColor.DARK_RED, TextDecoration.ITALIC));
             String mine = p.getPersistentDataContainer().get(mineKey, PersistentDataType.STRING);
             if (h.getUniqueId().toString().equals(mine)) p.getPersistentDataContainer().remove(mineKey);
         }
@@ -540,7 +619,7 @@ final class Homunculus implements Listener {
         l.getWorld().playSound(l, Sound.BLOCK_HONEY_BLOCK_BREAK, 1f, .6f);
         UUID o = owner(h);
         Player p = o == null ? null : Bukkit.getPlayer(o);
-        if (p != null) p.sendMessage(Component.text("You forgot to feed your homunculus. It's just a tumour now.", NamedTextColor.DARK_RED, TextDecoration.ITALIC));
+        if (p != null) p.sendMessage(Component.text("You forgot to feed " + called(h) + ". It's just a tumour now.", NamedTextColor.DARK_RED, TextDecoration.ITALIC));
         h.remove();
     }
 
@@ -571,7 +650,7 @@ final class Homunculus implements Listener {
             h.getWorld().playSound(h.getLocation(), Sound.ENTITY_ALLAY_HURT, 1.2f, 1.7f);
             h.getWorld().playSound(h.getLocation(), Sound.ENTITY_ALLAY_HURT, 1.2f, 1.5f);
             h.lookAt(v);
-            if (owner != null) owner.sendMessage(Component.text("Your homunculus squeals: ", TextColor.color(0xF2A8B4), TextDecoration.ITALIC)
+            if (owner != null) owner.sendMessage(Component.text((name(h) == null ? "Your homunculus" : name(h)) + " squeals: ", PINK, TextDecoration.ITALIC)
                     .append(Component.text(v.getName() + " is at your home.", NamedTextColor.WHITE)));
         }
     }
