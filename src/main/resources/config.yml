@@ -137,6 +137,10 @@ hunger:
   # World Egg (300 points, so 30% at 0.1) and enchanted golden apples (100, so 10%); without it red dust too (2, block 18).
   per-offering-point: 0.1
   datapack-objective: "sacrifice.offer"
+  # On top of offerings, his hunger grows by itself this much every day (0 = off). It only happens while someone's
+  # online, so he never fills up and rises to an empty server.
+  daily-gain: 10
+  daily-gain-hours: 24
   # He only rises at one of these times, so everyone can be there. Days in English, 24-hour clock.
   awakening-slots:
     - "FRIDAY 20:00"

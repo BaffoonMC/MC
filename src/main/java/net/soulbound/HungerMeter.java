@@ -170,6 +170,7 @@ final class HungerMeter implements Listener {
 
     private void tickSecond() {
         pollDatapack();
+        dailyGain();
         // the countdown to his rising
         if (awakenAt > 0 && !plugin.boss().active()) {
             long left = (awakenAt - System.currentTimeMillis()) / 1000;
@@ -182,6 +183,20 @@ final class HungerMeter implements Listener {
             if (plugin.boss().begin()) { awakenAt = 0; persist(); }
             else awakenAt = System.currentTimeMillis() + 60_000;   // realm not loaded yet: try again in a minute
         }
+    }
+
+    /** Every day he grows a little hungrier on his own (hunger.daily-gain), counted from the last time it happened. It
+     *  waits for someone to be online, so he never fills up and rises to an empty server. */
+    private void dailyGain() {
+        double gain = plugin.getConfig().getDouble("hunger.daily-gain", 10);
+        if (gain <= 0 || awakenAt > 0 || plugin.boss().active()) return;
+        long now = System.currentTimeMillis(), every = (long) (plugin.getConfig().getDouble("hunger.daily-gain-hours", 24) * 3600_000L);
+        long last = store.data.getLong("hunger.last-daily", 0);
+        if (last == 0) { store.set("hunger.last-daily", now); return; }
+        if (now - last < every || Bukkit.getOnlinePlayers().isEmpty()) return;
+        store.set("hunger.last-daily", now);
+        say("Another day without enough. Moloch's hunger grows on its own.", NamedTextColor.DARK_RED);
+        add(gain);
     }
 
     /** The data pack keeps a climbing count of offering points (#hunger: stars, kings' apples, redstone); turn each rise into Hunger. */
