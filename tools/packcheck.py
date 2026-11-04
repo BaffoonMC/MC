@@ -49,9 +49,18 @@ if m:
     for what in ["piglin", "piglin_brute", "hoglin"]:
         r = cmd(f"execute in sacrifice:sacrifice positioned {bx} 100 {bz} if entity @e[type=minecraft:{what},distance=..140]", r"(?i)passed|failed|error|unknown", 20)
         found["bastion " + what] = (r or "no reply").strip()[-80:]
-    for blk in ["gilded_blackstone", "polished_blackstone_bricks"]:
-        r = cmd(f"execute in sacrifice:sacrifice store result score #b sacrifice.offer run fill {bx - 15} 60 {bz - 15} {bx + 15} 90 {bz + 15} minecraft:{blk} replace minecraft:{blk}", r"(?i)filled|no blocks|error|unknown|could not|too many", 30)
-        found["bastion blocks " + blk] = (r or "no reply").strip()[-100:]
+    r = cmd(f"execute in sacrifice:sacrifice run data get entity @e[type=minecraft:piglin_brute,limit=1,sort=nearest,x={bx},y=100,z={bz}] Pos", r"(?i)has the following|found no|error|no entity", 20)
+    found["bastion brute pos"] = (r or "no reply").strip()[-140:]
+    for (ox, oz) in [(-60, -60), (60, 60), (-60, 60), (60, -60), (0, 0)]:
+        cmd(f"execute in sacrifice:sacrifice positioned {bx + ox} 0 {bz + oz} positioned over world_surface run summon minecraft:marker ~ ~ ~ {{Tags:[\"pc_ground\"]}}", None, 3)
+    pump(None, 2)
+    r = cmd("execute in sacrifice:sacrifice run data get entity @e[tag=pc_ground,limit=1,sort=furthest] Pos", r"(?i)has the following|found no|error|no entity", 20)
+    found["bastion ground (corner)"] = (r or "no reply").strip()[-140:]
+    r = cmd(f"execute in sacrifice:sacrifice run data get entity @e[tag=pc_ground,limit=1,sort=nearest,x={bx},y=100,z={bz}] Pos", r"(?i)has the following|found no|error|no entity", 20)
+    found["bastion top (centre)"] = (r or "no reply").strip()[-140:]
+    for blk in ["gilded_blackstone", "polished_blackstone_bricks", "blackstone"]:
+        r = cmd(f"execute in sacrifice:sacrifice positioned {bx} 0 {bz} positioned over world_surface if block ~ ~-1 ~ minecraft:{blk}", r"(?i)passed|failed|error|unknown", 20)
+        found["bastion top block " + blk] = (r or "no reply").strip()[-60:]
 locate_issues = list(bad); bad.clear()
 cmd("scoreboard players get #hunger sacrifice.offer", r"(?i)has|none|unknown", 10)
 cmd("execute in sacrifice:sacrifice run summon item 0 131 0 {Item:{id:\"minecraft:redstone\",count:5}}", None, 3)
