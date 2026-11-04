@@ -838,6 +838,16 @@ rtp:
   combat-seconds: 30    # not within this long of hitting or being hit by a player
 # Announcements: one random line to everyone every few hours (store and voting). MiniMessage format: <gold>, <yellow>,
 # <click:run_command:'/vote'>...</click>, <click:open_url:'https://...'>...</click>. Test one with /sb world broadcast.
+# The Market (/market): players buy from and sell to each other. The Market holds what's listed (and the money for
+# wanted requests), so nobody can be scammed. Uses Essentials money. Listings and money live in market.yml.
+market:
+  enabled: true
+  fee-percent: 2        # taken from each sale (keeps prices from inflating)
+  listing-days: 7       # unsold things and unfilled requests go back after this long
+  max-listings: 10      # per player
+  max-wanted: 5         # wanted requests per player
+  confirm-at: 1000      # buying something this expensive needs a second click
+# The Server Shop (/shop) is stocked in game: /shop add, /shop edit. Its items live in servershop.yml.
 broadcasts:
   enabled: true
   every-minutes: 180

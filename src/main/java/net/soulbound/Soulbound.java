@@ -419,6 +419,13 @@ public final class Soulbound extends JavaPlugin {
         pm.registerEvents(rtp, this);
         if (getCommand("rtp") != null) getCommand("rtp").setExecutor(rtp);
         if (getCommand("store") != null) getCommand("store").setExecutor(new StoreLink(this));
+        Market market = new Market(this);
+        pm.registerEvents(market, this);
+        market.start();
+        if (getCommand("market") != null) { getCommand("market").setExecutor(market); getCommand("market").setTabCompleter(market); }
+        ServerShop serverShop = new ServerShop(this);
+        pm.registerEvents(serverShop, this);
+        if (getCommand("shop") != null) { getCommand("shop").setExecutor(serverShop); getCommand("shop").setTabCompleter(serverShop); }
         broadcasts = new Broadcasts(this);
         broadcasts.start();
         sleeper = new Sleeper(this);

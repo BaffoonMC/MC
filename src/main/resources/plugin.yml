@@ -23,10 +23,18 @@ commands:
   claimfly:
     description: Turn your claim flight off or back on (Patron perk).
     usage: /claimfly
+  market:
+    description: The Market. Buy from and sell to other players, safely.
+    usage: /market [sell <price> [each]|want <amount> <price each>|search <what>|wanted|yours]
+    aliases: [ah, auction, marketplace]
+  shop:
+    description: The Server Shop. Sell crops and drops to the server, buy basics.
+    usage: /shop [page]
+    aliases: [servershop, sellshop]
   store:
     description: A link to the BaffoonMC store.
     usage: /store
-    aliases: [buy, donate, shop]
+    aliases: [buy, donate]
   rtp:
     description: Get sent to a random safe spot in the overworld.
     usage: /rtp
