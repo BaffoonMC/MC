@@ -36,6 +36,12 @@ for n in sorted(x for x in names if x.startswith("data/sacrifice/worldgen/biome/
     r = cmd(f"execute in sacrifice:sacrifice positioned 0 100 0 run locate biome sacrifice:{b}", r"(?i)nearest|could not|unknown|error|invalid", 180)
     found["biome " + b] = (r or "no reply").strip()[-160:]
 locate_issues = list(bad); bad.clear()
+cmd("scoreboard players get #hunger sacrifice.offer", r"(?i)has|none|unknown", 10)
+cmd("execute in sacrifice:sacrifice run summon item 0 131 0 {Item:{id:\"minecraft:redstone\",count:5}}", None, 3)
+pump(None, 4)
+cmd("scoreboard players get #hunger sacrifice.offer", r"(?i)has|none|unknown", 10)
+cmd("function sacrifice:spawn_tick", r"(?i)function|unknown|error", 10)
+cmd("datapack list enabled", r"data pack", 10)
 cmd("moloch", None, 5); cmd("sb selftest", r"(?i)selftest", 30)
 cmd("execute in minecraft:the_end run forceload add -64 -64 63 63", r"(?i)chunk|forceload", 300)
 pump(None, 60)
