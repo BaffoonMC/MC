@@ -116,6 +116,15 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-five-more", true);
             saveConfig();
         }
+        // one-off: bastions (new in Moloch's realm) keep away from the temple like fortresses do, in a saved list too
+        if (!getConfig().getBoolean("migrated.bastion-keep-away", false)) {
+            if (getConfig().isList("realm-structures.keep-away")) {
+                List<String> l = new java.util.ArrayList<>(getConfig().getStringList("realm-structures.keep-away"));
+                if (l.contains("sacrifice:fortress") && !l.contains("sacrifice:bastion")) { l.add("sacrifice:bastion"); getConfig().set("realm-structures.keep-away", l); }
+            }
+            getConfig().set("migrated.bastion-keep-away", true);
+            saveConfig();
+        }
         // one-off: the Judge's Wig and Star Stalker join a saved catalogue that already has the earlier additions
         if (!getConfig().getBoolean("migrated.wardrobe-two-more", false)) {
             List<String> cat = getConfig().getStringList("wardrobe.catalogue");
