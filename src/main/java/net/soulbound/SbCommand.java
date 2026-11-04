@@ -316,6 +316,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             s.sendMessage(line("/sb god heaven", "rebuild the throne, gates and pillars"));
         }
         if (group == null || group.equals("world")) {
+            s.sendMessage(line("/sb world broadcast", "send one of the store/vote announcements now"));
             s.sendMessage(line("/sb world sleeper [remove]", "look at a mannequin (or stand there): a grumpy homeless man asleep"));
             s.sendMessage(line("/sb world welcome", "preview the first-join welcome on yourself"));
             s.sendMessage(line("/sb world wilddrop [radius|off]", "stand in it: anyone who falls in here lands somewhere random in the overworld"));
@@ -411,6 +412,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                         if (a.length > 2) try { r = Math.max(0.5, Math.min(16, Double.parseDouble(a[2]))); } catch (NumberFormatException ex) { s.sendMessage(bad("Usage: /sb world wilddrop [radius|off]")); return true; }
                         s.sendMessage(ok(plugin.wildDrop().set(p, r)));
                     }
+                    case "broadcast" -> s.sendMessage(plugin.broadcasts().send() ? ok("Sent one.") : bad("Nothing sent: broadcasts are off, the list is empty, or too few players are online."));
                     case "sleeper" -> {
                         if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
                         boolean remove = a.length > 2 && a[2].equalsIgnoreCase("remove");
@@ -544,7 +546,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             }
             case "god" -> { if (a.length == 2) return filter(List.of("test", "heaven"), a[1]); }
             case "world" -> {
-                if (a.length == 2) return filter(List.of("priest", "peacekeeper", "gate", "temple", "setarrival", "zephyr", "brimstone", "wilddrop", "welcome", "sleeper"), a[1]);
+                if (a.length == 2) return filter(List.of("priest", "peacekeeper", "gate", "temple", "setarrival", "zephyr", "brimstone", "wilddrop", "welcome", "sleeper", "broadcast"), a[1]);
                 if (a.length == 3 && a[1].equalsIgnoreCase("wilddrop")) return filter(List.of("2", "3", "off"), a[2]);
                 if (a.length == 3 && (a[1].equalsIgnoreCase("priest") || a[1].equalsIgnoreCase("peacekeeper"))) return filter(List.of("remove"), a[2]);
                 if (a.length == 3 && a[1].equalsIgnoreCase("gate")) return filter(List.of("here"), a[2]);

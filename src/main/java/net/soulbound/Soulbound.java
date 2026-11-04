@@ -39,6 +39,7 @@ public final class Soulbound extends JavaPlugin {
     private VoteShop voteShop;
     private AccountReset accountReset;
     private Sleeper sleeper;
+    private Broadcasts broadcasts;
     private FesteringFlesh festering;
     private ThiefKey thiefKey;
     private KrakenBeard kraken;
@@ -412,6 +413,8 @@ public final class Soulbound extends JavaPlugin {
         Rtp rtp = new Rtp(this);
         pm.registerEvents(rtp, this);
         if (getCommand("rtp") != null) getCommand("rtp").setExecutor(rtp);
+        broadcasts = new Broadcasts(this);
+        broadcasts.start();
         sleeper = new Sleeper(this);
         pm.registerEvents(sleeper, this);
         sleeper.start();
@@ -584,6 +587,7 @@ public final class Soulbound extends JavaPlugin {
     VoteShop voteShop() { return voteShop; }
     AccountReset accountReset() { return accountReset; }
     Sleeper sleeper() { return sleeper; }
+    Broadcasts broadcasts() { return broadcasts; }
     LoreFixer lore() { return loreFixer; }
     Grace grace() { return grace; }
     EdenMask eden() { return eden; }
@@ -868,6 +872,7 @@ public final class Soulbound extends JavaPlugin {
 
     private void reload() {
         reloadConfig();
+        if (broadcasts != null) broadcasts.start();
         zones.load();
         captures.loadSettings();
         curses.loadSettings();

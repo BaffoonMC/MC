@@ -836,6 +836,22 @@ rtp:
   cooldown-minutes: 10
   warmup-seconds: 3     # stand still this long first (moving or getting hurt cancels it)
   combat-seconds: 30    # not within this long of hitting or being hit by a player
+# Announcements: one random line to everyone every few hours (store and voting). MiniMessage format: <gold>, <yellow>,
+# <click:run_command:'/vote'>...</click>, <click:open_url:'https://...'>...</click>. Test one with /sb world broadcast.
+broadcasts:
+  enabled: true
+  every-minutes: 180
+  min-players: 1
+  prefix: "<gold><bold>BAFFOON</bold></gold> <dark_gray>»</dark_gray> "
+  lines:
+    - "<gray>Vote for us with <click:run_command:'/vote'><hover:show_text:'<gray>Click to vote'><yellow>/vote</yellow></hover></click> and climb the ranks, from Newcomer all the way to Ancient."
+    - "<gray>Every vote is a point for the <click:run_command:'/voteshop'><hover:show_text:'<gray>Click to open the Vote Shop'><yellow>/voteshop</yellow></hover></click>. Diamonds, netherite, spawn eggs and more."
+    - "<gray>You can vote 5 times a day. That's 5 points, every day, for free. <click:run_command:'/vote'><hover:show_text:'<gray>Click to vote'><yellow>/vote</yellow></hover></click>"
+    - "<gray>Votes keep the server alive. And Moloch fed. Probably. <click:run_command:'/vote'><hover:show_text:'<gray>Click to vote'><yellow>/vote</yellow></hover></click>"
+    - "<gray>Love BaffoonMC? Help keep the lights on at <click:open_url:'https://store.playbaffoonmc.net'><hover:show_text:'<gray>Open the store'><yellow>store.playbaffoonmc.net</yellow></hover></click>."
+    - "<gray>Supporter, Patron and Chosen ranks come with tags, hats and claim flight. <click:open_url:'https://store.playbaffoonmc.net'><hover:show_text:'<gray>Open the store'><yellow>store.playbaffoonmc.net</yellow></hover></click>"
+    - "<gray>Fancy a new look? Hats are waiting in the <click:run_command:'/wardrobe'><yellow>/wardrobe</yellow></click>. Tokens at <click:open_url:'https://store.playbaffoonmc.net'><hover:show_text:'<gray>Open the store'><yellow>store.playbaffoonmc.net</yellow></hover></click>."
+    - "<gray>Nothing in the store helps you in a fight. Just style, comfort and bragging rights. <click:open_url:'https://store.playbaffoonmc.net'><hover:show_text:'<gray>Open the store'><yellow>store.playbaffoonmc.net</yellow></hover></click>"
 wild-drop:
   world: ""          # empty = the main overworld ("world")
   center-x: 0
