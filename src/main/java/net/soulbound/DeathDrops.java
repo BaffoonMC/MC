@@ -33,7 +33,9 @@ final class DeathDrops implements Listener {
         e.setDroppedExp(0);
         Player killer = p.getKiller();
         if (killer == null && e.getDamageSource().getCausingEntity() instanceof Player k) killer = k;   // arrows, bolts, tridents...
-        if (killer == null || killer.equals(p)) return;
+        boolean logged = plugin.combatLog() != null && plugin.combatLog().isLoggingOut(p);   // logged out mid-fight
+        if (logged) e.deathMessage(Component.text(p.getName() + " logged out in the middle of a fight", NamedTextColor.WHITE));
+        if (!logged && (killer == null || killer.equals(p))) return;
         String mode = plugin.getConfig().getString("death.pvp-drops", "all").toLowerCase(java.util.Locale.ROOT);
         if (mode.equals("none")) return;
         PlayerInventory inv = p.getInventory();

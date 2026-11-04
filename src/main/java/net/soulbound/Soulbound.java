@@ -41,6 +41,7 @@ public final class Soulbound extends JavaPlugin {
     private Sleeper sleeper;
     private SafeZones safeZones;
     private Broadcasts broadcasts;
+    private CombatLog combatLog;
     private FesteringFlesh festering;
     private ThiefKey thiefKey;
     private KrakenBeard kraken;
@@ -488,6 +489,9 @@ public final class Soulbound extends JavaPlugin {
         pm.registerEvents(quantumStand, this);
         quantumStand.start();
         pm.registerEvents(new DeathDrops(this), this);
+        combatLog = new CombatLog(this);
+        pm.registerEvents(combatLog, this);
+        combatLog.start();
         safeZones = new SafeZones(this);
         pm.registerEvents(safeZones, this);
         homunculus = new Homunculus(this);
@@ -554,6 +558,7 @@ public final class Soulbound extends JavaPlugin {
     @Override
     public void onDisable() {
         if (brimstone != null) brimstone.stop();
+        if (combatLog != null) combatLog.stop();
         if (sacrifices != null) sacrifices.stop();
         if (bloodEmeralds != null) bloodEmeralds.stop();
         if (tumourCrop != null) tumourCrop.stop();
@@ -611,6 +616,7 @@ public final class Soulbound extends JavaPlugin {
     Sleeper sleeper() { return sleeper; }
     SafeZones safeZones() { return safeZones; }
     Broadcasts broadcasts() { return broadcasts; }
+    CombatLog combatLog() { return combatLog; }
     LoreFixer lore() { return loreFixer; }
     Grace grace() { return grace; }
     EdenMask eden() { return eden; }

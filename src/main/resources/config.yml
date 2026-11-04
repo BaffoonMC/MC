@@ -879,6 +879,18 @@ death:
   enabled: true
   pvp-drops: all
 
+# ---------------------------------------------------------------- combat logging
+# Hitting a player or being hit by one puts you both in combat for `seconds`. Logging out while in combat kills you
+# and everything drops (as if the other player had killed you). Restarts and kicks don't count. These commands don't
+# work while in combat (anything not listed still does). Staff can skip it all with soulbound.combatlog.bypass.
+combat-log:
+  enabled: true
+  seconds: 15
+  punish-timeouts: true   # "timed out" counts too (pulling the plug looks the same as a real drop-out)
+  blocked-commands: [spawn, home, homes, back, warp, warps, tpa, tpahere, tpaccept, tpyes, call, tpask, rtp, wild,
+    randomtp, tpr, ec, echest, enderchest, fly, god, creative, hub, lobby, market, ah, auction, marketplace, shop,
+    servershop, sellshop, voteshop, trash, disposal]
+
 # ---------------------------------------------------------------- no-PvP places
 # No player-vs-player damage in Moloch's temple (moloch.temple-radius around the pyramid) or on God's main island
 # (island.radius), or inside anyone's land claim. Anyone dragging a captive can still be hit there, so a sacrifice can
