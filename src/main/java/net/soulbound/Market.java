@@ -68,6 +68,26 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
     private final Map<UUID, List<String>> notes = new HashMap<>();
     private final Map<UUID, Long> searching = new HashMap<>();
     private final Map<UUID, long[]> confirm = new HashMap<>();
+    private final Map<UUID, Integer> category = new HashMap<>();   // which shelf each player is browsing (0 = everything)
+
+    // ---------------------------------------------------------------- shelves: tools, armour, blocks...
+    private static final String[] CATS = {"Everything", "Blocks", "Tools & Weapons", "Armour", "Food", "Potions & Books", "Materials & Other"};
+    private static final Material[] CAT_ICONS = {Material.CHEST, Material.BRICKS, Material.IRON_PICKAXE, Material.IRON_CHESTPLATE, Material.BREAD, Material.POTION, Material.IRON_INGOT};
+
+    private static int catOf(ItemStack it) {
+        Material m = it.getType();
+        String n = m.name();
+        if (n.endsWith("_HELMET") || n.endsWith("_CHESTPLATE") || n.endsWith("_LEGGINGS") || n.endsWith("_BOOTS") || n.endsWith("_HORSE_ARMOR")
+                || m == Material.ELYTRA || m == Material.SHIELD || m == Material.TURTLE_HELMET || m == Material.WOLF_ARMOR) return 3;
+        if (n.endsWith("_SWORD") || n.endsWith("_AXE") || n.endsWith("_PICKAXE") || n.endsWith("_SHOVEL") || n.endsWith("_HOE") || n.endsWith("_SPEAR")
+                || m == Material.BOW || m == Material.CROSSBOW || m == Material.TRIDENT || m == Material.MACE || m == Material.FISHING_ROD
+                || m == Material.SHEARS || m == Material.FLINT_AND_STEEL || m == Material.SPYGLASS || m == Material.BRUSH || n.endsWith("ARROW")) return 2;
+        if (m == Material.POTION || m == Material.SPLASH_POTION || m == Material.LINGERING_POTION || m == Material.ENCHANTED_BOOK
+                || m == Material.EXPERIENCE_BOTTLE || m == Material.BOOK || m == Material.WRITTEN_BOOK) return 5;
+        if (m.isEdible()) return 4;
+        if (m.isBlock()) return 1;
+        return 6;
+    }
 
     Market(Soulbound plugin) {
         this.plugin = plugin;
@@ -246,7 +266,7 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         expire();
         View v = new View(mode, Math.max(0, page), key, filter);
         String title = switch (mode) {
-            case MAIN -> filter == null ? "Market" : "Market - \"" + filter + "\"";
+            case MAIN -> (filter == null ? "Market" : "Market - \"" + filter + "\"") + (category.getOrDefault(p.getUniqueId(), 0) == 0 ? "" : " > " + CATS[category.get(p.getUniqueId())]);
             case ITEM -> "Market > " + (key == null ? "" : pretty(key));
             case WANTED -> "Market > Wanted";
             case MINE -> "Market > Yours";
@@ -280,6 +300,12 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
             inv.setItem(47, button(Material.WRITABLE_BOOK, Component.text("Wanted", NamedTextColor.YELLOW), List.of(
                     plain("Things people want to buy.", NamedTextColor.GRAY), plain("Sell yours to them straight away.", NamedTextColor.GRAY)))); v.act.put(47, "wanted");
             inv.setItem(48, button(Material.COMPASS, Component.text("Search", NamedTextColor.YELLOW), List.of(plain("Click, then type what you're after.", NamedTextColor.GRAY)))); v.act.put(48, "search");
+            int cat = category.getOrDefault(p.getUniqueId(), 0);
+            List<Component> lore = new ArrayList<>();
+            for (int i = 0; i < CATS.length; i++) lore.add(plain((i == cat ? "> " : "  ") + CATS[i], i == cat ? NamedTextColor.GREEN : NamedTextColor.GRAY));
+            lore.add(Component.empty());
+            lore.add(plain("Left-click: next · Right-click: back", NamedTextColor.DARK_GRAY));
+            inv.setItem(52, button(CAT_ICONS[cat], Component.text("Showing: " + CATS[cat], NamedTextColor.YELLOW), lore)); v.act.put(52, "shelf");
         }
         int waiting = collection.getOrDefault(p.getUniqueId(), List.of()).size();
         double due = owed.getOrDefault(p.getUniqueId(), 0.0);
@@ -309,8 +335,10 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         listings.values().stream().sorted(Comparator.comparing(l -> pretty(key(l.unit))))
                 .forEach(l -> groups.computeIfAbsent(key(l.unit), k -> new ArrayList<>()).add(l));
         String f = filter == null ? null : filter.toLowerCase(Locale.ROOT);
+        int cat = category.getOrDefault(p.getUniqueId(), 0);
         for (var e : groups.entrySet()) {
             List<Listing> ls = e.getValue();
+            if (cat != 0 && catOf(ls.get(0).unit) != cat) continue;
             if (f != null && ls.stream().noneMatch(l -> pretty(e.getKey()).toLowerCase(Locale.ROOT).contains(f) || plainName(l.unit).toLowerCase(Locale.ROOT).contains(f))) continue;
             Listing cheapest = ls.stream().min(Comparator.comparingDouble(l -> l.each)).orElseThrow();
             long sellers = ls.stream().map(l -> l.seller).distinct().count();
@@ -411,6 +439,13 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         if (a.startsWith("page:")) { open(p, v.mode, Integer.parseInt(a.substring(5)), v.key, v.filter); return; }
         switch (a) {
             case "home" -> { open(p, Mode.MAIN, 0, null, null); return; }
+            case "shelf" -> {
+                int c = category.getOrDefault(p.getUniqueId(), 0);
+                c = Math.floorMod(c + (e.isRightClick() ? -1 : 1), CATS.length);
+                category.put(p.getUniqueId(), c);
+                open(p, Mode.MAIN, 0, null, v.filter);
+                return;
+            }
             case "wanted" -> { open(p, Mode.WANTED, 0, null, null); return; }
             case "mine" -> { open(p, Mode.MINE, 0, null, null); return; }
             case "search" -> {
