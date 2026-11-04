@@ -385,6 +385,9 @@ viking:
   war-cry-cooldown-seconds: 300
 # The Gate of Heaven: every stronghold's End portal room is rebuilt in marble and gold the first time it loads, with God's
 # face carved into the far wall, holy-water fonts and an angel spawner in place of the silverfish. Frames and portal untouched.
+# End ships: false = no dragon head on the ship's bow (new ships generate without it; existing ones lose it when they load).
+end-ships:
+  dragon-head: false
 stronghold:
   gate-of-heaven: true
   angel-spawner: true
