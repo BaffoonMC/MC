@@ -388,6 +388,10 @@ viking:
 stronghold:
   gate-of-heaven: true
   angel-spawner: true
+  # The Gatekeeper's Crown: this many in every stronghold, spread over its first chests-per-stronghold chests
+  # (the Brimstone Stronghold has 8). 0 = none.
+  crowns-per-stronghold: 2
+  chests-per-stronghold: 8
 # Shulkers in the End are Archangels: one hit from their bolt kills (creative and spectator are safe).
 archangels:
   instant-kill: true
