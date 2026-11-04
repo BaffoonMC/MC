@@ -418,6 +418,7 @@ public final class Soulbound extends JavaPlugin {
         Rtp rtp = new Rtp(this);
         pm.registerEvents(rtp, this);
         if (getCommand("rtp") != null) getCommand("rtp").setExecutor(rtp);
+        if (getCommand("store") != null) getCommand("store").setExecutor(new StoreLink(this));
         broadcasts = new Broadcasts(this);
         broadcasts.start();
         sleeper = new Sleeper(this);
