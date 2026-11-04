@@ -50,6 +50,18 @@ for i, t in enumerate(["tree_of_life_1", "tree_of_knowledge_2", "cloud_willow_3"
     r = cmd(f"execute in minecraft:the_end run place template heaven:eden/{t} {1200 + i * 20} 150 1200", r"(?i)placed|failed|invalid|unknown|error|not", 60)
     found["place " + t] = (r or "no reply").strip()[-160:]
 
+r = cmd("execute in minecraft:overworld positioned 0 64 0 run locate structure minecraft:stronghold", r"(?i)nearest|could not|unknown|error|invalid", 240)
+found["stronghold locate"] = (r or "no reply").strip()[-160:]
+cmd("execute in minecraft:overworld run forceload add 2000 2000 2063 2063", r"(?i)chunk|forceload", 120)
+r = cmd("execute in minecraft:overworld run place template minecraft:brimstone/stronghold 2000 20 2000", r"(?i)placed|failed|invalid|unknown|error|not", 60)
+found["stronghold place"] = (r or "no reply").strip()[-160:]
+for what, pos in [("ceiling", "2022 38 2022 minecraft:chiseled_sulfur"), ("chain", "2022 37 2022 minecraft:iron_chain"), ("lantern", "2022 36 2022 minecraft:soul_lantern"), ("frame", "2020 27 2021 minecraft:end_portal_frame")]:
+    r = cmd(f"execute in minecraft:overworld if block {pos}", r"(?i)passed|failed|error|unknown", 20)
+    found["stronghold " + what] = (r or "no reply").strip()[-100:]
+r = cmd("execute in minecraft:overworld if blocks 2000 20 2000 2045 39 2047 2000 20 2000 all", r"(?i)passed|failed|error|unknown", 20)
+r = cmd("execute in minecraft:overworld store result score #gw sacrifice.offer run fill 2000 20 2000 2045 39 2047 minecraft:end_gateway replace minecraft:end_gateway", r"(?i)filled|no blocks|error|unknown|could not|too many", 20)
+found["stronghold gateways"] = (r or "no reply").strip()[-100:]
+
 cmd("moloch", None, 5); cmd("sb selftest", r"(?i)selftest", 30)
 cmd("execute in minecraft:the_end run forceload add -64 -64 63 63", r"(?i)chunk|forceload", 300)
 pump(None, 60)
