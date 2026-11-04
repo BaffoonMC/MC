@@ -250,8 +250,9 @@ final class MolochGear implements Listener {
         String path = "moloch-gear.pending." + e.getPlayer().getUniqueId();
         List<?> list = store.data.getList(path);
         if (list == null) return;
-        store.set(path, null); store.save();
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!e.getPlayer().isOnline()) return;   // still kept: next time
+            store.set(path, null); store.save();
             for (Object o : list) if (o instanceof ItemStack s) for (ItemStack left : e.getPlayer().getInventory().addItem(s).values()) e.getPlayer().getWorld().dropItem(e.getPlayer().getLocation(), left);
             e.getPlayer().sendMessage(Component.text("Moloch's spoils were kept for you.", NamedTextColor.GOLD));
         }, 40L);

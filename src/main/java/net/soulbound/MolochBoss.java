@@ -256,7 +256,7 @@ final class MolochBoss implements Listener {
         if (active && dying) win();   // he was already dying: the players won
         else if (active) {            // a restart mid-fight: tidy up, and wake him again as soon as the server's back
             cleanup();
-            plugin.hunger().awakenNow();
+            plugin.hunger().rebook();   // after the usual warning, not the moment the server's back with nobody on
         }
         hideAll(moonBar, moonViewers);
     }
@@ -1762,7 +1762,7 @@ final class MolochBoss implements Listener {
         Bukkit.broadcast(Component.text("Moloch has fed, and sinks back into the dark.", NamedTextColor.DARK_RED, TextDecoration.BOLD));
         if (mins > 0 && plugin.curses() != null) for (UUID id : failed) {
             Player p = Bukkit.getPlayer(id);
-            if (p == null) continue;
+            if (p == null) { plugin.curses().curseLater(id, mins); continue; }   // logging out doesn't dodge it
             plugin.curses().curse(p, mins);
             p.sendMessage(Component.text("You failed him. Moloch's Curse is on you for " + mins + " minutes.", NamedTextColor.DARK_RED, TextDecoration.ITALIC));
         }
@@ -2065,6 +2065,13 @@ final class MolochBoss implements Listener {
             if (near && viewers.add(p.getUniqueId())) p.showBossBar(b);
             if (!near && viewers.remove(p.getUniqueId())) p.hideBossBar(b);
         }
+    }
+
+    /** Forget who was watching when they leave, so the bars show again when they come back. */
+    @EventHandler
+    public void onQuitBars(org.bukkit.event.player.PlayerQuitEvent e) {
+        UUID id = e.getPlayer().getUniqueId();
+        barViewers.remove(id); moonViewers.remove(id);
     }
 
     private void hideAll(BossBar b, Set<UUID> viewers) {

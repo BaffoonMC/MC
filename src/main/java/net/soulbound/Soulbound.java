@@ -39,6 +39,7 @@ public final class Soulbound extends JavaPlugin {
     private VoteShop voteShop;
     private AccountReset accountReset;
     private Sleeper sleeper;
+    private SafeZones safeZones;
     private Broadcasts broadcasts;
     private FesteringFlesh festering;
     private ThiefKey thiefKey;
@@ -480,7 +481,8 @@ public final class Soulbound extends JavaPlugin {
         pm.registerEvents(quantumStand, this);
         quantumStand.start();
         pm.registerEvents(new DeathDrops(this), this);
-        pm.registerEvents(new SafeZones(this), this);
+        safeZones = new SafeZones(this);
+        pm.registerEvents(safeZones, this);
         homunculus = new Homunculus(this);
         pm.registerEvents(homunculus, this);
         homunculus.start();
@@ -600,6 +602,7 @@ public final class Soulbound extends JavaPlugin {
     VoteShop voteShop() { return voteShop; }
     AccountReset accountReset() { return accountReset; }
     Sleeper sleeper() { return sleeper; }
+    SafeZones safeZones() { return safeZones; }
     Broadcasts broadcasts() { return broadcasts; }
     LoreFixer lore() { return loreFixer; }
     Grace grace() { return grace; }
@@ -611,6 +614,7 @@ public final class Soulbound extends JavaPlugin {
     Peacekeeper peacekeeper() { return peacekeeper; }
     IslandGuard island() { return island; }
     CaptureManager captures() { return captures; }
+    SacrificeManager sacrifices() { return sacrifices; }
     LeashItem leash() { return leash; }
     Cute cute() { return cute; }
     KrakenBeard kraken() { return kraken; }

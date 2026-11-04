@@ -23,7 +23,8 @@ final class SafeZones implements Listener {
 
     SafeZones(Soulbound plugin) { this.plugin = plugin; }
 
-    private String zone(Location l) {
+    /** The no-PvP place this spot is in ("Moloch's temple", "God's island", "claims"), or null. */
+    String zone(Location l) {
         if (plugin.getConfig().getBoolean("pvp-off.temple", true) && plugin.zones() != null && plugin.zones().inTemple(l)) return "Moloch's temple";
         if (plugin.getConfig().getBoolean("pvp-off.gods-island", true) && plugin.island() != null && plugin.island().inZone(l)) return "God's island";
         if (plugin.getConfig().getBoolean("pvp-off.claims", true) && inClaim(l)) return "claims";
@@ -59,6 +60,7 @@ final class SafeZones implements Listener {
         Entity src = e.getDamager();
         if (src instanceof Projectile pr && pr.getShooter() instanceof Entity shooter) src = shooter;
         if (src instanceof Tameable t && t.getOwner() instanceof Player owner) src = owner;
+        if (!(src instanceof Player) && e.getDamageSource().getCausingEntity() instanceof Player cause) src = cause;   // TNT, crystals, potion clouds...
         if (!(src instanceof Player attacker) || attacker.equals(victim)) return;
         if (plugin.captures() != null && plugin.captures().isCaptor(victim)) return;   // rescuing someone from a captor is always allowed
         String where = zone(victim.getLocation());

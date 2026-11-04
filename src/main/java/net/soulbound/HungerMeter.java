@@ -42,6 +42,7 @@ final class HungerMeter implements Listener {
     // the Hunger bar: always shown in his realm, and to everyone for a few seconds whenever it grows
     private BossBar bar;
     private final Set<UUID> viewers = new HashSet<>();
+    private double deferred;   // offerings made while he was awake or already full
     private double shown = -1, gained;
     private long popupUntil, lastSound;
     private boolean barEnabled, barEverywhere;
@@ -62,6 +63,7 @@ final class HungerMeter implements Listener {
         this.store = store;
         value = store.data.getDouble("hunger.value", 0);
         awakenAt = store.data.getLong("hunger.awaken-at", 0);
+        deferred = store.data.getDouble("hunger.deferred", 0);
         loadSettings();
     }
 
@@ -90,6 +92,10 @@ final class HungerMeter implements Listener {
     void start() {
         task = Bukkit.getScheduler().runTaskTimer(plugin, this::tickSecond, 40L, 20L);
         barTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tickBar, 40L, 2L);
+        // full but nothing booked: the server went down mid-fight without a clean stop. Book his rising again.
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (value >= 100 && awakenAt == 0 && plugin.boss() != null && !plugin.boss().active()) book();
+        }, 200L);
     }
 
     void stop() {
@@ -114,10 +120,17 @@ final class HungerMeter implements Listener {
     }
 
     /** After a fight: back to sleep. */
-    void reset() { value = 0; awakenAt = 0; persist(); }
+    void reset() {
+        value = Math.min(99, deferred); awakenAt = 0;   // offerings made while he was awake count towards next time
+        deferred = 0; store.set("hunger.deferred", null);
+        persist();
+    }
 
     /** Book the awakening for right now (admin). */
     void awakenNow() { awakenAt = System.currentTimeMillis(); persist(); }
+
+    /** A fight was cut short (restart or crash): his hunger stays full, and he rises again after the usual warning. */
+    void rebook() { if (value >= 100) { awakenAt = 0; book(); } }
 
     void add(double amount) {
         if (amount <= 0 || plugin.boss().active()) return;
@@ -207,7 +220,12 @@ final class HungerMeter implements Listener {
         if (lastScore == Integer.MIN_VALUE || s < lastScore) { lastScore = s; return; }
         int delta = s - lastScore;
         lastScore = s;
-        if (delta > 0) add(delta * perOfferPoint);
+        if (delta <= 0) return;
+        double amt = delta * perOfferPoint;
+        if (plugin.boss().active() || value >= 100) {   // he's awake or already full: keep it for his next hunger, don't waste it
+            deferred += amt;
+            store.set("hunger.deferred", deferred); store.save();
+        } else add(amt);
     }
 
     @EventHandler
@@ -269,4 +287,8 @@ final class HungerMeter implements Listener {
     }
 
     private static void say(String msg, NamedTextColor col) { Bukkit.broadcast(Component.text(msg, col)); }
+
+    /** Forget them when they leave, so the bar shows again when they come back. */
+    @org.bukkit.event.EventHandler
+    public void onQuitBar(org.bukkit.event.player.PlayerQuitEvent e) { viewers.remove(e.getPlayer().getUniqueId()); }
 }
