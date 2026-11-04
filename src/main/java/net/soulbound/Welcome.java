@@ -44,7 +44,8 @@ final class Welcome implements Listener {
         Component arrow = Component.text("> ", NamedTextColor.DARK_GRAY);
         p.sendMessage(Component.empty());
         p.sendMessage(Component.text("Welcome, ", GOLD).append(Component.text(p.getName(), NamedTextColor.YELLOW)).append(Component.text("! Here's how to get going:", GOLD)));
-        p.sendMessage(arrow.append(Component.text("Jump in the hole", NamedTextColor.GREEN)).append(Component.text(" to land somewhere wild", NamedTextColor.GRAY)));
+        p.sendMessage(arrow.append(Component.text("Jump in the hole", NamedTextColor.GREEN)).append(Component.text(" (or ", NamedTextColor.GRAY))
+                .append(Component.text("/rtp", NamedTextColor.YELLOW)).append(Component.text(") to land somewhere wild", NamedTextColor.GRAY)));
         p.sendMessage(arrow.append(Component.text("Golden shovel", NamedTextColor.YELLOW)).append(Component.text(" - claim land so it stays yours", NamedTextColor.GRAY)));
         p.sendMessage(arrow.append(Component.text("/sethome", NamedTextColor.YELLOW)).append(Component.text(" to save your base, ", NamedTextColor.GRAY))
                 .append(Component.text("/home", NamedTextColor.YELLOW)).append(Component.text(" to go back", NamedTextColor.GRAY)));
