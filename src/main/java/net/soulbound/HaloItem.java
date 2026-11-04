@@ -89,7 +89,10 @@ final class HaloItem implements Listener {
         String path = "halo.pending." + e.getPlayer().getUniqueId();
         String earned = store.data.getString(path);
         if (earned == null) return;
-        store.set(path, null); store.save();
-        Bukkit.getScheduler().runTaskLater(plugin, () -> { if (e.getPlayer().isOnline()) give(e.getPlayer(), earned); }, 40L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!e.getPlayer().isOnline()) return;   // still pending: next time
+            store.set(path, null); store.save();
+            give(e.getPlayer(), earned);
+        }, 40L);
     }
 }

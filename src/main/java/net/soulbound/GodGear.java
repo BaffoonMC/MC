@@ -141,9 +141,10 @@ final class GodGear implements Listener {
         Player p = e.getPlayer();
         List<?> pending = store.data.getList("god-gear.pending." + p.getUniqueId());
         if (pending == null || pending.isEmpty()) return;
-        store.set("god-gear.pending." + p.getUniqueId(), null);
-        store.save();
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!p.isOnline()) return;   // still pending: they'll get it next time
+            store.set("god-gear.pending." + p.getUniqueId(), null);
+            store.save();
             for (Object o : pending) if (o instanceof ItemStack s) for (ItemStack left : p.getInventory().addItem(s).values()) p.getWorld().dropItem(p.getLocation(), left);
             p.sendMessage(Component.text("While you were away, God's wardrobe was emptied in your favour.", NamedTextColor.GOLD));
         }, 40L);

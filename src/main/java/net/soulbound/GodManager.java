@@ -120,6 +120,7 @@ final class GodManager implements Listener {
     private boolean enabled, flyingPose;
     private double scale, hitShare, flyBack, flyDown, standDown, sitOffset, smiteDamage, napWake, sinnerDays;
     private int napSeconds;
+    private boolean finishing;   // our own killing blow is going through: don't scale or credit it again
     private double hpBase, hpPerFighter, toughness = 1;   // toughness: the share of damage that gets through, for the crowd
 
     // the fight
@@ -389,13 +390,16 @@ final class GodManager implements Listener {
         if (!(e instanceof EntityDamageByEntityEvent ed)) return;
         Player p = attacker(ed.getDamager());
         if (p == null) return;
-        if (ed.getDamager() instanceof Projectile) ed.getDamager().remove();
+        if (ed.getDamager() instanceof Projectile && !(ed.getDamager() instanceof org.bukkit.entity.Trident)) ed.getDamager().remove();   // never eat a trident
         EnderDragon d = dragonOf(e.getEntity().getUniqueId());
         if (d == null || !d.isValid() || d.getPhase() == EnderDragon.Phase.DYING || d.getHealth() <= 0) return;
         double raw = e.getDamage() * hitShare * (napping ? 2 : 1);
         onHurtBy(p, raw);
         double amount = raw * toughness;
-        if (d.getHealth() - amount <= 0) d.damage(d.getHealth() * 4 + 10, p);   // the killing blow goes through the dragon, so the kill counts
+        if (d.getHealth() - amount <= 0) {   // the killing blow goes through the dragon, so the kill counts (unscaled, credited once)
+            finishing = true;
+            try { d.damage(d.getHealth() * 4 + 10, p); } finally { finishing = false; }
+        }
         else {
             d.setHealth(d.getHealth() - amount);
             Location at = e.getEntity().getLocation().add(0, height() * 0.5, 0);
@@ -431,14 +435,20 @@ final class GodManager implements Listener {
         if (e.getEntity().getScoreboardTags().contains(TAG)) { e.setCancelled(true); e.getEntity().setFireTicks(0); }
     }
 
-    /** Hits on the dragon's own (invisible) hitbox: double while he naps. */
+    /**
+     * Anything that hurts the dragon itself (hits on its invisible hitbox, End crystal blasts, a healing crystal being
+     * destroyed...) is scaled to the crowd, so explosions can't skip his health. Players get the credit (double while he naps).
+     */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onDragonHurt(EntityDamageByEntityEvent e) {
-        if (!(e.getEntity() instanceof EnderDragon d) || !d.getUniqueId().equals(fightDragon)) return;
-        Player p = attacker(e.getDamager());
-        if (p == null) return;
-        if (napping) e.setDamage(e.getDamage() * 2);
-        onHurtBy(p, e.getDamage());
+    public void onDragonHurt(EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof EnderDragon d) || !d.getUniqueId().equals(fightDragon) || finishing) return;
+        if (e.getCause() == EntityDamageEvent.DamageCause.KILL || e.getCause() == EntityDamageEvent.DamageCause.VOID) return;
+        Player p = e instanceof EntityDamageByEntityEvent ed ? attacker(ed.getDamager()) : null;
+        if (p == null && e.getDamageSource().getCausingEntity() instanceof Player cp) p = cp;
+        if (p != null) {
+            if (napping) e.setDamage(e.getDamage() * 2);
+            onHurtBy(p, e.getDamage());
+        }
         e.setDamage(e.getDamage() * toughness);   // scaled to the crowd
     }
 
@@ -473,7 +483,7 @@ final class GodManager implements Listener {
         List<Player> out = new ArrayList<>();
         for (Player p : w.getPlayers())
             if ((p.getGameMode() == GameMode.SURVIVAL || p.getGameMode() == GameMode.ADVENTURE) && !p.isDead()
-                    && Math.hypot(p.getLocation().getX(), p.getLocation().getZ()) < 160) out.add(p);
+                    && Math.hypot(p.getLocation().getX(), p.getLocation().getZ()) < plugin.getConfig().getDouble("island.radius", 200)) out.add(p);   // the same ground he guards
         return out;
     }
 
@@ -673,6 +683,10 @@ final class GodManager implements Listener {
     /** A player's answer to "Why are you here?" (from the clickable chat). */
     void choose(Player p, String what) {
         if (fightDragon == null || p.getWorld().getEnvironment() != World.Environment.THE_END) { p.sendMessage(Component.text("There's nobody here to answer.", NamedTextColor.GRAY)); return; }
+        Entity fig = godFigure();
+        if (!peaceful || fig == null || !fig.getWorld().equals(p.getWorld()) || fig.getLocation().distanceSquared(p.getLocation()) > 48 * 48) {
+            p.sendMessage(Component.text(peaceful ? "He can't hear you from here." : "He's a bit busy right now.", NamedTextColor.GRAY)); return;
+        }
         long now = System.currentTimeMillis();
         if (now - choiceCooldown.getOrDefault(p.getUniqueId(), 0L) < 3000) return;
         choiceCooldown.put(p.getUniqueId(), now);
@@ -717,7 +731,6 @@ final class GodManager implements Listener {
      */
     private void setEndTime(World w, long t) {
         if (w == null) return;
-        try { w.setTime(t); } catch (Throwable ignored) { }
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "time of minecraft:the_end set " + Math.floorMod(t, 24000L));
     }
 
@@ -756,6 +769,14 @@ final class GodManager implements Listener {
         greeted.clear();
         idleSaid = false;
         clearAngels();
+        // the fight is over: nobody keeps credit, marks or sins from it, and its Archangels go
+        for (Location l : thorns.keySet()) if (l.getBlock().getType() == Material.SWEET_BERRY_BUSH) l.getBlock().setType(Material.AIR, false);
+        thorns.clear();
+        clearSinners();
+        if (plugin.archangels() != null) plugin.archangels().clearNear(new Location(d.getWorld(), 0, 64, 0), 260);
+        marks.clear(); frozen.clear(); frozenUntil.clear(); saltImmune.clear(); damageBy.clear(); lastHit = null;
+        judged = lowSaid = false;
+        day = 0; saltTicks = -1; nextAbility = 160;
         sitDown(d);
     }
 
@@ -825,7 +846,7 @@ final class GodManager implements Listener {
             Mark m = it.next();
             Player p = Bukkit.getPlayer(m.target);
             if (tick < m.lockAt && p != null && p.getWorld() == w) m.at = p.getLocation();
-            if (tick % 2 == 0) for (double y = 0; y < 30; y += 0.8)
+            if (tick % 3 == 0) for (double y = 0; y < 30; y += 1.5)   // a lighter beam: fewer packets for big fights
                 w.spawnParticle(Particle.DUST, m.at.clone().add(0, y, 0), 1, 0.15, 0, 0.15, 0, BEAM, true);
             if (tick < m.strikeAt) continue;
             it.remove();
