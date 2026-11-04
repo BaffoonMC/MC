@@ -842,7 +842,7 @@ broadcasts:
   enabled: true
   every-minutes: 180
   min-players: 1
-  prefix: "<gold><bold>BAFFOON</bold></gold> <dark_gray>»</dark_gray> "
+  prefix: "<gold><bold>BaffoonMC</bold></gold> <dark_gray>></dark_gray> "
   lines:
     - "<gray>Vote for us with <click:run_command:'/vote'><hover:show_text:'<gray>Click to vote'><yellow>/vote</yellow></hover></click> and climb the ranks, from Newcomer all the way to Ancient."
     - "<gray>Every vote is a point for the <click:run_command:'/voteshop'><hover:show_text:'<gray>Click to open the Vote Shop'><yellow>/voteshop</yellow></hover></click>. Diamonds, netherite, spawn eggs and more."

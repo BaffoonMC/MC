@@ -35,7 +35,7 @@ final class Broadcasts {
         if (lines.size() > 1 && i == last) i = (i + 1) % lines.size();
         last = i;
         Component msg;
-        try { msg = MiniMessage.miniMessage().deserialize(c.getString("broadcasts.prefix", "") + lines.get(i)); }
+        try { msg = MiniMessage.miniMessage().deserialize(c.getString("broadcasts.prefix", "<gold><bold>BaffoonMC</bold></gold> <dark_gray>></dark_gray> ") + lines.get(i)); }
         catch (RuntimeException ex) { plugin.getLogger().warning("Broadcast line " + (i + 1) + " couldn't be read: " + ex.getMessage()); return false; }
         Bukkit.getServer().sendMessage(Component.empty());
         Bukkit.getServer().sendMessage(msg);

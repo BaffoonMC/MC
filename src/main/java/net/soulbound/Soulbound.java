@@ -224,6 +224,11 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-yeti-three", true);
             saveConfig();
         }
+        // one-off: the broadcast tag reads "BaffoonMC >"
+        if ("<gold><bold>BAFFOON</bold></gold> <dark_gray>»</dark_gray> ".equals(getConfig().getString("broadcasts.prefix"))) {
+            getConfig().set("broadcasts.prefix", "<gold><bold>BaffoonMC</bold></gold> <dark_gray>></dark_gray> ");
+            saveConfig();
+        }
         // one-off: a player kill drops everything, not just the backpack
         if (!getConfig().getBoolean("migrated.pvp-drops-all", false)) {
             if ("backpack".equalsIgnoreCase(getConfig().getString("death.pvp-drops", "backpack"))) getConfig().set("death.pvp-drops", "all");
