@@ -112,7 +112,7 @@ final class StrongholdGate implements Listener {
         String id = at.getWorld().getName() + "_" + (int) bb.getMinX() + "_" + (int) bb.getMinY() + "_" + (int) bb.getMinZ();
         String path = "stronghold.crowns." + id;
         int given = store.data.getInt(path + ".given", 0), opened = store.data.getInt(path + ".opened", 0);
-        int chests = Math.max(per, plugin.getConfig().getInt("stronghold.chests-per-stronghold", 8));
+        int chests = Math.max(per, plugin.getConfig().getInt("stronghold.chests-per-stronghold", 9));
         store.set(path + ".opened", opened + 1);
         if (given < per) {
             int left = Math.max(1, chests - opened);

@@ -389,9 +389,9 @@ stronghold:
   gate-of-heaven: true
   angel-spawner: true
   # The Gatekeeper's Crown: this many in every stronghold, spread over its first chests-per-stronghold chests
-  # (the Brimstone Stronghold has 8). 0 = none.
+  # (the Brimstone Stronghold has 9: eight chests and the ore cart in the Sulfur Dig). 0 = none.
   crowns-per-stronghold: 2
-  chests-per-stronghold: 8
+  chests-per-stronghold: 9
 # Shulkers in the End are Archangels: one hit from their bolt kills (creative and spectator are safe).
 archangels:
   instant-kill: true
