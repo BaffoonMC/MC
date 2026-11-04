@@ -830,6 +830,12 @@ sleeper:
   forget-seconds: 30           # he forgets how much you've annoyed him after this long
   shove-cooldown-seconds: 120  # he only gets up for the same person this often
   shove-strength: 1.6
+# /rtp (also /wild): sends you to the same random overworld spots as the Wild Drop (range is under wild-drop below).
+rtp:
+  enabled: true
+  cooldown-minutes: 10
+  warmup-seconds: 3     # stand still this long first (moving or getting hurt cancels it)
+  combat-seconds: 30    # not within this long of hitting or being hit by a player
 wild-drop:
   world: ""          # empty = the main overworld ("world")
   center-x: 0

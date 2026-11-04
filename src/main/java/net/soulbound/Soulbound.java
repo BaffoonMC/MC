@@ -409,6 +409,9 @@ public final class Soulbound extends JavaPlugin {
         voteShop.start();
         accountReset = new AccountReset(this);
         pm.registerEvents(accountReset, this);
+        Rtp rtp = new Rtp(this);
+        pm.registerEvents(rtp, this);
+        if (getCommand("rtp") != null) getCommand("rtp").setExecutor(rtp);
         sleeper = new Sleeper(this);
         pm.registerEvents(sleeper, this);
         sleeper.start();

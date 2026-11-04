@@ -23,6 +23,10 @@ commands:
   claimfly:
     description: Turn your claim flight off or back on (Patron perk).
     usage: /claimfly
+  rtp:
+    description: Get sent to a random safe spot in the overworld.
+    usage: /rtp
+    aliases: [wild, randomtp]
   voteshop:
     description: The Vote Shop. Spend the points you get for voting (admins - /voteshop help).
     usage: /voteshop [page|add <price> [page]|edit [page]|points <player> [add|take|set] <n>]

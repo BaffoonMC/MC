@@ -77,6 +77,9 @@ final class WildDrop {
         return w != null ? w : Bukkit.getWorlds().get(0);
     }
 
+    /** Send someone to a random safe spot in the overworld (also used by /rtp). */
+    void sendToWild(Player p) { send(p, 0); }
+
     private void send(Player p, int attempt) {
         if (!p.isOnline()) return;
         var c = plugin.getConfig();
