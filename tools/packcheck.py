@@ -42,6 +42,14 @@ pump(None, 4)
 cmd("scoreboard players get #hunger sacrifice.offer", r"(?i)has|none|unknown", 10)
 cmd("function sacrifice:spawn_tick", r"(?i)function|unknown|error", 10)
 cmd("datapack list enabled", r"data pack", 10)
+for t in ["tree_of_life", "tree_of_knowledge", "cloud_willow"]:
+    r = cmd(f"execute in minecraft:the_end positioned 0 100 0 run locate structure heaven:{t}", r"(?i)nearest|could not|unknown|error|invalid", 180)
+    found["heaven " + t] = (r or "no reply").strip()[-160:]
+cmd("execute in minecraft:the_end run forceload add 1200 1200 1260 1260", r"(?i)chunk|forceload", 120)
+for i, t in enumerate(["tree_of_life_1", "tree_of_knowledge_2", "cloud_willow_3"]):
+    r = cmd(f"execute in minecraft:the_end run place template heaven:eden/{t} {1200 + i * 20} 150 1200", r"(?i)placed|failed|invalid|unknown|error|not", 60)
+    found["place " + t] = (r or "no reply").strip()[-160:]
+
 cmd("moloch", None, 5); cmd("sb selftest", r"(?i)selftest", 30)
 cmd("execute in minecraft:the_end run forceload add -64 -64 63 63", r"(?i)chunk|forceload", 300)
 pump(None, 60)
