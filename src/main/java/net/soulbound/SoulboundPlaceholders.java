@@ -67,6 +67,10 @@ final class SoulboundPlaceholders extends PlaceholderExpansion {
     private String realmName(World w) {
         var sec = plugin.getConfig().getConfigurationSection("placeholders.realm-worlds");
         String name = w.getName().toLowerCase(java.util.Locale.ROOT), key = w.getKey().getKey().toLowerCase(java.util.Locale.ROOT);
+        // the creative world(s) count as a realm of their own
+        java.util.List<String> creative = plugin.getConfig().getStringList("creative-world.worlds");
+        for (String c : creative.isEmpty() ? java.util.List.of("creative") : creative)
+            if (c.equalsIgnoreCase(name) || c.equalsIgnoreCase(key)) return plugin.getConfig().getString("placeholders.realm-creative", "&#7FD3EACreative");
         if (sec == null) return name.equals("spawn") || key.equals("spawn") ? "&#F5C351Spawn" : null;
         for (String k : sec.getKeys(false)) {
             String kk = k.toLowerCase(java.util.Locale.ROOT);

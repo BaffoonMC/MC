@@ -656,6 +656,8 @@ final class Homunculus implements Listener {
         if (!is(e.getEntity())) return;
         String cause = e.getCause().name();
         if (cause.equals("VOID") || cause.equals("KILL")) return;
+        // fire, lava and falls never hurt it, anywhere (Moloch's pit still takes it: that's not damage, it's the fire)
+        if (java.util.Set.of("FIRE", "FIRE_TICK", "LAVA", "HOT_FLOOR", "CAMPFIRE", "FALL").contains(cause)) { e.setCancelled(true); e.getEntity().setFireTicks(0); return; }
         if (Bukkit.getPluginManager().getPlugin("GriefPrevention") == null || !ownersClaim(e.getEntity().getLocation(), owner(e.getEntity()))) return;
         e.setCancelled(true);
         if (e instanceof EntityDamageByEntityEvent by) {
@@ -790,8 +792,7 @@ final class Homunculus implements Listener {
         h.remove();
         l.getWorld().spawnParticle(Particle.LAVA, l.clone().add(0, 1, 0), 40, 0.6, 0.6, 0.6, 0);
         l.getWorld().spawnParticle(Particle.FLAME, l.clone().add(0, 1, 0), 60, 0.5, 1, 0.5, 0.05);
-        for (Player q : l.getWorld().getPlayers()) if (q.getLocation().distanceSquared(l) < 160 * 160) q.playSound(l, "moloch:furnace", 1.2f, 1.2f);
-        l.getWorld().playSound(l.clone().add(0, 3, 0), "minecraft:entity.warden.roar", 4f, 0.55f);
+        l.getWorld().playSound(l, Sound.ENTITY_ALLAY_DEATH, 1.2f, .6f);   // its own little death sound, not the ritual's roar
         if (p == null) return;
         p.getPersistentDataContainer().remove(mineKey);
         if (plugin.getConfig().getBoolean("homunculus.speech", true))

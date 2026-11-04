@@ -41,6 +41,7 @@ public final class Soulbound extends JavaPlugin {
     private Sleeper sleeper;
     private SafeZones safeZones;
     private Broadcasts broadcasts;
+    private CombatLog combatLog;
     private FesteringFlesh festering;
     private ThiefKey thiefKey;
     private KrakenBeard kraken;
@@ -113,6 +114,15 @@ public final class Soulbound extends JavaPlugin {
                 getConfig().set("wardrobe.catalogue", l);
             }
             getConfig().set("migrated.wardrobe-five-more", true);
+            saveConfig();
+        }
+        // one-off: bastions (new in Moloch's realm) keep away from the temple like fortresses do, in a saved list too
+        if (!getConfig().getBoolean("migrated.bastion-keep-away", false)) {
+            if (getConfig().isList("realm-structures.keep-away")) {
+                List<String> l = new java.util.ArrayList<>(getConfig().getStringList("realm-structures.keep-away"));
+                if (l.contains("sacrifice:fortress") && !l.contains("sacrifice:bastion")) { l.add("sacrifice:bastion"); getConfig().set("realm-structures.keep-away", l); }
+            }
+            getConfig().set("migrated.bastion-keep-away", true);
             saveConfig();
         }
         // one-off: the Judge's Wig and Star Stalker join a saved catalogue that already has the earlier additions
@@ -223,6 +233,13 @@ public final class Soulbound extends JavaPlugin {
                 List<String> l = new java.util.ArrayList<>(cat); l.addAll(List.of("balaclava", "bandana")); getConfig().set("wardrobe.catalogue", l);
             }
             getConfig().set("migrated.wardrobe-yeti-three", true);
+            saveConfig();
+        }
+        // one-off: the Zombie Bell raises 4 for 2 minutes now
+        if (!getConfig().getBoolean("migrated.bell-4-120", false)) {
+            if (getConfig().getInt("deeper-still.bell-zombies", 3) == 3) getConfig().set("deeper-still.bell-zombies", 4);
+            if (getConfig().getInt("deeper-still.bell-zombie-seconds", 60) == 60) getConfig().set("deeper-still.bell-zombie-seconds", 120);
+            getConfig().set("migrated.bell-4-120", true);
             saveConfig();
         }
         // one-off: the broadcast tag reads "BaffoonMC >"
@@ -481,6 +498,10 @@ public final class Soulbound extends JavaPlugin {
         pm.registerEvents(quantumStand, this);
         quantumStand.start();
         pm.registerEvents(new DeathDrops(this), this);
+        pm.registerEvents(new EndShips(this), this);
+        combatLog = new CombatLog(this);
+        pm.registerEvents(combatLog, this);
+        combatLog.start();
         safeZones = new SafeZones(this);
         pm.registerEvents(safeZones, this);
         homunculus = new Homunculus(this);
@@ -547,6 +568,7 @@ public final class Soulbound extends JavaPlugin {
     @Override
     public void onDisable() {
         if (brimstone != null) brimstone.stop();
+        if (combatLog != null) combatLog.stop();
         if (sacrifices != null) sacrifices.stop();
         if (bloodEmeralds != null) bloodEmeralds.stop();
         if (tumourCrop != null) tumourCrop.stop();
@@ -604,6 +626,7 @@ public final class Soulbound extends JavaPlugin {
     Sleeper sleeper() { return sleeper; }
     SafeZones safeZones() { return safeZones; }
     Broadcasts broadcasts() { return broadcasts; }
+    CombatLog combatLog() { return combatLog; }
     LoreFixer lore() { return loreFixer; }
     Grace grace() { return grace; }
     EdenMask eden() { return eden; }

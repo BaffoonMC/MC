@@ -17,6 +17,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.LootGenerateEvent;
+import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.generator.structure.GeneratedStructure;
 import org.bukkit.generator.structure.Structure;
 import org.bukkit.generator.structure.StructurePiece;
@@ -89,6 +92,40 @@ final class StrongholdGate implements Listener {
                 Bukkit.getScheduler().runTask(plugin, () -> tryRebuild(w, box, key));
             }
         }
+    }
+
+    /**
+     * The Gatekeeper's Crown: exactly two in every stronghold, hidden in two of its chests. Each chest opened for the first
+     * time has a chance of (crowns left / chests left), so the last chests always hold whatever's still there.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onLoot(LootGenerateEvent e) {
+        Location at = e.getLootContext().getLocation();
+        if (at == null || at.getWorld() == null || at.getWorld().getEnvironment() != World.Environment.NORMAL) return;
+        int per = plugin.getConfig().getInt("stronghold.crowns-per-stronghold", 2);
+        if (per <= 0 || plugin.cute() == null) return;
+        GeneratedStructure here = null;
+        for (GeneratedStructure gs : at.getChunk().getStructures(Structure.STRONGHOLD))
+            if (gs.getBoundingBox().clone().expand(1).contains(at.toVector())) { here = gs; break; }
+        if (here == null) return;
+        BoundingBox bb = here.getBoundingBox();
+        String id = at.getWorld().getName() + "_" + (int) bb.getMinX() + "_" + (int) bb.getMinY() + "_" + (int) bb.getMinZ();
+        String path = "stronghold.crowns." + id;
+        int given = store.data.getInt(path + ".given", 0), opened = store.data.getInt(path + ".opened", 0);
+        int chests = Math.max(per, plugin.getConfig().getInt("stronghold.chests-per-stronghold", 9));
+        store.set(path + ".opened", opened + 1);
+        if (given < per) {
+            int left = Math.max(1, chests - opened);
+            if (java.util.concurrent.ThreadLocalRandom.current().nextInt(left) < per - given) {
+                List<ItemStack> loot = new ArrayList<>(e.getLoot());
+                loot.add(plugin.cute().create(Cute.Kind.GATEKEEPER));
+                e.setLoot(loot);
+                store.set(path + ".given", given + 1);
+                plugin.getLogger().info("A Gatekeeper's Crown went into a stronghold chest at " + at.getBlockX() + " " + at.getBlockY() + " " + at.getBlockZ()
+                        + " (" + (given + 1) + " of " + per + " in that stronghold).");
+            }
+        }
+        store.save();
     }
 
     private void tryRebuild(World w, BoundingBox bb, String key) {

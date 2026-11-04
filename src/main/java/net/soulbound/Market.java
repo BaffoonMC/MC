@@ -51,7 +51,7 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
 
     private static final class Listing { String id; UUID seller; String sellerName; ItemStack unit; int qty; double each; long at; }
     private static final class Wanted { String id; UUID buyer; String buyerName; ItemStack unit; int want, got; double each; long at; }
-    private enum Mode { MAIN, ITEM, WANTED, MINE }
+    private enum Mode { HOME, MAIN, ITEM, WANTED, MINE }
     private static final class View implements InventoryHolder {
         final Mode mode; final int page; final String key, filter; Inventory inv;
         final Map<Integer, String> act = new HashMap<>();
@@ -68,6 +68,26 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
     private final Map<UUID, List<String>> notes = new HashMap<>();
     private final Map<UUID, Long> searching = new HashMap<>();
     private final Map<UUID, long[]> confirm = new HashMap<>();
+    private final Map<UUID, Integer> category = new HashMap<>();   // which shelf each player is browsing (0 = everything)
+
+    // ---------------------------------------------------------------- shelves: tools, armour, blocks...
+    private static final String[] CATS = {"Everything", "Blocks", "Tools & Weapons", "Armour", "Food", "Potions & Books", "Materials & Other"};
+    private static final Material[] CAT_ICONS = {Material.CHEST, Material.BRICKS, Material.IRON_PICKAXE, Material.IRON_CHESTPLATE, Material.BREAD, Material.POTION, Material.IRON_INGOT};
+
+    private static int catOf(ItemStack it) {
+        Material m = it.getType();
+        String n = m.name();
+        if (n.endsWith("_HELMET") || n.endsWith("_CHESTPLATE") || n.endsWith("_LEGGINGS") || n.endsWith("_BOOTS") || n.endsWith("_HORSE_ARMOR")
+                || m == Material.ELYTRA || m == Material.SHIELD || m == Material.TURTLE_HELMET || m == Material.WOLF_ARMOR) return 3;
+        if (n.endsWith("_SWORD") || n.endsWith("_AXE") || n.endsWith("_PICKAXE") || n.endsWith("_SHOVEL") || n.endsWith("_HOE") || n.endsWith("_SPEAR")
+                || m == Material.BOW || m == Material.CROSSBOW || m == Material.TRIDENT || m == Material.MACE || m == Material.FISHING_ROD
+                || m == Material.SHEARS || m == Material.FLINT_AND_STEEL || m == Material.SPYGLASS || m == Material.BRUSH || n.endsWith("ARROW")) return 2;
+        if (m == Material.POTION || m == Material.SPLASH_POTION || m == Material.LINGERING_POTION || m == Material.ENCHANTED_BOOK
+                || m == Material.EXPERIENCE_BOTTLE || m == Material.BOOK || m == Material.WRITTEN_BOOK) return 5;
+        if (m.isEdible()) return 4;
+        if (m.isBlock()) return 1;
+        return 6;
+    }
 
     Market(Soulbound plugin) {
         this.plugin = plugin;
@@ -244,9 +264,11 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
 
     void open(Player p, Mode mode, int page, String key, String filter) {
         expire();
+        if (mode == Mode.HOME) { openHome(p); return; }
         View v = new View(mode, Math.max(0, page), key, filter);
         String title = switch (mode) {
-            case MAIN -> filter == null ? "Market" : "Market - \"" + filter + "\"";
+            case HOME -> "Market";
+            case MAIN -> (filter == null ? "Market" : "Market - \"" + filter + "\"") + (category.getOrDefault(p.getUniqueId(), 0) == 0 ? "" : " > " + CATS[category.get(p.getUniqueId())]);
             case ITEM -> "Market > " + (key == null ? "" : pretty(key));
             case WANTED -> "Market > Wanted";
             case MINE -> "Market > Yours";
@@ -256,6 +278,7 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         List<ItemStack> shown = new ArrayList<>();
         List<String> acts = new ArrayList<>();
         switch (mode) {
+            case HOME -> { }
             case MAIN -> fillMain(p, filter, shown, acts);
             case ITEM -> fillItem(p, key, shown, acts);
             case WANTED -> fillWanted(p, shown, acts);
@@ -275,7 +298,8 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         if (pg < pages - 1) { inv.setItem(53, button(Material.ARROW, Component.text("Next page", NamedTextColor.YELLOW), List.of(plain("Page " + (pg + 2) + " of " + pages, NamedTextColor.GRAY)))); v.act.put(53, "page:" + (pg + 1)); }
         double bal = Money.balance(p.getUniqueId());
         inv.setItem(49, button(Material.SUNFLOWER, Component.text("You have " + (bal < 0 ? "?" : Money.fmt(bal)), GOLD), List.of(plain("Page " + (pg + 1) + " of " + pages, NamedTextColor.DARK_GRAY))));
-        if (mode != Mode.MAIN || filter != null) { inv.setItem(46, button(Material.CHEST, Component.text("Back to the Market", NamedTextColor.YELLOW), List.of())); v.act.put(46, "home"); }
+        if (mode == Mode.ITEM) { inv.setItem(46, button(Material.CHEST, Component.text("Back to the list", NamedTextColor.YELLOW), List.of())); v.act.put(46, "list"); }
+        else { inv.setItem(46, button(Material.CHEST, Component.text("Back to the categories", NamedTextColor.YELLOW), List.of())); v.act.put(46, "home"); }
         if (mode == Mode.MAIN) {
             inv.setItem(47, button(Material.WRITABLE_BOOK, Component.text("Wanted", NamedTextColor.YELLOW), List.of(
                     plain("Things people want to buy.", NamedTextColor.GRAY), plain("Sell yours to them straight away.", NamedTextColor.GRAY)))); v.act.put(47, "wanted");
@@ -299,6 +323,48 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         p.openInventory(inv);
     }
 
+    /** The front page: pick a category, or go to Wanted, Search or Yours. */
+    private void openHome(Player p) {
+        View v = new View(Mode.HOME, 0, null, null);
+        Inventory inv = Bukkit.createInventory(v, 54, Component.text("Market", NamedTextColor.DARK_GRAY));
+        v.inv = inv;
+        ItemStack filler = button(Material.GRAY_STAINED_GLASS_PANE, Component.text(" "), List.of());
+        for (int s = 0; s < 54; s++) inv.setItem(s, filler);
+        int[] count = new int[CATS.length], kinds = new int[CATS.length];
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (Listing l : listings.values()) {
+            int c = catOf(l.unit);
+            count[0] += l.qty; count[c] += l.qty;
+            if (seen.add(key(l.unit))) { kinds[0]++; kinds[c]++; }
+        }
+        int[] slots = {10, 11, 12, 13, 14, 15, 16};
+        for (int i = 0; i < CATS.length; i++) {
+            List<Component> lore = new ArrayList<>();
+            lore.add(plain(kinds[i] == 0 ? "Nothing for sale yet" : kinds[i] + " kind" + (kinds[i] == 1 ? "" : "s") + " of thing, " + count[i] + " for sale", kinds[i] == 0 ? NamedTextColor.DARK_GRAY : NamedTextColor.GRAY));
+            lore.add(Component.empty());
+            lore.add(plain("Click to browse", NamedTextColor.GREEN));
+            inv.setItem(slots[i], button(CAT_ICONS[i], Component.text(CATS[i], i == 0 ? GOLD : NamedTextColor.YELLOW, TextDecoration.BOLD), lore));
+            v.act.put(slots[i], "cat:" + i);
+        }
+        inv.setItem(29, button(Material.WRITABLE_BOOK, Component.text("Wanted", NamedTextColor.YELLOW, TextDecoration.BOLD), List.of(
+                plain(wanted.size() + " request" + (wanted.size() == 1 ? "" : "s") + " up", NamedTextColor.GRAY),
+                plain("Things people want to buy.", NamedTextColor.GRAY), plain("Sell yours to them straight away.", NamedTextColor.GRAY)))); v.act.put(29, "wanted");
+        inv.setItem(31, button(Material.COMPASS, Component.text("Search", NamedTextColor.YELLOW, TextDecoration.BOLD), List.of(plain("Click, then type what you're after.", NamedTextColor.GRAY)))); v.act.put(31, "search");
+        int waiting = collection.getOrDefault(p.getUniqueId(), List.of()).size();
+        double due = owed.getOrDefault(p.getUniqueId(), 0.0);
+        List<Component> yl = new ArrayList<>(List.of(plain("Your listings, wanted requests,", NamedTextColor.GRAY), plain("and things waiting for you.", NamedTextColor.GRAY)));
+        if (waiting > 0 || due > 0) yl.add(plain("Something's waiting for you!", NamedTextColor.GREEN));
+        inv.setItem(33, button(Material.BUNDLE, Component.text("Yours", NamedTextColor.YELLOW, TextDecoration.BOLD), yl)); v.act.put(33, "mine");
+        double bal = Money.balance(p.getUniqueId());
+        inv.setItem(49, button(Material.SUNFLOWER, Component.text("You have " + (bal < 0 ? "?" : Money.fmt(bal)), GOLD), List.of()));
+        inv.setItem(51, button(Material.BOOK, Component.text("How it works", NamedTextColor.YELLOW), List.of(
+                line("Sell: hold it, ", NamedTextColor.GRAY, "/market sell <price>", NamedTextColor.YELLOW),
+                line("Want: hold one, ", NamedTextColor.GRAY, "/market want <amount> <price each>", NamedTextColor.YELLOW),
+                plain("The Market holds the item (or the money)", NamedTextColor.GRAY),
+                plain("so nobody can be scammed.", NamedTextColor.GRAY))));
+        p.openInventory(inv);
+    }
+
     private static String pretty(String key) {
         String s = key.toLowerCase(Locale.ROOT).replace('_', ' ');
         return s.isEmpty() ? s : Character.toUpperCase(s.charAt(0)) + s.substring(1);
@@ -309,8 +375,10 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         listings.values().stream().sorted(Comparator.comparing(l -> pretty(key(l.unit))))
                 .forEach(l -> groups.computeIfAbsent(key(l.unit), k -> new ArrayList<>()).add(l));
         String f = filter == null ? null : filter.toLowerCase(Locale.ROOT);
+        int cat = category.getOrDefault(p.getUniqueId(), 0);
         for (var e : groups.entrySet()) {
             List<Listing> ls = e.getValue();
+            if (cat != 0 && catOf(ls.get(0).unit) != cat) continue;
             if (f != null && ls.stream().noneMatch(l -> pretty(e.getKey()).toLowerCase(Locale.ROOT).contains(f) || plainName(l.unit).toLowerCase(Locale.ROOT).contains(f))) continue;
             Listing cheapest = ls.stream().min(Comparator.comparingDouble(l -> l.each)).orElseThrow();
             long sellers = ls.stream().map(l -> l.seller).distinct().count();
@@ -410,7 +478,8 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         if (a == null) return;
         if (a.startsWith("page:")) { open(p, v.mode, Integer.parseInt(a.substring(5)), v.key, v.filter); return; }
         switch (a) {
-            case "home" -> { open(p, Mode.MAIN, 0, null, null); return; }
+            case "home" -> { openHome(p); return; }
+            case "list" -> { open(p, Mode.MAIN, 0, null, null); return; }
             case "wanted" -> { open(p, Mode.WANTED, 0, null, null); return; }
             case "mine" -> { open(p, Mode.MINE, 0, null, null); return; }
             case "search" -> {
@@ -428,6 +497,7 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
             }
             default -> {}
         }
+        if (a.startsWith("cat:")) { category.put(p.getUniqueId(), Integer.parseInt(a.substring(4))); open(p, Mode.MAIN, 0, null, null); return; }
         if (a.startsWith("item:")) { open(p, Mode.ITEM, 0, a.substring(5), null); return; }
         if (a.startsWith("claim:")) {
             List<ItemStack> col = collection.get(p.getUniqueId());
@@ -547,7 +617,7 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         e.setCancelled(true);
         String text = PLAIN.serialize(e.originalMessage()).trim();
         Player p = e.getPlayer();
-        Bukkit.getScheduler().runTask(plugin, () -> { if (!text.equalsIgnoreCase("cancel") && !text.isEmpty()) open(p, Mode.MAIN, 0, null, text); });
+        Bukkit.getScheduler().runTask(plugin, () -> { if (!text.equalsIgnoreCase("cancel") && !text.isEmpty()) { category.put(p.getUniqueId(), 0); open(p, Mode.MAIN, 0, null, text); } });
     }
 
     @EventHandler
@@ -576,12 +646,13 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
         if (!plugin.getConfig().getBoolean("market.enabled", true)) { p.sendMessage(Component.text("The Market is closed.", NamedTextColor.GRAY)); return true; }
         if (!Money.available()) { p.sendMessage(Component.text("The Market can't reach the money system right now.", NamedTextColor.RED)); return true; }
-        if (a.length == 0) { open(p, Mode.MAIN, 0, null, null); return true; }
+        if (a.length == 0) { openHome(p); return true; }
         switch (a[0].toLowerCase(Locale.ROOT)) {
             case "sell" -> sell(p, a);
             case "want", "buy" -> want(p, a);
             case "search", "find" -> {
                 if (a.length < 2) { p.sendMessage(Component.text("Usage: /market search <what>", NamedTextColor.RED)); return true; }
+                category.put(p.getUniqueId(), 0);
                 open(p, Mode.MAIN, 0, null, String.join(" ", java.util.Arrays.copyOfRange(a, 1, a.length)));
             }
             case "wanted" -> open(p, Mode.WANTED, 0, null, null);
