@@ -99,18 +99,20 @@ for (sx, sz) in [(1500, 1500), (-1500, 1500), (1500, -1500), (-1500, -1500), (25
     m = re.search(r"\[(-?\d+), ~, (-?\d+)\]", r or "")
     if not m: found[f"end city near {sx},{sz}"] = (r or "no reply").strip()[-120:]; continue
     cx, cz = int(m.group(1)), int(m.group(2))
-    cmd(f"execute in minecraft:the_end run forceload add {cx - 80} {cz - 80} {cx + 80} {cz + 80}", r"(?i)chunk|forceload|too many", 300)
+    cmd(f"execute in minecraft:the_end run forceload add {cx - 100} {cz - 100} {cx + 100} {cz + 100}", r"(?i)chunk|forceload|too many", 300)
     pump(None, 15)
     for y in range(30, 200, 4):
-        r = cmd(f"execute in minecraft:the_end run fill {cx - 80} {y} {cz - 50} {cx + 80} {y + 3} {cz + 0} minecraft:dragon_head replace minecraft:dragon_head", r"(?i)filled|no blocks|error|unknown|could not|too many", 10)
-        if r and "Successfully" in r: heads_total += int(re.search(r"filled (\d+)", r).group(1))
-        r = cmd(f"execute in minecraft:the_end run fill {cx - 80} {y} {cz + 1} {cx + 80} {y + 3} {cz + 50} minecraft:dragon_head replace minecraft:dragon_head", r"(?i)filled|no blocks|error|unknown|could not|too many", 10)
-        if r and "Successfully" in r: heads_total += int(re.search(r"filled (\d+)", r).group(1))
-    r = cmd(f"execute in minecraft:the_end positioned {cx} 100 {cz} if entity @e[type=minecraft:item_frame,distance=..150,nbt={{Item:{{id:\"minecraft:elytra\"}}}}]", r"(?i)passed|failed|error|unknown", 20)
-    if r and "passed" in r: elytra_total += int((re.search(r"Count: (\d+)", r) or re.search(r"(1)", "1")).group(1))
-    cmd(f"execute in minecraft:the_end run forceload remove {cx - 80} {cz - 80} {cx + 80} {cz + 80}", None, 5)
+        for z0 in range(cz - 100, cz + 100, 40):
+            r = cmd(f"execute in minecraft:the_end run fill {cx - 100} {y} {z0} {cx + 100} {y + 3} {z0 + 39} minecraft:dragon_head replace minecraft:dragon_head", r"(?i)filled|no blocks|error|unknown|could not|too many", 10)
+            if r and "Successfully" in r: heads_total += int(re.search(r"filled (\d+)", r).group(1))
+    r = cmd(f"execute in minecraft:the_end positioned {cx} 100 {cz} if entity @e[type=minecraft:item_frame,distance=..160,nbt={{Item:{{id:\"minecraft:elytra\"}}}}]", r"(?i)passed|failed|error|unknown", 20)
+    ships = int(m2.group(1)) if r and (m2 := re.search(r"Count: (\d+)", r)) else (1 if r and "passed" in r else 0)
+    elytra_total += ships
+    print(f"RESULT end city {cx},{cz}: ships {ships}, dragon heads so far {heads_total}", flush=True)
+    cmd(f"execute in minecraft:the_end run forceload remove {cx - 100} {cz - 100} {cx + 100} {cz + 100}", None, 5)
 found["end ships with elytra (ships found)"] = str(elytra_total)
 found["dragon heads left on them"] = str(heads_total)
+print(f"RESULT ships found {elytra_total}, dragon heads left {heads_total}", flush=True)
 
 cmd("moloch", None, 5); cmd("sb selftest", r"(?i)selftest", 30)
 cmd("execute in minecraft:the_end run forceload add -64 -64 63 63", r"(?i)chunk|forceload", 300)
