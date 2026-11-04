@@ -51,7 +51,7 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
 
     private static final class Listing { String id; UUID seller; String sellerName; ItemStack unit; int qty; double each; long at; }
     private static final class Wanted { String id; UUID buyer; String buyerName; ItemStack unit; int want, got; double each; long at; }
-    private enum Mode { MAIN, ITEM, WANTED, MINE }
+    private enum Mode { HOME, MAIN, ITEM, WANTED, MINE }
     private static final class View implements InventoryHolder {
         final Mode mode; final int page; final String key, filter; Inventory inv;
         final Map<Integer, String> act = new HashMap<>();
@@ -264,8 +264,10 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
 
     void open(Player p, Mode mode, int page, String key, String filter) {
         expire();
+        if (mode == Mode.HOME) { openHome(p); return; }
         View v = new View(mode, Math.max(0, page), key, filter);
         String title = switch (mode) {
+            case HOME -> "Market";
             case MAIN -> (filter == null ? "Market" : "Market - \"" + filter + "\"") + (category.getOrDefault(p.getUniqueId(), 0) == 0 ? "" : " > " + CATS[category.get(p.getUniqueId())]);
             case ITEM -> "Market > " + (key == null ? "" : pretty(key));
             case WANTED -> "Market > Wanted";
@@ -276,6 +278,7 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         List<ItemStack> shown = new ArrayList<>();
         List<String> acts = new ArrayList<>();
         switch (mode) {
+            case HOME -> { }
             case MAIN -> fillMain(p, filter, shown, acts);
             case ITEM -> fillItem(p, key, shown, acts);
             case WANTED -> fillWanted(p, shown, acts);
@@ -295,17 +298,12 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         if (pg < pages - 1) { inv.setItem(53, button(Material.ARROW, Component.text("Next page", NamedTextColor.YELLOW), List.of(plain("Page " + (pg + 2) + " of " + pages, NamedTextColor.GRAY)))); v.act.put(53, "page:" + (pg + 1)); }
         double bal = Money.balance(p.getUniqueId());
         inv.setItem(49, button(Material.SUNFLOWER, Component.text("You have " + (bal < 0 ? "?" : Money.fmt(bal)), GOLD), List.of(plain("Page " + (pg + 1) + " of " + pages, NamedTextColor.DARK_GRAY))));
-        if (mode != Mode.MAIN || filter != null) { inv.setItem(46, button(Material.CHEST, Component.text("Back to the Market", NamedTextColor.YELLOW), List.of())); v.act.put(46, "home"); }
+        if (mode == Mode.ITEM) { inv.setItem(46, button(Material.CHEST, Component.text("Back to the list", NamedTextColor.YELLOW), List.of())); v.act.put(46, "list"); }
+        else { inv.setItem(46, button(Material.CHEST, Component.text("Back to the categories", NamedTextColor.YELLOW), List.of())); v.act.put(46, "home"); }
         if (mode == Mode.MAIN) {
             inv.setItem(47, button(Material.WRITABLE_BOOK, Component.text("Wanted", NamedTextColor.YELLOW), List.of(
                     plain("Things people want to buy.", NamedTextColor.GRAY), plain("Sell yours to them straight away.", NamedTextColor.GRAY)))); v.act.put(47, "wanted");
             inv.setItem(48, button(Material.COMPASS, Component.text("Search", NamedTextColor.YELLOW), List.of(plain("Click, then type what you're after.", NamedTextColor.GRAY)))); v.act.put(48, "search");
-            int cat = category.getOrDefault(p.getUniqueId(), 0);
-            List<Component> lore = new ArrayList<>();
-            for (int i = 0; i < CATS.length; i++) lore.add(plain((i == cat ? "> " : "  ") + CATS[i], i == cat ? NamedTextColor.GREEN : NamedTextColor.GRAY));
-            lore.add(Component.empty());
-            lore.add(plain("Left-click: next · Right-click: back", NamedTextColor.DARK_GRAY));
-            inv.setItem(52, button(CAT_ICONS[cat], Component.text("Showing: " + CATS[cat], NamedTextColor.YELLOW), lore)); v.act.put(52, "shelf");
         }
         int waiting = collection.getOrDefault(p.getUniqueId(), List.of()).size();
         double due = owed.getOrDefault(p.getUniqueId(), 0.0);
@@ -322,6 +320,48 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
                 plain("so nobody can be scammed.", NamedTextColor.GRAY),
                 line("Listings last ", NamedTextColor.GRAY, days() + " days", NamedTextColor.WHITE),
                 line("Fee on each sale: ", NamedTextColor.GRAY, Math.round(fee() * 100) + "%", NamedTextColor.WHITE))));
+        p.openInventory(inv);
+    }
+
+    /** The front page: pick a category, or go to Wanted, Search or Yours. */
+    private void openHome(Player p) {
+        View v = new View(Mode.HOME, 0, null, null);
+        Inventory inv = Bukkit.createInventory(v, 54, Component.text("Market", NamedTextColor.DARK_GRAY));
+        v.inv = inv;
+        ItemStack filler = button(Material.GRAY_STAINED_GLASS_PANE, Component.text(" "), List.of());
+        for (int s = 0; s < 54; s++) inv.setItem(s, filler);
+        int[] count = new int[CATS.length], kinds = new int[CATS.length];
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (Listing l : listings.values()) {
+            int c = catOf(l.unit);
+            count[0] += l.qty; count[c] += l.qty;
+            if (seen.add(key(l.unit))) { kinds[0]++; kinds[c]++; }
+        }
+        int[] slots = {10, 11, 12, 13, 14, 15, 16};
+        for (int i = 0; i < CATS.length; i++) {
+            List<Component> lore = new ArrayList<>();
+            lore.add(plain(kinds[i] == 0 ? "Nothing for sale yet" : kinds[i] + " kind" + (kinds[i] == 1 ? "" : "s") + " of thing, " + count[i] + " for sale", kinds[i] == 0 ? NamedTextColor.DARK_GRAY : NamedTextColor.GRAY));
+            lore.add(Component.empty());
+            lore.add(plain("Click to browse", NamedTextColor.GREEN));
+            inv.setItem(slots[i], button(CAT_ICONS[i], Component.text(CATS[i], i == 0 ? GOLD : NamedTextColor.YELLOW, TextDecoration.BOLD), lore));
+            v.act.put(slots[i], "cat:" + i);
+        }
+        inv.setItem(29, button(Material.WRITABLE_BOOK, Component.text("Wanted", NamedTextColor.YELLOW, TextDecoration.BOLD), List.of(
+                plain(wanted.size() + " request" + (wanted.size() == 1 ? "" : "s") + " up", NamedTextColor.GRAY),
+                plain("Things people want to buy.", NamedTextColor.GRAY), plain("Sell yours to them straight away.", NamedTextColor.GRAY)))); v.act.put(29, "wanted");
+        inv.setItem(31, button(Material.COMPASS, Component.text("Search", NamedTextColor.YELLOW, TextDecoration.BOLD), List.of(plain("Click, then type what you're after.", NamedTextColor.GRAY)))); v.act.put(31, "search");
+        int waiting = collection.getOrDefault(p.getUniqueId(), List.of()).size();
+        double due = owed.getOrDefault(p.getUniqueId(), 0.0);
+        List<Component> yl = new ArrayList<>(List.of(plain("Your listings, wanted requests,", NamedTextColor.GRAY), plain("and things waiting for you.", NamedTextColor.GRAY)));
+        if (waiting > 0 || due > 0) yl.add(plain("Something's waiting for you!", NamedTextColor.GREEN));
+        inv.setItem(33, button(Material.BUNDLE, Component.text("Yours", NamedTextColor.YELLOW, TextDecoration.BOLD), yl)); v.act.put(33, "mine");
+        double bal = Money.balance(p.getUniqueId());
+        inv.setItem(49, button(Material.SUNFLOWER, Component.text("You have " + (bal < 0 ? "?" : Money.fmt(bal)), GOLD), List.of()));
+        inv.setItem(51, button(Material.BOOK, Component.text("How it works", NamedTextColor.YELLOW), List.of(
+                line("Sell: hold it, ", NamedTextColor.GRAY, "/market sell <price>", NamedTextColor.YELLOW),
+                line("Want: hold one, ", NamedTextColor.GRAY, "/market want <amount> <price each>", NamedTextColor.YELLOW),
+                plain("The Market holds the item (or the money)", NamedTextColor.GRAY),
+                plain("so nobody can be scammed.", NamedTextColor.GRAY))));
         p.openInventory(inv);
     }
 
@@ -438,14 +478,8 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         if (a == null) return;
         if (a.startsWith("page:")) { open(p, v.mode, Integer.parseInt(a.substring(5)), v.key, v.filter); return; }
         switch (a) {
-            case "home" -> { open(p, Mode.MAIN, 0, null, null); return; }
-            case "shelf" -> {
-                int c = category.getOrDefault(p.getUniqueId(), 0);
-                c = Math.floorMod(c + (e.isRightClick() ? -1 : 1), CATS.length);
-                category.put(p.getUniqueId(), c);
-                open(p, Mode.MAIN, 0, null, v.filter);
-                return;
-            }
+            case "home" -> { openHome(p); return; }
+            case "list" -> { open(p, Mode.MAIN, 0, null, null); return; }
             case "wanted" -> { open(p, Mode.WANTED, 0, null, null); return; }
             case "mine" -> { open(p, Mode.MINE, 0, null, null); return; }
             case "search" -> {
@@ -463,6 +497,7 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
             }
             default -> {}
         }
+        if (a.startsWith("cat:")) { category.put(p.getUniqueId(), Integer.parseInt(a.substring(4))); open(p, Mode.MAIN, 0, null, null); return; }
         if (a.startsWith("item:")) { open(p, Mode.ITEM, 0, a.substring(5), null); return; }
         if (a.startsWith("claim:")) {
             List<ItemStack> col = collection.get(p.getUniqueId());
@@ -582,7 +617,7 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         e.setCancelled(true);
         String text = PLAIN.serialize(e.originalMessage()).trim();
         Player p = e.getPlayer();
-        Bukkit.getScheduler().runTask(plugin, () -> { if (!text.equalsIgnoreCase("cancel") && !text.isEmpty()) open(p, Mode.MAIN, 0, null, text); });
+        Bukkit.getScheduler().runTask(plugin, () -> { if (!text.equalsIgnoreCase("cancel") && !text.isEmpty()) { category.put(p.getUniqueId(), 0); open(p, Mode.MAIN, 0, null, text); } });
     }
 
     @EventHandler
@@ -611,12 +646,13 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
         if (!plugin.getConfig().getBoolean("market.enabled", true)) { p.sendMessage(Component.text("The Market is closed.", NamedTextColor.GRAY)); return true; }
         if (!Money.available()) { p.sendMessage(Component.text("The Market can't reach the money system right now.", NamedTextColor.RED)); return true; }
-        if (a.length == 0) { open(p, Mode.MAIN, 0, null, null); return true; }
+        if (a.length == 0) { openHome(p); return true; }
         switch (a[0].toLowerCase(Locale.ROOT)) {
             case "sell" -> sell(p, a);
             case "want", "buy" -> want(p, a);
             case "search", "find" -> {
                 if (a.length < 2) { p.sendMessage(Component.text("Usage: /market search <what>", NamedTextColor.RED)); return true; }
+                category.put(p.getUniqueId(), 0);
                 open(p, Mode.MAIN, 0, null, String.join(" ", java.util.Arrays.copyOfRange(a, 1, a.length)));
             }
             case "wanted" -> open(p, Mode.WANTED, 0, null, null);
