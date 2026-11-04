@@ -1,3 +1,4 @@
+import re
 import subprocess, re, time, threading, queue, json, zipfile, glob
 p = subprocess.Popen(["java", "-Xmx5G", "-jar", "server.jar", "nogui"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
 q = queue.Queue(); log = open("full.log", "w")
@@ -35,6 +36,22 @@ for n in sorted(x for x in names if x.startswith("data/sacrifice/worldgen/biome/
     b = n.split("/")[-1][:-5]
     r = cmd(f"execute in sacrifice:sacrifice positioned 0 100 0 run locate biome sacrifice:{b}", r"(?i)nearest|could not|unknown|error|invalid", 180)
     found["biome " + b] = (r or "no reply").strip()[-160:]
+r = cmd("execute in sacrifice:sacrifice positioned 1500 100 1500 run locate structure sacrifice:bastion", r"(?i)nearest|could not|unknown|error|invalid", 180)
+found["bastion from 1500,1500"] = (r or "no reply").strip()[-160:]
+m = re.search(r"\[(-?\d+), ~, (-?\d+)\]", r or "")
+if m:
+    bx, bz = int(m.group(1)), int(m.group(2))
+    cmd(f"execute in sacrifice:sacrifice run forceload add {bx - 96} {bz - 96} {bx + 96} {bz + 96}", r"(?i)chunk|forceload|too many", 300)
+    pump(None, 20)
+    r = cmd(f"execute in sacrifice:sacrifice run place structure sacrifice:bastion {bx} 100 {bz}", r"(?i)generated|failed|invalid|unknown|error|could not", 240)
+    found["bastion place"] = (r or "no reply").strip()[-160:]
+    pump(None, 10)
+    for what in ["piglin", "piglin_brute", "hoglin"]:
+        r = cmd(f"execute in sacrifice:sacrifice positioned {bx} 100 {bz} if entity @e[type=minecraft:{what},distance=..140]", r"(?i)passed|failed|error|unknown", 20)
+        found["bastion " + what] = (r or "no reply").strip()[-80:]
+    for blk in ["gilded_blackstone", "polished_blackstone_bricks"]:
+        r = cmd(f"execute in sacrifice:sacrifice store result score #b sacrifice.offer run fill {bx - 15} 60 {bz - 15} {bx + 15} 90 {bz + 15} minecraft:{blk} replace minecraft:{blk}", r"(?i)filled|no blocks|error|unknown|could not|too many", 30)
+        found["bastion blocks " + blk] = (r or "no reply").strip()[-100:]
 locate_issues = list(bad); bad.clear()
 cmd("scoreboard players get #hunger sacrifice.offer", r"(?i)has|none|unknown", 10)
 cmd("execute in sacrifice:sacrifice run summon item 0 131 0 {Item:{id:\"minecraft:redstone\",count:5}}", None, 3)
