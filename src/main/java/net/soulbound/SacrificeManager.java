@@ -44,6 +44,7 @@ final class SacrificeManager implements Listener {
     private final Zones zones;
     private final Map<UUID, Ritual> rituals = new HashMap<>();
     private final Set<UUID> sacrificing = new HashSet<>();
+    boolean beingSacrificed(UUID id) { return sacrificing.contains(id); }
     private final Map<UUID, Long> lastRefusal = new HashMap<>();
     private BukkitTask task;
 
@@ -134,6 +135,16 @@ final class SacrificeManager implements Listener {
         r.ticksLeft--;
         r.bar.progress(Math.max(0f, (float) r.ticksLeft / ritualTicks));
         if (r.ticksLeft <= 0) complete(r, captor, victim);
+    }
+
+    /** The offering logs out mid-ritual: the fire takes them anyway. True if it did. */
+    boolean completeOnQuit(Player victim) {
+        Ritual r = rituals.get(victim.getUniqueId());
+        if (r == null) return false;
+        Player captor = Bukkit.getPlayer(r.cap.captor);
+        if (captor == null) return false;
+        complete(r, captor, victim);
+        return true;
     }
 
     private void cancel(Ritual r, Player victim) {

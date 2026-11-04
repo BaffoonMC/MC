@@ -26,6 +26,7 @@ final class DeathDrops implements Listener {
     public void onDeath(PlayerDeathEvent e) {
         if (!plugin.getConfig().getBoolean("death.enabled", true)) return;
         Player p = e.getEntity();
+        if (plugin.captures() != null) plugin.captures().unwrap(p);   // hoods and chains drop as the real helmet/chestplate
         e.setKeepInventory(true);
         e.getDrops().clear();
         e.setKeepLevel(true);

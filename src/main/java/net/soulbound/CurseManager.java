@@ -3,6 +3,7 @@ package net.soulbound;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -140,7 +141,22 @@ final class CurseManager implements Listener {
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent e) { showBar(e.getPlayer()); }
+    public void onJoin(PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        int owed = store.data.getInt("curse-pending." + p.getUniqueId(), 0);
+        if (owed > 0) {
+            store.set("curse-pending." + p.getUniqueId(), null); store.save();
+            curse(p, owed);
+            p.sendMessage(Component.text("You failed Moloch and ran. His Curse found you anyway: " + owed + " minutes.", NamedTextColor.DARK_RED, TextDecoration.ITALIC));
+        }
+        showBar(p);
+    }
+
+    /** For someone offline: it lands when they next join. */
+    void curseLater(UUID id, int minutes) {
+        store.set("curse-pending." + id, store.data.getInt("curse-pending." + id, 0) + minutes);
+        store.save();
+    }
 
     /**
      * While Moloch's Curse is on you, keepInventory doesn't save you: die and your things drop like anyone's would.
@@ -150,6 +166,7 @@ final class CurseManager implements Listener {
     public void onDeath(org.bukkit.event.entity.PlayerDeathEvent e) {
         Player p = e.getEntity();
         if (!plugin.getConfig().getBoolean("curse.drops-items", true) || left.getOrDefault(p.getUniqueId(), 0) <= 0 || !e.getKeepInventory()) return;
+        if (plugin.sacrifices() != null && plugin.sacrifices().beingSacrificed(p.getUniqueId())) return;   // the sacrificed keep their things
         e.setKeepInventory(false);   // (anything already dropped, e.g. a pack lost to a player, stays dropped)
         for (org.bukkit.inventory.ItemStack it : p.getInventory().getContents()) {
             if (it == null || it.getType().isAir() || it.containsEnchantment(org.bukkit.enchantments.Enchantment.VANISHING_CURSE)) continue;

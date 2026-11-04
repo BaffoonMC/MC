@@ -257,6 +257,11 @@ final class CaptureManager implements Listener {
         World w = victim.getWorld();
         if (disabledWorlds.contains(w.getName())) return "No captures in this world.";
         if (spawnSafeRadius > 0 && victim.getLocation().distance(w.getSpawnLocation()) < spawnSafeRadius) return "No captures this close to spawn.";
+        if (plugin.safeZones() != null) {
+            String z = plugin.safeZones().zone(victim.getLocation());
+            if (z == null) z = plugin.safeZones().zone(captor.getLocation());
+            if (z != null) return "No captures in " + z + ".";
+        }
         double limit = isDazed(victim) ? maxHealth + 4 : maxHealth;
         if (victim.getHealth() > limit) return victim.getName() + " is too strong. Wear them down to " + hearts(maxHealth) + " first.";
         return null;
@@ -525,9 +530,12 @@ final class CaptureManager implements Listener {
         Player p = e.getPlayer();
         Capture held = byCaptive.get(p.getUniqueId());
         if (held != null) {
+            if (plugin.sacrifices() != null && plugin.sacrifices().completeOnQuit(p)) return;   // logging out doesn't stop the fire
+            Player captor = Bukkit.getPlayer(held.captor);
             end(held, End.QUIT);
             if (killOnLogout && !p.isDead()) {
                 if (broadcast) Bukkit.broadcast(Component.text(p.getName() + " tried to escape by logging out, and paid for it.", NamedTextColor.DARK_RED));
+                if (captor != null) p.setKiller(captor);   // counts as the captor's kill: their things drop
                 p.setHealth(0.0);
             }
             return;
@@ -764,6 +772,9 @@ final class CaptureManager implements Listener {
     }
 
     /** Off comes the sack; back on goes whatever helmet they were wearing. */
+    /** Swap any worn hood/chain wrappers back for the real items (before a death drops them). */
+    void unwrap(Player p) { takeHoodOff(p); }
+
     private void takeHoodOff(Player p) {
         org.bukkit.inventory.ItemStack h = p.getInventory().getHelmet();
         if (items.isWorn(h)) p.getInventory().setHelmet(items.stashOf(h));
