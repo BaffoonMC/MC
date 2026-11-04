@@ -225,6 +225,13 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.wardrobe-yeti-three", true);
             saveConfig();
         }
+        // one-off: the Zombie Bell raises 4 for 2 minutes now
+        if (!getConfig().getBoolean("migrated.bell-4-120", false)) {
+            if (getConfig().getInt("deeper-still.bell-zombies", 3) == 3) getConfig().set("deeper-still.bell-zombies", 4);
+            if (getConfig().getInt("deeper-still.bell-zombie-seconds", 60) == 60) getConfig().set("deeper-still.bell-zombie-seconds", 120);
+            getConfig().set("migrated.bell-4-120", true);
+            saveConfig();
+        }
         // one-off: the broadcast tag reads "BaffoonMC >"
         if ("<gold><bold>BAFFOON</bold></gold> <dark_gray>»</dark_gray> ".equals(getConfig().getString("broadcasts.prefix"))) {
             getConfig().set("broadcasts.prefix", "<gold><bold>BaffoonMC</bold></gold> <dark_gray>></dark_gray> ");

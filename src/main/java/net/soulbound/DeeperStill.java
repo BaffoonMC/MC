@@ -75,6 +75,15 @@ final class DeeperStill implements Listener {
         raised.removeIf(id -> {
             Entity z = Bukkit.getEntity(id);
             if (z == null || !z.isValid()) return true;
+            if (z instanceof Mob m && (m.getTarget() == null || !m.getTarget().isValid() || m.getTarget().isDead())) {
+                UUID o = minionOwner(z);
+                Player owner = o == null ? null : Bukkit.getPlayer(o);
+                if (owner != null && owner.getWorld().equals(z.getWorld())) {
+                    double d2 = owner.getLocation().distanceSquared(z.getLocation());
+                    if (d2 > 40 * 40) m.teleport(owner.getLocation());
+                    else if (d2 > 5 * 5) m.getPathfinder().moveTo(owner, 1.2);
+                }
+            }
             if (awake && plugin.zones() != null && plugin.zones().inTemple(z.getLocation())) {
                 z.getWorld().spawnParticle(Particle.LARGE_SMOKE, z.getLocation().add(0, 1, 0), 14, 0.3, 0.5, 0.3, 0.02);
                 z.getWorld().spawnParticle(Particle.FLAME, z.getLocation().add(0, 0.6, 0), 10, 0.3, 0.4, 0.3, 0.02);
@@ -121,8 +130,9 @@ final class DeeperStill implements Listener {
         m.displayName(Component.text("Zombie Bell", ROT, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
         m.lore(List.of(
                 Component.text("Ring it and the dead get up for you.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                Component.text("Raises " + (int) cfg("bell-zombies", 3) + " zombies for " + (int) cfg("bell-zombie-seconds", 60) + "s. Rests " + (int) (cfg("bell-cooldown-seconds", 300) / 60) + " min after.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false),
-                Component.text("Only for those who went Deeper Still.", NamedTextColor.DARK_PURPLE).decoration(TextDecoration.ITALIC, true)));
+                Component.text("Raises " + (int) cfg("bell-zombies", 4) + " axe-wielding dead for " + (int) cfg("bell-zombie-seconds", 120) + "s. Rests " + (int) (cfg("bell-cooldown-seconds", 300) / 60) + " min after.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false),
+                Component.text("They fight for you. Their bite starves.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false),
+                Component.text("Only for the inhuman who went Deeper Still.", NamedTextColor.DARK_PURPLE).decoration(TextDecoration.ITALIC, true)));
         m.setItemModel(new NamespacedKey("soulbound", "zombie_bell"));
         m.setMaxStackSize(1);
         m.getPersistentDataContainer().set(bellKey, PersistentDataType.BYTE, (byte) 1);
@@ -148,6 +158,11 @@ final class DeeperStill implements Listener {
         Player p = e.getPlayer();
         if (e.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) return;
         if (!is(p)) { p.sendActionBar(Component.text("The bell is silent in your hand.", NamedTextColor.GRAY)); return; }
+        if (plugin.inhuman() == null || !plugin.inhuman().is(p)) {
+            p.sendActionBar(Component.text("The dead won't answer a living heart. Eat the Heart of Darkness.", NamedTextColor.DARK_RED)); return;
+        }
+        ItemMeta held = e.getItem().getItemMeta();
+        if (!java.util.Objects.equals(held.lore(), bell().getItemMeta().lore())) { held.lore(bell().getItemMeta().lore()); e.getItem().setItemMeta(held); }
         if (safeZone(p.getLocation())) { p.sendActionBar(Component.text("The dead won't rise here.", NamedTextColor.GRAY)); return; }
         if (bossNear(p.getLocation())) { p.sendActionBar(Component.text("The dead won't rise against him.", NamedTextColor.GRAY)); return; }
         long now = System.currentTimeMillis(), last = p.getPersistentDataContainer().getOrDefault(bellUsedKey, PersistentDataType.LONG, 0L);
@@ -158,10 +173,17 @@ final class DeeperStill implements Listener {
             return;
         }
         p.getPersistentDataContainer().set(bellUsedKey, PersistentDataType.LONG, now);
-        p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BELL_USE, 1.2f, 0.5f);
-        p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_AMBIENT, 1f, 0.6f);
-        int n = (int) cfg("bell-zombies", 3);
-        int life = (int) cfg("bell-zombie-seconds", 60) * 20;
+        // the bell tolls three times, loud enough for everyone around to hear
+        for (int t = 0; t < 3; t++) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (!p.isOnline()) return;
+                p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BELL_USE, 3f, 0.5f);
+                p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BELL_RESONATE, 1.5f, 0.6f);
+            }, t * 14L);
+        }
+        p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_AMBIENT, 1.5f, 0.6f);
+        int n = (int) cfg("bell-zombies", 4);
+        int life = (int) cfg("bell-zombie-seconds", 120) * 20;
         var rnd = ThreadLocalRandom.current();
         for (int i = 0; i < n; i++) {
             double a = i * Math.PI * 2 / n + rnd.nextDouble() * 0.6;
@@ -176,6 +198,15 @@ final class DeeperStill implements Listener {
                 x.setPersistent(false);
                 x.setCanPickupItems(false);
                 x.getEquipment().clear();
+                // bigger, faster, harder-hitting than the wandering dead, each with an axe
+                x.getEquipment().setItemInMainHand(new ItemStack(Material.IRON_AXE));
+                x.getEquipment().setItemInMainHandDropChance(0f);
+                attr(x, Attribute.SCALE, cfg("bell-zombie-scale", 1.15));
+                attr(x, Attribute.MOVEMENT_SPEED, 0.23 * cfg("bell-zombie-speed", 1.3));
+                attr(x, Attribute.ATTACK_DAMAGE, cfg("bell-zombie-damage", 5));
+                attr(x, Attribute.MAX_HEALTH, cfg("bell-zombie-health", 30));
+                x.setHealth(cfg("bell-zombie-health", 30));
+                attr(x, Attribute.SPAWN_REINFORCEMENTS, 0);
                 x.customName(Component.text(p.getName() + "'s dead", ROT));
                 x.getPersistentDataContainer().set(minionKey, PersistentDataType.STRING, p.getUniqueId().toString());
             });
@@ -189,6 +220,11 @@ final class DeeperStill implements Listener {
             }, life);
         }
         p.sendActionBar(Component.text("The dead get up for you.", ROT));
+    }
+
+    private static void attr(LivingEntity e, Attribute a, double v) {
+        AttributeInstance i = e.getAttribute(a);
+        if (i != null) i.setBaseValue(v);
     }
 
     private UUID minionOwner(Entity e) {
@@ -247,6 +283,19 @@ final class DeeperStill implements Listener {
         if (!(d instanceof Player p) || !(e.getEntity() instanceof LivingEntity v) || minionOwner(v) != null || bossSide(v)) return;
         for (Entity x : p.getNearbyEntities(20, 10, 20))
             if (x instanceof Mob m && p.getUniqueId().equals(minionOwner(x))) m.setTarget(v);
+    }
+
+    /** Their bite starves; and anyone who hurts their master becomes their target. */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBiteOrDefend(EntityDamageByEntityEvent e) {
+        if (minionOwner(e.getDamager()) != null && e.getEntity() instanceof Player v)
+            v.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, (int) (cfg("bell-bite-hunger-seconds", 10) * 20), 1));
+        if (!(e.getEntity() instanceof Player owner)) return;
+        Entity d = e.getDamager();
+        if (d instanceof org.bukkit.entity.Projectile pr && pr.getShooter() instanceof Entity sh) d = sh;
+        if (!(d instanceof LivingEntity att) || att.equals(owner) || minionOwner(att) != null || bossSide(att)) return;
+        for (Entity x : owner.getNearbyEntities(20, 10, 20))
+            if (x instanceof Mob m && owner.getUniqueId().equals(minionOwner(x))) m.setTarget(att);
     }
 
     @EventHandler(ignoreCancelled = true)

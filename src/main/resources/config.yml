@@ -924,7 +924,12 @@ rapture-crossbow:
 deeper-still:
   night-speed-level: 2
   realm-extra-health: 4
-  bell-zombies: 3
-  bell-zombie-seconds: 60
+  bell-zombies: 4                # the bell only rings for the inhuman (they've eaten the Heart of Darkness)
+  bell-zombie-seconds: 120
+  bell-zombie-scale: 1.15
+  bell-zombie-speed: 1.3         # times a normal zombie's speed
+  bell-zombie-damage: 5          # base hit (a normal zombie is 3), plus their iron axe
+  bell-zombie-health: 30
+  bell-bite-hunger-seconds: 10
   bell-cooldown-seconds: 300
   haunt-days: 3
