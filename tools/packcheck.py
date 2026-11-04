@@ -92,6 +92,26 @@ found["dig ore cart"] = (r or "no reply").strip()[-100:]
 r = cmd("execute in minecraft:overworld run data get entity @e[type=minecraft:chest_minecart,limit=1,x=2061.5,y=25,z=2022.5,distance=..3] LootTable", r"(?i)has the following|found no|error|unknown|no entity", 20)
 found["dig ore cart loot"] = (r or "no reply").strip()[-140:]
 
+# End ships: no dragon heads (the plugin swaps them for air as end cities generate)
+heads_total, elytra_total = 0, 0
+for (sx, sz) in [(1500, 1500), (-1500, 1500), (1500, -1500), (-1500, -1500), (2500, 0), (0, 2500)]:
+    r = cmd(f"execute in minecraft:the_end positioned {sx} 80 {sz} run locate structure minecraft:end_city", r"(?i)nearest|could not|unknown|error|invalid", 180)
+    m = re.search(r"\[(-?\d+), ~, (-?\d+)\]", r or "")
+    if not m: found[f"end city near {sx},{sz}"] = (r or "no reply").strip()[-120:]; continue
+    cx, cz = int(m.group(1)), int(m.group(2))
+    cmd(f"execute in minecraft:the_end run forceload add {cx - 80} {cz - 80} {cx + 80} {cz + 80}", r"(?i)chunk|forceload|too many", 300)
+    pump(None, 15)
+    for y in range(30, 200, 4):
+        r = cmd(f"execute in minecraft:the_end run fill {cx - 80} {y} {cz - 50} {cx + 80} {y + 3} {cz + 0} minecraft:dragon_head replace minecraft:dragon_head", r"(?i)filled|no blocks|error|unknown|could not|too many", 10)
+        if r and "Successfully" in r: heads_total += int(re.search(r"filled (\d+)", r).group(1))
+        r = cmd(f"execute in minecraft:the_end run fill {cx - 80} {y} {cz + 1} {cx + 80} {y + 3} {cz + 50} minecraft:dragon_head replace minecraft:dragon_head", r"(?i)filled|no blocks|error|unknown|could not|too many", 10)
+        if r and "Successfully" in r: heads_total += int(re.search(r"filled (\d+)", r).group(1))
+    r = cmd(f"execute in minecraft:the_end positioned {cx} 100 {cz} if entity @e[type=minecraft:item_frame,distance=..150,nbt={{Item:{{id:\"minecraft:elytra\"}}}}]", r"(?i)passed|failed|error|unknown", 20)
+    if r and "passed" in r: elytra_total += int((re.search(r"Count: (\d+)", r) or re.search(r"(1)", "1")).group(1))
+    cmd(f"execute in minecraft:the_end run forceload remove {cx - 80} {cz - 80} {cx + 80} {cz + 80}", None, 5)
+found["end ships with elytra (ships found)"] = str(elytra_total)
+found["dragon heads left on them"] = str(heads_total)
+
 cmd("moloch", None, 5); cmd("sb selftest", r"(?i)selftest", 30)
 cmd("execute in minecraft:the_end run forceload add -64 -64 63 63", r"(?i)chunk|forceload", 300)
 pump(None, 60)
