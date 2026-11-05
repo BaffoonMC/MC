@@ -43,6 +43,7 @@ final class GiantCreaking implements Listener {
     private final Map<UUID, Integer> charge = new HashMap<>();     // creaking -> ticks charged
     private final Map<UUID, UUID> aim = new HashMap<>();           // creaking -> player being charged at
     private final Map<UUID, Long> rest = new HashMap<>();          // creaking -> tick it may fire again
+    private final Map<UUID, Map<UUID, Double>> hurt = new HashMap<>();   // creaking -> player -> damage dealt
     private BukkitTask task;
     private long tick;
 
@@ -212,10 +213,45 @@ final class GiantCreaking implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onBurn(EntityCombustEvent e) { if (is(e.getEntity())) e.setCancelled(true); }
 
+    /** Who hurt it, and how much: arrows, tridents and the like count for whoever fired them. */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onHit(org.bukkit.event.entity.EntityDamageByEntityEvent e) {
+        if (!is(e.getEntity())) return;
+        Player p = e.getDamageSource().getCausingEntity() instanceof Player pl ? pl
+                : e.getDamager() instanceof org.bukkit.entity.Projectile pr && pr.getShooter() instanceof Player pl2 ? pl2 : null;
+        if (p == null) return;
+        hurt.computeIfAbsent(e.getEntity().getUniqueId(), k -> new HashMap<>()).merge(p.getUniqueId(), e.getFinalDamage(), Double::sum);
+    }
+
+    /**
+     * Its fall: every fighter gets XP straight into them (fair in a crowd, no scramble for orbs), a little more bursts out
+     * where it fell, and whoever hurt it most takes Jotun's Crown.
+     */
     @EventHandler
     public void onDeath(EntityDeathEvent e) {
         if (!is(e.getEntity())) return;
         removeEye(e.getEntity());
-        e.getEntity().getWorld().playSound(e.getEntity().getLocation(), Sound.ENTITY_CREAKING_DEATH, 3f, 0.5f);
+        Location at = e.getEntity().getLocation();
+        at.getWorld().playSound(at, Sound.ENTITY_CREAKING_DEATH, 3f, 0.5f);
+        e.getDrops().clear();
+        e.setDroppedExp((int) cfg("xp-burst", 100));
+        Map<UUID, Double> fought = hurt.remove(e.getEntity().getUniqueId());
+        if (fought == null || fought.isEmpty()) return;
+        int each = (int) cfg("xp-each", 600);
+        UUID top = null; double most = -1;
+        for (var en : fought.entrySet()) {
+            Player p = Bukkit.getPlayer(en.getKey());
+            if (p != null && p.isOnline()) { p.giveExp(each); p.sendMessage(Component.text("Jotun falls. You feel wiser for having survived it.", NamedTextColor.GOLD)); }
+            if (en.getValue() > most) { most = en.getValue(); top = en.getKey(); }
+        }
+        Player best = top == null ? null : Bukkit.getPlayer(top);
+        if (plugin.cute() == null) return;
+        org.bukkit.inventory.ItemStack crown = plugin.cute().create(Cute.Kind.JOTUN);
+        if (best != null && best.isOnline()) {
+            for (org.bukkit.inventory.ItemStack left : best.getInventory().addItem(crown).values()) best.getWorld().dropItemNaturally(best.getLocation(), left);
+            Bukkit.broadcast(Component.text(best.getName() + " felled " + name() + " and takes its crown.", NamedTextColor.GOLD));
+        } else {
+            at.getWorld().dropItemNaturally(at, crown);
+        }
     }
 }

@@ -846,6 +846,8 @@ giant-creaking:
   cooldown-seconds: 3    # rest between beams
   beam-damage: 10000
   melee-damage: 12
+  xp-each: 600          # given straight to everyone who hurt it (600 is about level 20 from nothing)
+  xp-burst: 100         # orbs that spill out where it falls
 sleeper:
   skin: ""                     # empty = his own skin from the resource pack; or a player name to wear their skin instead
   forget-seconds: 30           # he forgets how much you've annoyed him after this long
