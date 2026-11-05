@@ -147,6 +147,7 @@ final class QuantumGear implements Listener {
                 Component.text("Past good and evil. Built, not given.", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, true),
                 Component.text("Quantum Humanity", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
         if (t == Tool.PICKAXE) l.add(Component.text("Drills 3x3 through natural stone. Sneak to mine one block.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        if (t == Tool.AXE) l.add(Component.text("Fells a whole natural tree. Sneak to chop one log.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
         return l;
     }
 
@@ -179,6 +180,67 @@ final class QuantumGear implements Listener {
         List<Component> lore = toolLore(t);
         if (!lore.equals(m.lore())) { m.lore(lore); changed = true; }
         if (changed) it.setItemMeta(m);
+    }
+
+    // ---------------------------------------------------------------- the Cleaver: whole trees
+
+    private final java.util.Set<UUID> felling = new java.util.HashSet<>();
+
+    private boolean isCleaver(ItemStack it) {
+        return it != null && it.hasItemMeta()
+                && Tool.AXE.name().equals(it.getItemMeta().getPersistentDataContainer().get(toolKey, PersistentDataType.STRING));
+    }
+
+    private static boolean naturalLeaves(org.bukkit.block.Block b) {
+        return org.bukkit.Tag.LEAVES.isTagged(b.getType()) && b.getBlockData() instanceof org.bukkit.block.data.type.Leaves l && !l.isPersistent();
+    }
+
+    /**
+     * Chop a log of a natural tree with the Quantum Cleaver and the whole tree comes down, from the cut upwards. "Natural"
+     * means its leaves grew there (placed leaves don't count), so log builds are safe; and anything bigger than
+     * quantum.fell.max-logs is left alone (Moloch's titan trees, Heaven's Eden trees). Each log is broken as if you
+     * chopped it: claims and spawn still decide, and each one wears the Cleaver. Sneak to chop just the one.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onFell(org.bukkit.event.block.BlockBreakEvent e) {
+        Player p = e.getPlayer();
+        if (felling.contains(p.getUniqueId()) || p.isSneaking()) return;
+        if (!plugin.getConfig().getBoolean("quantum.fell.enabled", true)) return;
+        if (p.getGameMode() != org.bukkit.GameMode.SURVIVAL && p.getGameMode() != org.bukkit.GameMode.ADVENTURE) return;
+        org.bukkit.block.Block cut = e.getBlock();
+        if (!isCleaver(p.getInventory().getItemInMainHand()) || !org.bukkit.Tag.LOGS.isTagged(cut.getType())) return;
+        int max = plugin.getConfig().getInt("quantum.fell.max-logs", 150);
+        java.util.List<org.bukkit.block.Block> logs = new java.util.ArrayList<>();
+        java.util.Set<org.bukkit.block.Block> seen = new java.util.HashSet<>(java.util.List.of(cut));
+        java.util.ArrayDeque<org.bukkit.block.Block> q = new java.util.ArrayDeque<>(java.util.List.of(cut));
+        java.util.Set<org.bukkit.block.Block> leaves = new java.util.HashSet<>();
+        while (!q.isEmpty()) {
+            org.bukkit.block.Block b = q.poll();
+            for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
+                org.bukkit.block.Block o = b.getRelative(dx, dy, dz);
+                if (o.getY() < cut.getY()) continue;                          // from the cut upwards: the stump stays
+                if (Math.abs(o.getX() - cut.getX()) > 12 || Math.abs(o.getZ() - cut.getZ()) > 12) continue;
+                if (naturalLeaves(o)) { leaves.add(o); continue; }
+                if (!seen.add(o) || !org.bukkit.Tag.LOGS.isTagged(o.getType())) continue;
+                logs.add(o); q.add(o);
+                if (logs.size() > max) return;                                // too big to be an ordinary tree
+            }
+        }
+        if (logs.isEmpty() || leaves.size() < plugin.getConfig().getInt("quantum.fell.min-leaves", 4)) return;   // not a natural tree
+        logs.sort(java.util.Comparator.comparingDouble(b -> b.getLocation().distanceSquared(cut.getLocation())));
+        int perTick = Math.max(1, plugin.getConfig().getInt("quantum.fell.logs-per-tick", 6));
+        cut.getWorld().playSound(cut.getLocation(), org.bukkit.Sound.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR, 0.6f, 0.6f);
+        java.util.Iterator<org.bukkit.block.Block> it = logs.iterator();
+        felling.add(p.getUniqueId());
+        Bukkit.getScheduler().runTaskTimer(plugin, task -> {
+            boolean go = p.isOnline() && isCleaver(p.getInventory().getItemInMainHand());
+            for (int n = 0; go && n < perTick && it.hasNext(); n++) {
+                org.bukkit.block.Block b = it.next();
+                if (org.bukkit.Tag.LOGS.isTagged(b.getType())) p.breakBlock(b);
+                go = isCleaver(p.getInventory().getItemInMainHand());           // it broke, or they let go of it
+            }
+            if (!go || !it.hasNext()) { felling.remove(p.getUniqueId()); task.cancel(); }
+        }, 1L, 1L);
     }
 
     // ---------------------------------------------------------------- the Drill: 3x3

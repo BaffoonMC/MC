@@ -376,6 +376,13 @@ screen-crack:
 # shell: true adds a bulky 3D power-armour shell riding on the wearer (off by default for the sleek suit); nudge the
 # numbers if it sits too high or low, or faces backwards (0 or 180).
 quantum:
+  # The Quantum Cleaver fells a whole natural tree (its own grown leaves; log builds are safe). Bigger than max-logs
+  # is left alone (Moloch's titan trees, Heaven's Eden trees). Sneak to chop one log.
+  fell:
+    enabled: true
+    max-logs: 150
+    min-leaves: 4
+    logs-per-tick: 6
   shell: false
   shell-height: -0.675
   shell-sneak-height: -0.57
