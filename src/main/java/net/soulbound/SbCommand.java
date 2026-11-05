@@ -318,7 +318,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
         if (group == null || group.equals("world")) {
             s.sendMessage(line("/sb world broadcast", "send one of the store/vote announcements now"));
             s.sendMessage(line("/sb world sleeper [remove]", "look at a mannequin (or stand there): a grumpy homeless man asleep"));
-            s.sendMessage(line("/sb world creaking [size|remove]", "a Giant Creaking whose stare charges a beam that kills (size 1-16, default 4)"));
+            s.sendMessage(line("/sb world creaking [size|remove]", "Jotun, the giant Creaking: its stare charges a beam that kills (size 1-16, default 16)"));
             s.sendMessage(line("/sb world welcome", "preview the first-join welcome on yourself"));
             s.sendMessage(line("/sb world wilddrop [radius|off]", "stand in it: anyone who falls in here lands somewhere random in the overworld"));
             s.sendMessage(line("/sb world priest [remove]", "place (or remove) the Blood Priest here"));
@@ -424,7 +424,8 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                         if (a.length > 2 && a[2].equalsIgnoreCase("remove")) { s.sendMessage(ok(plugin.giantCreaking().removeNear(p))); return true; }
                         double size = 0;
                         if (a.length > 2) try { size = Math.max(1, Math.min(16, Double.parseDouble(a[2]))); } catch (NumberFormatException ex) { s.sendMessage("Size must be a number from 1 to 16."); return true; }
-                        s.sendMessage(ok(plugin.giantCreaking().summon(p.getLocation().add(p.getLocation().getDirection().setY(0).normalize().multiply(6)), size)));
+                        double away = 4 + (size > 0 ? size : plugin.getConfig().getDouble("giant-creaking.size", 16)) * 0.6;   // clear of its feet
+                        s.sendMessage(ok(plugin.giantCreaking().summon(p.getLocation().add(p.getLocation().getDirection().setY(0).normalize().multiply(away)), size)));
                     }
                     case "welcome" -> {
                         if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }

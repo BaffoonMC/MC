@@ -834,11 +834,12 @@ account-reset:
     # - "lp user {player} parent set default"  # LuckPerms: back to Newcomer (this also takes away bought ranks!)
 # The Sleeper (/sb world sleeper): a homeless man asleep at spawn. Poke him and he gets grumpier; the 4th time he gets up
 # and shoves you away (no damage), then lies back down.
-# The Giant Creaking (/sb world creaking [size|remove]): it turns to watch the nearest player it can see and charges a
+# Jotun, the Giant Creaking (/sb world creaking [size|remove]): it turns to watch the nearest player it can see and charges a
 # guardian's beam from its eyes. Hold its gaze for charge-seconds and the beam hits for beam-damage (10000 = dead, though
 # a Totem of Undying still saves you). Break its line of sight and the beam fizzles. Fire and lava can't hurt it.
 giant-creaking:
-  size: 4
+  name: Jotun
+  size: 16               # 16 is about 46 blocks tall: summon it somewhere open
   health: 300
   sight: 64              # how far it can see you, in blocks
   charge-seconds: 3

@@ -57,12 +57,12 @@ final class GiantCreaking implements Listener {
     boolean is(Entity e) { return e instanceof Creaking && e.getPersistentDataContainer().has(key, PersistentDataType.BYTE); }
 
     String summon(Location at, double size) {
-        double scale = size > 0 ? size : cfg("size", 4);
+        double scale = size > 0 ? size : cfg("size", 16);
         Creaking c = at.getWorld().spawn(at, Creaking.class, cr -> {
             cr.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
             cr.setPersistent(true);
             cr.setRemoveWhenFarAway(false);
-            cr.customName(Component.text("Giant Creaking", NamedTextColor.GOLD));
+            cr.customName(Component.text(name(), NamedTextColor.GOLD));
             cr.setCustomNameVisible(false);
             set(cr, Attribute.SCALE, scale);
             set(cr, Attribute.MAX_HEALTH, cfg("health", 300));
@@ -71,8 +71,12 @@ final class GiantCreaking implements Listener {
             cr.setHealth(cfg("health", 300));
         });
         ensureEye(c);
-        return "A Giant Creaking (" + scale + "x) stands up. It sees " + (int) cfg("sight", 64) + " blocks.";
+        return name() + " (" + fmt(scale) + "x) stands up. It sees " + (int) cfg("sight", 64) + " blocks.";
     }
+
+    private String name() { return plugin.getConfig().getString("giant-creaking.name", "Jotun"); }
+
+    private static String fmt(double d) { return d == Math.rint(d) ? String.valueOf((long) d) : String.valueOf(d); }
 
     private static void set(org.bukkit.entity.LivingEntity e, Attribute a, double v) {
         AttributeInstance i = e.getAttribute(a);
@@ -81,8 +85,8 @@ final class GiantCreaking implements Listener {
 
     String removeNear(Player p) {
         int n = 0;
-        for (Entity e : p.getNearbyEntities(32, 32, 32)) if (is(e)) { removeEye(e); e.remove(); n++; }
-        return n == 0 ? "No Giant Creaking within 32 blocks." : "Removed " + n + " Giant Creaking" + (n == 1 ? "" : "s") + ".";
+        for (Entity e : p.getNearbyEntities(48, 64, 48)) if (is(e)) { removeEye(e); e.remove(); n++; }
+        return n == 0 ? "No " + name() + " within 48 blocks." : "Removed " + n + " " + name() + (n == 1 ? "" : "s") + ".";
     }
 
     void start() { task = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, 1L); }
