@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * The Blade of Potential ("Twin Worlds"): a greatsword made of two Eggs of Potential fused end to end.
- * Unbreakable, no enchantment shimmer. 9 attack damage (one above netherite), sword speed, one block more reach when
+ * Unbreakable, no enchantment shimmer. 9 attack damage (one above netherite), sword speed, half a block more reach when
  * hitting; takes normal enchantments at
  * an anvil. Its potential is grown at
  * an anvil: blade + a nether star = +1 Sharpness, up to Sharpness X.
@@ -40,7 +40,7 @@ final class PotentialBlade implements Listener {
     static final int STAR_COST = 5;      // levels per nether star
     static final double DAMAGE = 8;      // +1 base = 9 attack damage, one more than netherite: 14.5 at Sharpness X
     static final double SPEED = -2.4;    // a sword's swing
-    static final double REACH = 1.0;     // a greatsword: one block more reach when hitting
+    static final double REACH = 0.5;     // a greatsword: half a block more reach when hitting
 
     private final Soulbound plugin;
     private final NamespacedKey key;
@@ -73,14 +73,16 @@ final class PotentialBlade implements Listener {
         m.addAttributeModifier(Attribute.ENTITY_INTERACTION_RANGE, new AttributeModifier(reachKey(), REACH, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
     }
 
-    /** Blades made before the reach was added get it (and the new description); everything else is kept. */
+    /** Blades made before the reach was added or changed get the current reach (and description); everything else is kept. */
     private void refresh(ItemStack it) {
         if (!is(it)) return;
         ItemMeta m = it.getItemMeta();
         var mods = m.getAttributeModifiers(Attribute.ENTITY_INTERACTION_RANGE);
-        boolean has = false;
-        if (mods != null) for (AttributeModifier am : mods) if (am.getKey().equals(reachKey())) has = true;
-        if (has) return;
+        boolean ok = false;
+        if (mods != null) for (AttributeModifier am : new java.util.ArrayList<>(mods)) if (am.getKey().equals(reachKey())) {
+            if (am.getAmount() == REACH) ok = true; else m.removeAttributeModifier(Attribute.ENTITY_INTERACTION_RANGE, am);
+        }
+        if (ok) return;
         addReach(m);
         lore(m);
         it.setItemMeta(m);
@@ -100,7 +102,7 @@ final class PotentialBlade implements Listener {
         int sharp = m.getEnchantLevel(Enchantment.SHARPNESS);
         m.lore(List.of(
                 Component.text("Two worlds, one edge.", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, true),
-                Component.text("Reaches a block further than a sword.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+                Component.text("Reaches half a block further than a sword.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                 Component.text("Potential: " + sharp + " / " + MAX_SHARPNESS, sharp >= MAX_SHARPNESS ? NamedTextColor.GOLD : NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                 Component.text(sharp >= MAX_SHARPNESS ? "Fulfilled." : "Anvil + a nether star: +1 Sharpness.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false)));
     }
