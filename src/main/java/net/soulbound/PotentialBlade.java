@@ -29,7 +29,8 @@ import java.util.List;
 
 /**
  * The Blade of Potential ("Twin Worlds"): a greatsword made of two Eggs of Potential fused end to end.
- * Unbreakable, no enchantment shimmer. 9 attack damage (one above netherite), sword speed; takes normal enchantments at
+ * Unbreakable, no enchantment shimmer. 9 attack damage (one above netherite), sword speed, one block more reach when
+ * hitting; takes normal enchantments at
  * an anvil. Its potential is grown at
  * an anvil: blade + a nether star = +1 Sharpness, up to Sharpness X.
  * Grindstones won't strip it. Crafted from two dragon eggs (the World Egg), two gold ingots and a stick.
@@ -39,6 +40,7 @@ final class PotentialBlade implements Listener {
     static final int STAR_COST = 5;      // levels per nether star
     static final double DAMAGE = 8;      // +1 base = 9 attack damage, one more than netherite: 14.5 at Sharpness X
     static final double SPEED = -2.4;    // a sword's swing
+    static final double REACH = 1.0;     // a greatsword: one block more reach when hitting
 
     private final Soulbound plugin;
     private final NamespacedKey key;
@@ -56,6 +58,7 @@ final class PotentialBlade implements Listener {
         // setting any modifier replaces the netherite defaults, so damage and speed are given in full
         m.addAttributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(new NamespacedKey(plugin, "potential_blade_damage"), DAMAGE, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
         m.addAttributeModifier(Attribute.ATTACK_SPEED, new AttributeModifier(new NamespacedKey(plugin, "potential_blade_speed"), SPEED, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
+        addReach(m);
         m.setEnchantmentGlintOverride(false);
         m.setUnbreakable(true);
         m.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
@@ -64,10 +67,40 @@ final class PotentialBlade implements Listener {
         return it;
     }
 
+    private NamespacedKey reachKey() { return new NamespacedKey(plugin, "potential_blade_reach"); }
+
+    private void addReach(ItemMeta m) {
+        m.addAttributeModifier(Attribute.ENTITY_INTERACTION_RANGE, new AttributeModifier(reachKey(), REACH, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
+    }
+
+    /** Blades made before the reach was added get it (and the new description); everything else is kept. */
+    private void refresh(ItemStack it) {
+        if (!is(it)) return;
+        ItemMeta m = it.getItemMeta();
+        var mods = m.getAttributeModifiers(Attribute.ENTITY_INTERACTION_RANGE);
+        boolean has = false;
+        if (mods != null) for (AttributeModifier am : mods) if (am.getKey().equals(reachKey())) has = true;
+        if (has) return;
+        addReach(m);
+        lore(m);
+        it.setItemMeta(m);
+    }
+
+    @EventHandler
+    public void onJoinRefresh(org.bukkit.event.player.PlayerJoinEvent e) {
+        for (ItemStack it : e.getPlayer().getInventory().getContents()) refresh(it);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onHeldRefresh(org.bukkit.event.player.PlayerItemHeldEvent e) {
+        refresh(e.getPlayer().getInventory().getItem(e.getNewSlot()));
+    }
+
     private void lore(ItemMeta m) {
         int sharp = m.getEnchantLevel(Enchantment.SHARPNESS);
         m.lore(List.of(
                 Component.text("Two worlds, one edge.", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, true),
+                Component.text("Reaches a block further than a sword.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                 Component.text("Potential: " + sharp + " / " + MAX_SHARPNESS, sharp >= MAX_SHARPNESS ? NamedTextColor.GOLD : NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                 Component.text(sharp >= MAX_SHARPNESS ? "Fulfilled." : "Anvil + a nether star: +1 Sharpness.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false)));
     }
