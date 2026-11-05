@@ -72,7 +72,7 @@ final class QuantumGear implements Listener {
     /** The tools: netherite fused with a Quantum Core and a netherite ingot. Harder-hitting, faster, longer-lived. */
     enum Tool {
         SWORD(Material.NETHERITE_SWORD, "Quantum Blade", 9, -2.4, 0),
-        PICKAXE(Material.NETHERITE_PICKAXE, "Quantum Drill", 6, -2.8, 10),
+        PICKAXE(Material.NETHERITE_PICKAXE, "Quantum Drill", 6, -2.8, 0),    // netherite speed; its gift is the 3x3
         AXE(Material.NETHERITE_AXE, "Quantum Cleaver", 11, -3.0, 10),
         SHOVEL(Material.NETHERITE_SHOVEL, "Quantum Spade", 6.5, -3.0, 10),
         HOE(Material.NETHERITE_HOE, "Quantum Reaper", 1, 0, 10);
@@ -129,9 +129,7 @@ final class QuantumGear implements Listener {
         ItemMeta m = it.getItemMeta();
         String id = "quantum_" + t.name().toLowerCase(Locale.ROOT);
         m.displayName(Component.text(t.title, NamedTextColor.DARK_AQUA, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
-        m.lore(List.of(
-                Component.text("Past good and evil. Built, not given.", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, true),
-                Component.text("Quantum Humanity", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
+        m.lore(toolLore(t));
         m.setItemModel(new NamespacedKey("soulbound", id));
         // setting any modifier replaces the netherite defaults, so damage and speed are given in full
         m.addAttributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(new NamespacedKey(plugin, id + "_damage"), t.damage, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
@@ -144,7 +142,18 @@ final class QuantumGear implements Listener {
         return it;
     }
 
-    /** Tools made before a change to their swing speed are brought up to date (enchantments, name and wear are kept). */
+    private static List<Component> toolLore(Tool t) {
+        List<Component> l = new java.util.ArrayList<>(List.of(
+                Component.text("Past good and evil. Built, not given.", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, true),
+                Component.text("Quantum Humanity", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
+        if (t == Tool.PICKAXE) l.add(Component.text("Drills 3x3 through natural stone. Sneak to mine one block.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        return l;
+    }
+
+    /**
+     * Tools made before a change are brought up to date (enchantments, name and wear are kept): swing speed, mining
+     * speed (the Drill lost its extra speed when it learned to drill 3x3) and the description.
+     */
     private void refreshSpeed(ItemStack it) {
         if (it == null || !it.hasItemMeta()) return;
         ItemMeta m = it.getItemMeta();
@@ -152,12 +161,79 @@ final class QuantumGear implements Listener {
         if (name == null) return;
         Tool t;
         try { t = Tool.valueOf(name); } catch (IllegalArgumentException ex) { return; }
-        NamespacedKey k = new NamespacedKey(plugin, "quantum_" + t.name().toLowerCase(Locale.ROOT) + "_speed");
+        boolean changed = false;
+        String id = "quantum_" + t.name().toLowerCase(Locale.ROOT);
+        NamespacedKey k = new NamespacedKey(plugin, id + "_speed");
         var mods = m.getAttributeModifiers(Attribute.ATTACK_SPEED);
-        if (mods != null) for (AttributeModifier am : mods) if (am.getKey().equals(k) && am.getAmount() == t.speed) return;
-        if (mods != null) for (AttributeModifier am : new java.util.ArrayList<>(mods)) if (am.getKey().equals(k)) m.removeAttributeModifier(Attribute.ATTACK_SPEED, am);
-        m.addAttributeModifier(Attribute.ATTACK_SPEED, new AttributeModifier(k, t.speed, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
-        it.setItemMeta(m);
+        boolean speedOk = false;
+        if (mods != null) for (AttributeModifier am : mods) if (am.getKey().equals(k) && am.getAmount() == t.speed) speedOk = true;
+        if (!speedOk) {
+            if (mods != null) for (AttributeModifier am : new java.util.ArrayList<>(mods)) if (am.getKey().equals(k)) m.removeAttributeModifier(Attribute.ATTACK_SPEED, am);
+            m.addAttributeModifier(Attribute.ATTACK_SPEED, new AttributeModifier(k, t.speed, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
+            changed = true;
+        }
+        NamespacedKey ek = new NamespacedKey(plugin, id + "_efficiency");
+        var eff = m.getAttributeModifiers(Attribute.MINING_EFFICIENCY);
+        if (t.efficiency <= 0 && eff != null) for (AttributeModifier am : new java.util.ArrayList<>(eff))
+            if (am.getKey().equals(ek)) { m.removeAttributeModifier(Attribute.MINING_EFFICIENCY, am); changed = true; }
+        List<Component> lore = toolLore(t);
+        if (!lore.equals(m.lore())) { m.lore(lore); changed = true; }
+        if (changed) it.setItemMeta(m);
+    }
+
+    // ---------------------------------------------------------------- the Drill: 3x3
+
+    private final java.util.Set<UUID> drilling = new java.util.HashSet<>();
+
+    /** Natural rock the Drill bores through in a 3x3 (anything built, and anything that isn't rock, is left alone). */
+    private static boolean drillable(Material m) {
+        if (m.name().endsWith("_ORE") || m == Material.ANCIENT_DEBRIS) return true;
+        return switch (m.name()) {
+            case "STONE", "DEEPSLATE", "TUFF", "ANDESITE", "DIORITE", "GRANITE", "CALCITE", "DRIPSTONE_BLOCK",
+                 "NETHERRACK", "BASALT", "SMOOTH_BASALT", "BLACKSTONE", "END_STONE", "MAGMA_BLOCK",
+                 "SULFUR", "CINNABAR", "AMETHYST_BLOCK" -> true;
+            default -> false;
+        };
+    }
+
+    private boolean isDrill(ItemStack it) {
+        return it != null && it.hasItemMeta()
+                && Tool.PICKAXE.name().equals(it.getItemMeta().getPersistentDataContainer().get(toolKey, PersistentDataType.STRING));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onDrill(org.bukkit.event.block.BlockBreakEvent e) {
+        Player p = e.getPlayer();
+        if (drilling.contains(p.getUniqueId()) || p.isSneaking()) return;
+        if (p.getGameMode() != org.bukkit.GameMode.SURVIVAL && p.getGameMode() != org.bukkit.GameMode.ADVENTURE) return;
+        ItemStack hand = p.getInventory().getItemInMainHand();
+        if (!isDrill(hand) || !drillable(e.getBlock().getType())) return;
+        org.bukkit.block.BlockFace face = p.getTargetBlockFace(6);
+        if (face == null) face = Math.abs(p.getLocation().getPitch()) > 50 ? org.bukkit.block.BlockFace.UP : p.getFacing();
+        org.bukkit.block.Block c = e.getBlock();
+        java.util.List<org.bukkit.block.Block> ring = new java.util.ArrayList<>(8);
+        for (int a = -1; a <= 1; a++) for (int b = -1; b <= 1; b++) {
+            if (a == 0 && b == 0) continue;
+            org.bukkit.block.Block o = switch (face) {
+                case UP, DOWN -> c.getRelative(a, 0, b);
+                case NORTH, SOUTH -> c.getRelative(a, b, 0);
+                default -> c.getRelative(0, a, b);
+            };
+            if (drillable(o.getType())) ring.add(o);
+        }
+        if (ring.isEmpty()) return;
+        // after this break lands: each extra block is broken as if the player mined it, so claims, spawn and the realms
+        // still decide (they see a normal break), Fortune and Silk Touch apply, and each one wears the Drill
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!p.isOnline() || !isDrill(p.getInventory().getItemInMainHand())) return;
+            drilling.add(p.getUniqueId());
+            try {
+                for (org.bukkit.block.Block o : ring) {
+                    if (!isDrill(p.getInventory().getItemInMainHand())) break;         // it broke
+                    if (drillable(o.getType())) p.breakBlock(o);
+                }
+            } finally { drilling.remove(p.getUniqueId()); }
+        });
     }
 
     @EventHandler
