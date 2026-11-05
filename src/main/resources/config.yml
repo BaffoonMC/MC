@@ -834,6 +834,17 @@ account-reset:
     # - "lp user {player} parent set default"  # LuckPerms: back to Newcomer (this also takes away bought ranks!)
 # The Sleeper (/sb world sleeper): a homeless man asleep at spawn. Poke him and he gets grumpier; the 4th time he gets up
 # and shoves you away (no damage), then lies back down.
+# The Giant Creaking (/sb world creaking [size|remove]): it turns to watch the nearest player it can see and charges a
+# guardian's beam from its eyes. Hold its gaze for charge-seconds and the beam hits for beam-damage (10000 = dead, though
+# a Totem of Undying still saves you). Break its line of sight and the beam fizzles. Fire and lava can't hurt it.
+giant-creaking:
+  size: 4
+  health: 300
+  sight: 64              # how far it can see you, in blocks
+  charge-seconds: 3
+  cooldown-seconds: 3    # rest between beams
+  beam-damage: 10000
+  melee-damage: 12
 sleeper:
   skin: ""                     # empty = his own skin from the resource pack; or a player name to wear their skin instead
   forget-seconds: 30           # he forgets how much you've annoyed him after this long

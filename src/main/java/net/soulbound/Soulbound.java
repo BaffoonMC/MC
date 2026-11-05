@@ -39,6 +39,7 @@ public final class Soulbound extends JavaPlugin {
     private VoteShop voteShop;
     private AccountReset accountReset;
     private Sleeper sleeper;
+    private GiantCreaking giantCreaking;
     private SafeZones safeZones;
     private Broadcasts broadcasts;
     private CombatLog combatLog;
@@ -455,6 +456,9 @@ public final class Soulbound extends JavaPlugin {
         sleeper = new Sleeper(this);
         pm.registerEvents(sleeper, this);
         sleeper.start();
+        giantCreaking = new GiantCreaking(this);
+        pm.registerEvents(giantCreaking, this);
+        giantCreaking.start();
         if (getCommand("voteshop") != null) { getCommand("voteshop").setExecutor(voteShop); getCommand("voteshop").setTabCompleter(voteShop); }
         festering = new FesteringFlesh(this);
         pm.registerEvents(festering, this);
@@ -575,6 +579,7 @@ public final class Soulbound extends JavaPlugin {
     public void onDisable() {
         if (brimstone != null) brimstone.stop();
         if (combatLog != null) combatLog.stop();
+        if (giantCreaking != null) giantCreaking.stop();
         if (sacrifices != null) sacrifices.stop();
         if (bloodEmeralds != null) bloodEmeralds.stop();
         if (tumourCrop != null) tumourCrop.stop();
@@ -630,6 +635,7 @@ public final class Soulbound extends JavaPlugin {
     VoteShop voteShop() { return voteShop; }
     AccountReset accountReset() { return accountReset; }
     Sleeper sleeper() { return sleeper; }
+    GiantCreaking giantCreaking() { return giantCreaking; }
     SafeZones safeZones() { return safeZones; }
     Broadcasts broadcasts() { return broadcasts; }
     CombatLog combatLog() { return combatLog; }

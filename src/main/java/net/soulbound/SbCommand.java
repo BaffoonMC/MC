@@ -318,6 +318,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
         if (group == null || group.equals("world")) {
             s.sendMessage(line("/sb world broadcast", "send one of the store/vote announcements now"));
             s.sendMessage(line("/sb world sleeper [remove]", "look at a mannequin (or stand there): a grumpy homeless man asleep"));
+            s.sendMessage(line("/sb world creaking [size|remove]", "a Giant Creaking whose stare charges a beam that kills (size 1-16, default 4)"));
             s.sendMessage(line("/sb world welcome", "preview the first-join welcome on yourself"));
             s.sendMessage(line("/sb world wilddrop [radius|off]", "stand in it: anyone who falls in here lands somewhere random in the overworld"));
             s.sendMessage(line("/sb world priest [remove]", "place (or remove) the Blood Priest here"));
@@ -417,6 +418,13 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                         if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
                         boolean remove = a.length > 2 && a[2].equalsIgnoreCase("remove");
                         s.sendMessage(ok(remove ? plugin.sleeper().removeNear(p) : plugin.sleeper().set(p)));
+                    }
+                    case "creaking" -> {
+                        if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
+                        if (a.length > 2 && a[2].equalsIgnoreCase("remove")) { s.sendMessage(ok(plugin.giantCreaking().removeNear(p))); return true; }
+                        double size = 0;
+                        if (a.length > 2) try { size = Math.max(1, Math.min(16, Double.parseDouble(a[2]))); } catch (NumberFormatException ex) { s.sendMessage("Size must be a number from 1 to 16."); return true; }
+                        s.sendMessage(ok(plugin.giantCreaking().summon(p.getLocation().add(p.getLocation().getDirection().setY(0).normalize().multiply(6)), size)));
                     }
                     case "welcome" -> {
                         if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
@@ -546,7 +554,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             }
             case "god" -> { if (a.length == 2) return filter(List.of("test", "heaven"), a[1]); }
             case "world" -> {
-                if (a.length == 2) return filter(List.of("priest", "peacekeeper", "gate", "temple", "setarrival", "zephyr", "brimstone", "wilddrop", "welcome", "sleeper", "broadcast"), a[1]);
+                if (a.length == 2) return filter(List.of("priest", "peacekeeper", "gate", "temple", "setarrival", "zephyr", "brimstone", "wilddrop", "welcome", "sleeper", "creaking", "broadcast"), a[1]);
                 if (a.length == 3 && a[1].equalsIgnoreCase("wilddrop")) return filter(List.of("2", "3", "off"), a[2]);
                 if (a.length == 3 && (a[1].equalsIgnoreCase("priest") || a[1].equalsIgnoreCase("peacekeeper"))) return filter(List.of("remove"), a[2]);
                 if (a.length == 3 && a[1].equalsIgnoreCase("gate")) return filter(List.of("here"), a[2]);
