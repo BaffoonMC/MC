@@ -24,6 +24,9 @@ import org.bukkit.inventory.ItemStack;
  * The World Egg that appears on God's island after each of His defeats: the first player to touch it (a click or a hit,
  * either hand) takes it straight into their inventory instead of watching it teleport away, the server hears about it,
  * and they earn "Atlas". Only on God's island; an egg someone has set down elsewhere behaves as usual.
+ *
+ * Every defeat, not just the first: the game only lays the egg the first time the dragon (God's mount) dies. When He
+ * falls again after a revival, the egg is laid here instead, on top of the exit portal, once the death is over.
  */
 final class WorldEgg implements Listener {
     private final Soulbound plugin;
@@ -51,6 +54,40 @@ final class WorldEgg implements Listener {
         if (!godsEgg(e.getBlock())) return;
         e.setCancelled(true);
         take(e.getPlayer(), e.getBlock());
+    }
+
+    @EventHandler
+    public void onGodFalls(org.bukkit.event.entity.EntityDeathEvent e) {
+        if (!(e.getEntity() instanceof org.bukkit.entity.EnderDragon d) || d.getWorld().getEnvironment() != World.Environment.THE_END) return;
+        if (!plugin.getConfig().getBoolean("world-egg.every-defeat", true)) return;
+        World w = d.getWorld();
+        org.bukkit.boss.DragonBattle battle = w.getEnderDragonBattle();
+        if (battle == null || !battle.hasBeenPreviouslyKilled()) return;   // the first time, the game lays it itself
+        // the dying takes ten seconds and the portal is built at the end of it: then lay the egg on top (checked for a
+        // while in case the portal is slow to appear)
+        final boolean[] done = {false};   // once per fall: laid, or found already there
+        for (int k = 0; k <= 10; k++) {
+            final boolean last = k == 10;
+            Bukkit.getScheduler().runTaskLater(plugin, () -> { if (!done[0]) done[0] = layEgg(w, last); }, 215L + k * 20L);
+        }
+    }
+
+    /** True when this fall's egg is settled (laid now, or one is already on the portal); false to try again shortly. */
+    private boolean layEgg(World w, boolean last) {
+        org.bukkit.boss.DragonBattle battle = w.getEnderDragonBattle();
+        org.bukkit.Location portal = battle != null ? battle.getEndPortalLocation() : null;
+        int x = portal != null ? portal.getBlockX() : 0, z = portal != null ? portal.getBlockZ() : 0;
+        // already there (laid, or someone's holding it from this fall)? then nothing to do
+        for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++)
+            for (int y = w.getMinHeight(); y < w.getMaxHeight(); y++) if (w.getBlockAt(x + dx, y, z + dz).getType() == Material.DRAGON_EGG) return true;
+        Block top = w.getHighestBlockAt(x, z, org.bukkit.HeightMap.MOTION_BLOCKING);
+        if (top.getType() != Material.BEDROCK && !last) return false;   // the portal isn't built yet
+        Block egg = top.getRelative(org.bukkit.block.BlockFace.UP);
+        if (!egg.getType().isAir()) return true;
+        egg.setType(Material.DRAGON_EGG, false);
+        w.spawnParticle(Particle.END_ROD, egg.getLocation().add(0.5, 0.5, 0.5), 40, 0.3, 0.5, 0.3, 0.05);
+        plugin.getLogger().info("Laid the World Egg on the exit portal at " + x + " " + egg.getY() + " " + z + ".");
+        return true;
     }
 
     private void take(Player p, Block b) {

@@ -711,6 +711,7 @@ roads:
 # inventory (and earns Atlas), instead of it teleporting away. Only within this many blocks of the End's centre.
 world-egg:
   radius: 40
+  every-defeat: true   # the game only lays it the first time; this lays one on the exit portal every time God falls
 
 # The Peacekeeper: a great still vex by the Pearly Gates (/sb world peacekeeper). He sells the Breath of Eden, the
 # Angel Engine (which the inhuman can only get as a gift: they can't come up to Heaven), Levitation and gate frames.
