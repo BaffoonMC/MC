@@ -74,7 +74,7 @@ final class QuantumGear implements Listener {
         SWORD(Material.NETHERITE_SWORD, "Quantum Blade", 9, -2.4, 0),
         PICKAXE(Material.NETHERITE_PICKAXE, "Quantum Drill", 6, -2.8, 0),    // netherite speed; its gift is the 3x3
         AXE(Material.NETHERITE_AXE, "Quantum Cleaver", 11, -3.0, 10),
-        SHOVEL(Material.NETHERITE_SHOVEL, "Quantum Spade", 6.5, -3.0, 10),
+        SHOVEL(Material.NETHERITE_SHOVEL, "Quantum Spade", 6.5, -3.0, 0),    // netherite speed; it digs 3x3
         HOE(Material.NETHERITE_HOE, "Quantum Reaper", 1, 0, 10);
         final Material base; final String title; final double damage, speed, efficiency;
         Tool(Material base, String title, double damage, double speed, double efficiency) {
@@ -147,6 +147,7 @@ final class QuantumGear implements Listener {
                 Component.text("Past good and evil. Built, not given.", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, true),
                 Component.text("Quantum Humanity", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
         if (t == Tool.PICKAXE) l.add(Component.text("Drills 3x3 through natural stone. Sneak to mine one block.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        if (t == Tool.SHOVEL) l.add(Component.text("Digs 3x3 through natural ground. Sneak to dig one block.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
         if (t == Tool.AXE) l.add(Component.text("Fells a whole natural tree. Sneak to chop one log.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
         return l;
     }
@@ -222,6 +223,7 @@ final class QuantumGear implements Listener {
                 if (Math.abs(o.getX() - cut.getX()) > 12 || Math.abs(o.getZ() - cut.getZ()) > 12) continue;
                 if (naturalLeaves(o)) { leaves.add(o); continue; }
                 if (!seen.add(o) || !org.bukkit.Tag.LOGS.isTagged(o.getType())) continue;
+                if (!sameClaim(cut, o)) continue;                             // never into a claim
                 logs.add(o); q.add(o);
                 if (logs.size() > max) return;                                // too big to be an ordinary tree
             }
@@ -247,6 +249,24 @@ final class QuantumGear implements Listener {
 
     private final java.util.Set<UUID> drilling = new java.util.HashSet<>();
 
+    /** Natural ground the Spade digs through in a 3x3 (farmland, paths and suspicious sand/gravel are left alone). */
+    private static boolean diggable(Material m) {
+        return switch (m.name()) {
+            case "DIRT", "GRASS_BLOCK", "COARSE_DIRT", "ROOTED_DIRT", "PODZOL", "MYCELIUM", "SAND", "RED_SAND", "GRAVEL",
+                 "CLAY", "SOUL_SAND", "SOUL_SOIL", "MUD", "SNOW_BLOCK", "SNOW", "POWDER_SNOW", "MUDDY_MANGROVE_ROOTS" -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * The 3x3 (and the Cleaver's tree) never reaches into a claim: an extra block only goes if it's in the same claim as
+     * the block you actually broke (or both are unclaimed). Each extra break is also checked like a normal one.
+     */
+    private boolean sameClaim(org.bukkit.block.Block a, org.bukkit.block.Block b) {
+        if (plugin.safeZones() == null) return true;
+        return plugin.safeZones().claimAt(a.getLocation()) == plugin.safeZones().claimAt(b.getLocation());
+    }
+
     /** Natural rock the Drill bores through in a 3x3 (anything built, and anything that isn't rock, is left alone). */
     private static boolean drillable(Material m) {
         if (m.name().endsWith("_ORE") || m == Material.ANCIENT_DEBRIS) return true;
@@ -258,9 +278,11 @@ final class QuantumGear implements Listener {
         };
     }
 
-    private boolean isDrill(ItemStack it) {
+    private boolean isDrill(ItemStack it) { return toolIs(it, Tool.PICKAXE); }
+
+    private boolean toolIs(ItemStack it, Tool t) {
         return it != null && it.hasItemMeta()
-                && Tool.PICKAXE.name().equals(it.getItemMeta().getPersistentDataContainer().get(toolKey, PersistentDataType.STRING));
+                && t.name().equals(it.getItemMeta().getPersistentDataContainer().get(toolKey, PersistentDataType.STRING));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -269,7 +291,10 @@ final class QuantumGear implements Listener {
         if (drilling.contains(p.getUniqueId()) || p.isSneaking()) return;
         if (p.getGameMode() != org.bukkit.GameMode.SURVIVAL && p.getGameMode() != org.bukkit.GameMode.ADVENTURE) return;
         ItemStack hand = p.getInventory().getItemInMainHand();
-        if (!isDrill(hand) || !drillable(e.getBlock().getType())) return;
+        Tool tool = toolIs(hand, Tool.PICKAXE) ? Tool.PICKAXE : toolIs(hand, Tool.SHOVEL) ? Tool.SHOVEL : null;
+        if (tool == null) return;
+        java.util.function.Predicate<Material> takes = tool == Tool.PICKAXE ? QuantumGear::drillable : QuantumGear::diggable;
+        if (!takes.test(e.getBlock().getType())) return;
         org.bukkit.block.BlockFace face = p.getTargetBlockFace(6);
         if (face == null) face = Math.abs(p.getLocation().getPitch()) > 50 ? org.bukkit.block.BlockFace.UP : p.getFacing();
         org.bukkit.block.Block c = e.getBlock();
@@ -281,18 +306,18 @@ final class QuantumGear implements Listener {
                 case NORTH, SOUTH -> c.getRelative(a, b, 0);
                 default -> c.getRelative(0, a, b);
             };
-            if (drillable(o.getType())) ring.add(o);
+            if (takes.test(o.getType()) && sameClaim(c, o)) ring.add(o);
         }
         if (ring.isEmpty()) return;
         // after this break lands: each extra block is broken as if the player mined it, so claims, spawn and the realms
         // still decide (they see a normal break), Fortune and Silk Touch apply, and each one wears the Drill
         Bukkit.getScheduler().runTask(plugin, () -> {
-            if (!p.isOnline() || !isDrill(p.getInventory().getItemInMainHand())) return;
+            if (!p.isOnline() || !toolIs(p.getInventory().getItemInMainHand(), tool)) return;
             drilling.add(p.getUniqueId());
             try {
                 for (org.bukkit.block.Block o : ring) {
-                    if (!isDrill(p.getInventory().getItemInMainHand())) break;         // it broke
-                    if (drillable(o.getType())) p.breakBlock(o);
+                    if (!toolIs(p.getInventory().getItemInMainHand(), tool)) break;    // it broke
+                    if (takes.test(o.getType()) && sameClaim(c, o)) p.breakBlock(o);
                 }
             } finally { drilling.remove(p.getUniqueId()); }
         });

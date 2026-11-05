@@ -34,12 +34,15 @@ final class SafeZones implements Listener {
     // ---------------------------------------------------------------- GriefPrevention, found by name
     private Object dataStore; private java.lang.reflect.Method getClaimAt; private boolean gpTried;
 
-    private boolean inClaim(Location l) {
+    private boolean inClaim(Location l) { return claimAt(l) != null; }
+
+    /** The GriefPrevention claim at this spot (the same object for every spot in one claim), or null. */
+    Object claimAt(Location l) {
         if (dataStore == null) {
-            if (gpTried) return false;
+            if (gpTried) return null;
             gpTried = true;
             org.bukkit.plugin.Plugin gp = plugin.getServer().getPluginManager().getPlugin("GriefPrevention");
-            if (gp == null || !gp.isEnabled()) return false;
+            if (gp == null || !gp.isEnabled()) return null;
             try {
                 Class<?> claimC = Class.forName("me.ryanhamshire.GriefPrevention.Claim", true, gp.getClass().getClassLoader());
                 Object store = gp.getClass().getField("dataStore").get(gp);
@@ -47,11 +50,11 @@ final class SafeZones implements Listener {
                 dataStore = store;
             } catch (ReflectiveOperationException | RuntimeException ex) {
                 plugin.getLogger().warning("No-PvP in claims: couldn't read GriefPrevention claims (" + ex + ").");
-                return false;
+                return null;
             }
         }
-        try { return getClaimAt.invoke(dataStore, l, true, null) != null; }
-        catch (ReflectiveOperationException | RuntimeException ex) { return false; }
+        try { return getClaimAt.invoke(dataStore, l, true, null); }
+        catch (ReflectiveOperationException | RuntimeException ex) { return null; }
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
