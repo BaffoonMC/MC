@@ -83,12 +83,20 @@ final class Sleeper implements Listener {
     /** Make sure he has a hitbox over his body you can click. */
     private void ensureHitbox(Mannequin m) {
         String s = m.getPersistentDataContainer().get(hitboxKey, PersistentDataType.STRING);
-        if (s != null) try { if (Bukkit.getEntity(UUID.fromString(s)) instanceof org.bukkit.entity.Interaction i && i.isValid()) return; } catch (IllegalArgumentException ignored) {}
-        Location at = m.getLocation().clone(); at.setPitch(0);
+        boolean lying = !up.contains(m.getUniqueId());
+        if (s != null) try {
+            if (Bukkit.getEntity(UUID.fromString(s)) instanceof org.bukkit.entity.Interaction i && i.isValid()) {
+                // keep the click box over his body, not his feet (older ones sat on his feet)
+                Location want = middle(m, 0.9).add(0, -0.05, 0);
+                if (lying && i.getLocation().distanceSquared(want) > 0.04) { placing = true; try { i.teleport(want); } finally { placing = false; } }
+                return;
+            }
+        } catch (IllegalArgumentException ignored) {}
+        Location at = (lying ? middle(m, 0.9) : m.getLocation().clone()); at.setPitch(0);
         placing = true;
         try {
             org.bukkit.entity.Interaction box = m.getWorld().spawn(at.add(0, -0.05, 0), org.bukkit.entity.Interaction.class, i -> {
-                i.setInteractionWidth(2.6f);
+                i.setInteractionWidth(2.2f);
                 i.setInteractionHeight(0.75f);
                 i.setResponsive(true);
                 i.setPersistent(true);
@@ -253,12 +261,22 @@ final class Sleeper implements Listener {
 
     // ---------------------------------------------------------------- talking and snoring
 
+    /**
+     * A point along his body while he lies down. A sleeping body is drawn from his feet (his position) towards his head,
+     * and with no bed the head points along (-cos, sin) of his body yaw: 0.9 is his middle, 1.6 his head.
+     */
+    private Location middle(Mannequin m, double along) {
+        along *= plugin.getConfig().getDouble("sleeper.body-direction", 1.0);   // -1 if it ever lands past his feet
+        double a = Math.toRadians(m.getBodyYaw());
+        return m.getLocation().clone().add(-Math.cos(a) * along, 0, Math.sin(a) * along);
+    }
+
     private static String pick(List<String> l) { return l.get(ThreadLocalRandom.current().nextInt(l.size())); }
 
     private void say(Mannequin m, String line, Sound sound, float pitch) {
         clearBubble(m.getUniqueId());
         boolean lying = !up.contains(m.getUniqueId());
-        Location at = m.getLocation().add(0, lying ? 0.9 : 2.25, 0);
+        Location at = lying ? middle(m, 0.9).add(0, 0.9, 0) : m.getLocation().add(0, 2.25, 0);
         TextDisplay d = m.getWorld().spawn(at, TextDisplay.class, t -> {
             t.text(Component.text(line, SPEECH));
             t.setBillboard(Display.Billboard.CENTER);
@@ -288,7 +306,7 @@ final class Sleeper implements Listener {
                 if (up.contains(m.getUniqueId())) continue;
                 if (m.getLocation().getNearbyPlayers(10).isEmpty()) continue;
                 w.playSound(m.getLocation(), Sound.ENTITY_FOX_SLEEP, 0.7f, 0.55f);
-                w.spawnParticle(Particle.WHITE_ASH, m.getLocation().add(0, 0.6, 0), 4, 0.2, 0.1, 0.2, 0);
+                w.spawnParticle(Particle.WHITE_ASH, middle(m, 1.6).add(0, 0.5, 0), 4, 0.2, 0.1, 0.2, 0);
             }
         }
         long now = System.currentTimeMillis();
