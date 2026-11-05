@@ -848,6 +848,17 @@ giant-creaking:
   melee-damage: 12
   xp-each: 600          # given straight to everyone who hurt it (600 is about level 20 from nothing)
   xp-burst: 100         # orbs that spill out where it falls
+  # Wild Jotuns walk the last stretch of Moloch's realm, just before The Wall (from/to = blocks from the temple; The Wall
+  # starts at about 6,830). Every check-seconds, each player out there has this chance of one rising about distance
+  # blocks away, unless one is already near them or max are about. Wild ones vanish when nobody's near.
+  wild:
+    enabled: true
+    from: 6300
+    to: 6800
+    check-seconds: 30
+    chance: 0.15
+    distance: 90
+    max: 3
 sleeper:
   skin: ""                     # empty = his own skin from the resource pack; or a player name to wear their skin instead
   forget-seconds: 30           # he forgets how much you've annoyed him after this long

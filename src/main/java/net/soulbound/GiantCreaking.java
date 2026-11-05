@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.damage.DamageSource;
@@ -39,7 +40,7 @@ import java.util.UUID;
  */
 final class GiantCreaking implements Listener {
     private final Soulbound plugin;
-    private final NamespacedKey key, eyeKey;
+    private final NamespacedKey key, eyeKey, wildKey;
     private final Map<UUID, Integer> charge = new HashMap<>();     // creaking -> ticks charged
     private final Map<UUID, UUID> aim = new HashMap<>();           // creaking -> player being charged at
     private final Map<UUID, Long> rest = new HashMap<>();          // creaking -> tick it may fire again
@@ -51,18 +52,22 @@ final class GiantCreaking implements Listener {
         this.plugin = plugin;
         this.key = new NamespacedKey(plugin, "giant_creaking");
         this.eyeKey = new NamespacedKey(plugin, "giant_creaking_eye");
+        this.wildKey = new NamespacedKey(plugin, "giant_creaking_wild");
     }
 
     private double cfg(String k, double d) { return plugin.getConfig().getDouble("giant-creaking." + k, d); }
 
     boolean is(Entity e) { return e instanceof Creaking && e.getPersistentDataContainer().has(key, PersistentDataType.BYTE); }
 
-    String summon(Location at, double size) {
+    String summon(Location at, double size) { return summon(at, size, false); }
+
+    String summon(Location at, double size, boolean wild) {
         double scale = size > 0 ? size : cfg("size", 16);
         Creaking c = at.getWorld().spawn(at, Creaking.class, cr -> {
             cr.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
-            cr.setPersistent(true);
-            cr.setRemoveWhenFarAway(false);
+            cr.setPersistent(!wild);            // a wild one isn't saved: it's gone when its chunk unloads
+            cr.setRemoveWhenFarAway(false);     // but it never wanders off mid-fight like a normal monster would
+            if (wild) cr.getPersistentDataContainer().set(wildKey, PersistentDataType.BYTE, (byte) 1);
             cr.customName(Component.text(name(), NamedTextColor.GOLD));
             cr.setCustomNameVisible(false);
             set(cr, Attribute.SCALE, scale);
@@ -90,10 +95,60 @@ final class GiantCreaking implements Listener {
         return n == 0 ? "No " + name() + " within 48 blocks." : "Removed " + n + " " + name() + (n == 1 ? "" : "s") + ".";
     }
 
-    void start() { task = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, 1L); }
+    void start() {
+        task = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, 1L);
+        wildTask = Bukkit.getScheduler().runTaskTimer(plugin, this::wild, 200L, 20L * Math.max(5, (long) cfg("wild.check-seconds", 30)));
+    }
+
+    private BukkitTask wildTask;
+
+    /**
+     * In the wild: Jotuns walk the last stretch of Moloch's realm, just before The Wall (between wild.from and wild.to
+     * blocks from the temple). Every check, each player out there has wild.chance of one rising wild.distance blocks
+     * away, unless one is already near them or wild.max are about. Wild ones sink back into the ground once nobody is within
+     * 200 blocks (and aren't saved when their chunk unloads).
+     */
+    private void wild() {
+        if (!plugin.getConfig().getBoolean("giant-creaking.wild.enabled", true) || plugin.zones() == null) return;
+        World w = plugin.zones().world();
+        if (w == null || w.getPlayers().isEmpty()) return;
+        double from = cfg("wild.from", 6300), to = cfg("wild.to", 6800);
+        int alive = 0;
+        for (Creaking c : w.getEntitiesByClass(Creaking.class)) {
+            if (!is(c)) continue;
+            // wild ones nobody is anywhere near go back into the ground
+            if (c.getPersistentDataContainer().has(wildKey, PersistentDataType.BYTE) && c.getLocation().getNearbyPlayers(200).isEmpty()) { removeEye(c); c.remove(); continue; }
+            alive++;
+        }
+        java.util.concurrent.ThreadLocalRandom r = java.util.concurrent.ThreadLocalRandom.current();
+        for (Player p : w.getPlayers()) {
+            if (alive >= (int) cfg("wild.max", 3)) return;
+            if (p.getGameMode() != GameMode.SURVIVAL && p.getGameMode() != GameMode.ADVENTURE) continue;
+            double d = Math.hypot(p.getLocation().getX(), p.getLocation().getZ());
+            if (d < from - 64 || d > to + 64) continue;
+            if (r.nextDouble() >= cfg("wild.chance", 0.15)) continue;
+            boolean near = false;
+            for (Entity e : p.getNearbyEntities(160, 128, 160)) if (is(e)) { near = true; break; }
+            if (near) continue;
+            for (int tries = 0; tries < 12; tries++) {
+                double ang = r.nextDouble(Math.PI * 2), dist = cfg("wild.distance", 90) * (0.8 + r.nextDouble() * 0.4);
+                double x = p.getLocation().getX() + Math.cos(ang) * dist, z = p.getLocation().getZ() + Math.sin(ang) * dist;
+                double rr = Math.hypot(x, z);
+                if (rr < from || rr > to) continue;
+                if (!w.isChunkLoaded((int) Math.floor(x) >> 4, (int) Math.floor(z) >> 4)) continue;
+                org.bukkit.block.Block ground = w.getHighestBlockAt((int) Math.floor(x), (int) Math.floor(z));
+                if (ground.getY() <= w.getMinHeight() + 1 || ground.isLiquid() && ground.getType() == org.bukkit.Material.WATER) continue;
+                summon(ground.getLocation().add(0.5, 1, 0.5), 0, true);
+                alive++;
+                plugin.getLogger().info("A wild " + name() + " rose at " + (int) x + " " + (int) z + " in Moloch's realm.");
+                break;
+            }
+        }
+    }
 
     void stop() {
         if (task != null) task.cancel();
+        if (wildTask != null) wildTask.cancel();
         for (var w : Bukkit.getWorlds()) for (Creaking c : w.getEntitiesByClass(Creaking.class)) if (is(c)) removeEye(c);
     }
 
@@ -249,7 +304,7 @@ final class GiantCreaking implements Listener {
         org.bukkit.inventory.ItemStack crown = plugin.cute().create(Cute.Kind.JOTUN);
         if (best != null && best.isOnline()) {
             for (org.bukkit.inventory.ItemStack left : best.getInventory().addItem(crown).values()) best.getWorld().dropItemNaturally(best.getLocation(), left);
-            Bukkit.broadcast(Component.text(best.getName() + " felled " + name() + " and takes its crown.", NamedTextColor.GOLD));
+            best.sendMessage(Component.text("You hurt it most. Its crown is yours.", NamedTextColor.GOLD));
         } else {
             at.getWorld().dropItemNaturally(at, crown);
         }
