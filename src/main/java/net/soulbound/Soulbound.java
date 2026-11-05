@@ -509,6 +509,7 @@ public final class Soulbound extends JavaPlugin {
         quantumStand.start();
         pm.registerEvents(new DeathDrops(this), this);
         pm.registerEvents(new EndShips(this), this);
+        pm.registerEvents(new NoHunger(this), this);
         combatLog = new CombatLog(this);
         pm.registerEvents(combatLog, this);
         combatLog.start();
