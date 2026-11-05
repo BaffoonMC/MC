@@ -289,9 +289,10 @@ boss:
     - "give %player% minecraft:netherite_ingot 1"
     - "give %player% minecraft:enchanted_golden_apple 1"
   # His spoils: the top damage dealer takes Moloch's Horns (cosmetic) and a piece of his Regalia (armour a little better
-  # than netherite); everyone else who fought has this chance at a piece. Wear all four and you grow this much bigger.
+  # than netherite); everyone else who fought has this chance at a piece. Wear all four and fire can't touch you (and you
+  # grow this much bigger, if above 1).
   regalia-drop-chance: 0.35
-  regalia-set-scale: 1.5
+  regalia-set-scale: 1.0   # 1.0 = normal size (the full set used to make you 1.5x bigger)
   # If he survives the fight there's this chance (0.10 = 1 in 10) of a blood moon. The rest of the time the moon stays pale.
   blood-moon-chance: 0.10
   # A blood moon covers his realm AND the main world for this long. Monsters that spawn

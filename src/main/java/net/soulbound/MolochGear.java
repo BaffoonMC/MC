@@ -39,8 +39,8 @@ import java.util.UUID;
  * Moloch's Horns: a cosmetic pair of bull horns worn on the head, for whoever hurt him most (the evil twin of God's Halo).
  *
  * Moloch's Regalia: a charred armour set with molten cracks, a little better than netherite (more toughness, more
- * knockback resistance, more durability, fireproof). Wear all four and Moloch's power swells in you: you grow to one
- * and a half times your size, and fire can't touch you.
+ * knockback resistance, more durability, fireproof). Wear all four and Moloch's power swells in you: fire can't touch
+ * you (boss.regalia-set-scale above 1 also makes you bigger; it's normal size by default).
  */
 final class MolochGear implements Listener {
     enum Piece {
@@ -74,7 +74,7 @@ final class MolochGear implements Listener {
 
     void loadSettings() {
         FileConfiguration c = plugin.getConfig();
-        setScale = c.getDouble("boss.regalia-set-scale", 1.5);
+        setScale = c.getDouble("boss.regalia-set-scale", 1.0);
         dropChance = c.getDouble("boss.regalia-drop-chance", 0.15);
     }
 
@@ -84,10 +84,7 @@ final class MolochGear implements Listener {
         ItemStack it = new ItemStack(p.base);
         ItemMeta m = it.getItemMeta();
         m.displayName(Component.text(p.title, NamedTextColor.DARK_RED, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
-        m.lore(List.of(
-                Component.text("Forged in the furnace of his belly.", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, true),
-                Component.text("Moloch's Regalia (1 of 4)", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false),
-                Component.text("Full set: you grow to " + fmt(setScale) + "x your size, and fire can't touch you.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
+        m.lore(regaliaLore());
         m.setItemModel(new NamespacedKey("soulbound", "moloch_" + p.name().toLowerCase(Locale.ROOT)));
         EquippableComponent eq = m.getEquippable();
         eq.setSlot(p.slot);
@@ -327,6 +324,10 @@ final class MolochGear implements Listener {
             ItemStack head = p.getInventory().getHelmet();
             if (isViking(head) && !head.getItemMeta().getPersistentDataContainer().has(vikingKey, PersistentDataType.BYTE))
                 p.getInventory().setHelmet(viking(null));   // an early Gjermundbu without its stats: upgrade it
+            for (EquipmentSlot es : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+                ItemStack worn = p.getInventory().getItem(es);
+                if (refreshLore(worn)) p.getInventory().setItem(es, worn);
+            }
             boolean full = pieceOf(p.getInventory().getHelmet()) == Piece.HELMET && pieceOf(p.getInventory().getChestplate()) == Piece.CHESTPLATE
                     && pieceOf(p.getInventory().getLeggings()) == Piece.LEGGINGS && pieceOf(p.getInventory().getBoots()) == Piece.BOOTS;
             boolean was = empowered.contains(p.getUniqueId());
@@ -353,6 +354,7 @@ final class MolochGear implements Listener {
         AttributeInstance a = p.getAttribute(Attribute.SCALE);
         if (a == null) return;
         AttributeModifier m = a.getModifier(sizeKey);
+        if (setScale <= 1.0001) { if (m != null) a.removeModifier(sizeKey); return; }
         if (m != null && Math.abs(m.getAmount() - (setScale - 1)) < 1e-6) return;
         if (m != null) a.removeModifier(sizeKey);
         a.addModifier(new AttributeModifier(sizeKey, setScale - 1, AttributeModifier.Operation.ADD_SCALAR, EquipmentSlotGroup.ANY));
@@ -367,6 +369,26 @@ final class MolochGear implements Listener {
     private boolean hasSizeBoost(Player p) {
         AttributeInstance a = p.getAttribute(Attribute.SCALE);
         return a != null && a.getModifier(sizeKey) != null;
+    }
+
+    private List<Component> regaliaLore() {
+        String full = setScale > 1.0001 ? "Full set: you grow to " + fmt(setScale) + "x your size, and fire can't touch you."
+                : "Full set: fire can't touch you.";
+        return List.of(
+                Component.text("Forged in the furnace of his belly.", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, true),
+                Component.text("Moloch's Regalia (1 of 4)", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false),
+                Component.text(full, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+    }
+
+    /** Pieces made before a change to the full-set power get the current description. */
+    private boolean refreshLore(ItemStack it) {
+        if (it == null || pieceOf(it) == null) return false;
+        ItemMeta m = it.getItemMeta();
+        List<Component> want = regaliaLore();
+        if (want.equals(m.lore())) return false;
+        m.lore(want);
+        it.setItemMeta(m);
+        return true;
     }
 
     private static String fmt(double d) { return d == Math.floor(d) ? String.valueOf((int) d) : String.valueOf(d); }

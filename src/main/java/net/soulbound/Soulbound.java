@@ -83,6 +83,12 @@ public final class Soulbound extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         // one-off: his scream's nausea went from 6 to 11 seconds; bump configs still on the old default
+        // one-off: Moloch's Regalia no longer makes you bigger (a saved 1.5 goes back to normal size)
+        if (!getConfig().getBoolean("migrated.regalia-no-grow", false)) {
+            if (getConfig().getDouble("boss.regalia-set-scale", 1.0) == 1.5) getConfig().set("boss.regalia-set-scale", 1.0);
+            getConfig().set("migrated.regalia-no-grow", true);
+            saveConfig();
+        }
         if (!getConfig().getBoolean("migrated.scream-nausea-11", false)) {
             if (getConfig().getInt("boss.scream-nausea-seconds", 6) == 6) getConfig().set("boss.scream-nausea-seconds", 11);
             getConfig().set("migrated.scream-nausea-11", true);
