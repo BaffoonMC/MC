@@ -47,6 +47,9 @@ commands:
     description: Answer God when he asks why you're here.
     usage: /god <challenge|lost|forgive|look>
 permissions:
+  soulbound.commands.seeall:
+    description: See every command in the / suggestions, including staff tools hidden from players.
+    default: op
   soulbound.combatlog.bypass:
     description: Logging out mid-fight doesn't kill you, and escape commands still work in combat.
     default: false

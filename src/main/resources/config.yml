@@ -393,6 +393,15 @@ viking:
   war-cry-cooldown-seconds: 300
 # The Gate of Heaven: every stronghold's End portal room is rebuilt in marble and gold the first time it loads, with God's
 # face carved into the far wall, holy-water fonts and an angel spawner in place of the silverfish. Frames and portal untouched.
+# Players only see commands they can use: commands from these plugins (which list everything to everyone) and any
+# command a player has no permission for are left out of their / suggestions. Staff with soulbound.commands.seeall see
+# everything. Nothing is blocked from running; each command still checks its own permission.
+hide-commands:
+  enabled: true
+  namespaced: true      # hide the plugin:command duplicates (worldedit:brush, essentials:home...)
+  plugins: [WorldEdit, FastAsyncWorldEdit, WorldGuard, CoreProtect, LuckPerms, Multiverse-Core, Chunky, BlueMap, PlugManX, spark]
+  names: []             # any other commands to hide from players, e.g. [plugins, pl, version, ver, about]
+
 # No hunger in these worlds: the hunger bar just doesn't go down there (it isn't refilled, so it doesn't heal anyone).
 no-hunger:
   worlds: [spawn]
