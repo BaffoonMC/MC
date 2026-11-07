@@ -255,7 +255,7 @@ final class Bestiary implements Listener, CommandExecutor {
                 List.of(label("Wants"), t("His Hunger fed to"), t("100. Then he wakes."),
                         row(label("Drops "), icon("moloch_horns", "Moloch's Horns", "For whoever hurt him most."), t(" "),
                                 icon("ember_of_moloch", "Ember of Moloch", "Half a Quantum Core."), t(" "),
-                                icon("moloch_helmet", "Moloch's Regalia", "Charred plate, molten cracks.", "Full set: 1.5x size, fireproof.")),
+                                icon("moloch_helmet", "Moloch's Regalia", "Charred plate, molten cracks.", "Full set: fireproof.")),
                         Component.empty(), quote("\"Moloch turns his"), quote(" eyes on you.\"")));
     }
 

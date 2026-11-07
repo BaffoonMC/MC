@@ -88,6 +88,7 @@ public final class Soulbound extends JavaPlugin {
         if (!getConfig().getBoolean("migrated.regalia-no-grow", false)) {
             if (getConfig().getDouble("boss.regalia-set-scale", 1.0) == 1.5) getConfig().set("boss.regalia-set-scale", 1.0);
             getConfig().set("migrated.regalia-no-grow", true);
+            getConfig().set("migrated.regalia-scale-15", true);   // and the older "grow again" one-off must never run after this
             saveConfig();
         }
         if (!getConfig().getBoolean("migrated.scream-nausea-11", false)) {
