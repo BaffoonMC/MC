@@ -17,7 +17,7 @@ import org.bukkit.event.server.ServerListPingEvent;
  */
 final class Motd implements Listener {
     static final String DEFAULT_1 = "<white><bold>BaffoonMC</bold></white> <dark_gray>|</dark_gray> <bold><gradient:#F2C94C:#FFF3B0>GRAND OPENING WEEK</gradient></bold>";
-    static final String DEFAULT_2 = "<gray>A brand new world.</gray> <green>Claim the best land first!</green>";
+    static final String DEFAULT_2 = "<gray>The gates of</gray> <#8FD3FF>Heaven</#8FD3FF> <gray>and</gray> <#FF5555>Hell</#FF5555> <gray>are open.</gray>";
 
     /** Width of the text area of a server-list entry, in GUI pixels. */
     private static final int ROW = 270;

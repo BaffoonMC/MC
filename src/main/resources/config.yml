@@ -413,7 +413,7 @@ motd:
   enabled: true
   centre: true
   line1: "<white><bold>BaffoonMC</bold></white> <dark_gray>|</dark_gray> <bold><gradient:#F2C94C:#FFF3B0>GRAND OPENING WEEK</gradient></bold>"
-  line2: "<gray>A brand new world.</gray> <green>Claim the best land first!</green>"
+  line2: "<gray>The gates of</gray> <#8FD3FF>Heaven</#8FD3FF> <gray>and</gray> <#FF5555>Hell</#FF5555> <gray>are open.</gray>"
 
 # End ships: false = no dragon head on the ship's bow (new ships generate without it; existing ones lose it when they load).
 end-ships:
