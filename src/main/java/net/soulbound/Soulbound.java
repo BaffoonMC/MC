@@ -91,6 +91,12 @@ public final class Soulbound extends JavaPlugin {
             getConfig().set("migrated.regalia-scale-15", true);   // and the older "grow again" one-off must never run after this
             saveConfig();
         }
+        // one-off: an older one-off could put the Regalia back to 1.5x after the one above; normal size, for good
+        if (!getConfig().getBoolean("migrated.regalia-normal-size", false)) {
+            if (getConfig().getDouble("boss.regalia-set-scale", 1.0) > 1.0) getConfig().set("boss.regalia-set-scale", 1.0);
+            getConfig().set("migrated.regalia-normal-size", true);
+            saveConfig();
+        }
         if (!getConfig().getBoolean("migrated.scream-nausea-11", false)) {
             if (getConfig().getInt("boss.scream-nausea-seconds", 6) == 6) getConfig().set("boss.scream-nausea-seconds", 11);
             getConfig().set("migrated.scream-nausea-11", true);
@@ -308,12 +314,6 @@ public final class Soulbound extends JavaPlugin {
         if (!getConfig().getBoolean("migrated.archangels-2", false)) {
             if (getConfig().getInt("archangels.ghasts.max-per-player", 2) == 3) getConfig().set("archangels.ghasts.max-per-player", 2);
             getConfig().set("migrated.archangels-2", true);
-            saveConfig();
-        }
-        // one-off: Moloch's Regalia makes you 1.5x bigger again (a config left at 1.1 is brought back up)
-        if (!getConfig().getBoolean("migrated.regalia-scale-15", false)) {
-            if (getConfig().getDouble("boss.regalia-set-scale", 1.5) < 1.5) getConfig().set("boss.regalia-set-scale", 1.5);
-            getConfig().set("migrated.regalia-scale-15", true);
             saveConfig();
         }
         // one-off: 3 minutes before an escaped player can be captured again
