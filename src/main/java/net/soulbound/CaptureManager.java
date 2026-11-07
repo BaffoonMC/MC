@@ -82,7 +82,7 @@ final class CaptureManager implements Listener {
     private int durationTicks, strugglePresses, immunitySeconds, struggleDelayTicks, struggleGapTicks;
     private double struggleDecay, hoodedHarder, carriedHarder;
     private boolean requireLead, captorSlowness, broadcast, killOnLogout;
-    private List<String> disabledWorlds = new ArrayList<>(), allowedCommands = new ArrayList<>();
+    private List<String> disabledWorlds = new ArrayList<>(), allowedCommands = new ArrayList<>(), carryWarps = new ArrayList<>();
 
     CaptureManager(Soulbound plugin, LeashItem leash) {
         this.plugin = plugin;
@@ -119,6 +119,8 @@ final class CaptureManager implements Listener {
         try { carryPose = org.bukkit.entity.Pose.valueOf(c.getString("capture.carry.pose", "SLEEPING").toUpperCase(java.util.Locale.ROOT)); }
         catch (IllegalArgumentException ex) { carryPose = org.bukkit.entity.Pose.SLEEPING; }
         propYaw = c.getDouble("capture.prop-yaw-offset", 180);
+        carryWarps = new ArrayList<>();
+        for (String w : c.getStringList("capture.warps-with-captive")) carryWarps.add(w.toLowerCase(java.util.Locale.ROOT));
         allowedCommands = new ArrayList<>();
         for (String s : c.getStringList("capture.captive-allowed-commands")) allowedCommands.add(s.toLowerCase(java.util.Locale.ROOT));
     }
@@ -157,8 +159,14 @@ final class CaptureManager implements Listener {
         boolean ok;
         try { ok = captor.teleport(to); } finally { portalCarry.remove(captor.getUniqueId()); }
         if (!ok || cap == null || !isActive(cap)) return ok;
+        bringAlong(cap, to, wasCarried);
+        return true;
+    }
+
+    /** The captor has just arrived at {@code to}: bring their captive after them, and back onto their shoulder if they were carried. */
+    private void bringAlong(Capture cap, Location to, boolean wasCarried) {
         Player victim = Bukkit.getPlayer(cap.captive);
-        if (victim == null) return true;
+        if (victim == null) return;
         if (cap.anchor != null) { if (cap.anchor.isValid()) { victim.removePassenger(cap.anchor); cap.anchor.remove(); } cap.anchor = null; }
         Vector back = to.getDirection().setY(0);
         Location behind = to.clone();
@@ -168,7 +176,25 @@ final class CaptureManager implements Listener {
             Player c2 = Bukkit.getPlayer(cap.captor), v2 = Bukkit.getPlayer(cap.captive);
             if (isActive(cap) && !cap.ritual && c2 != null && v2 != null) startCarry(cap, c2, v2);
         }, 2L);
-        return true;
+    }
+
+    /** Captors who typed a warp their captive is allowed to come along to (capture.warps-with-captive): until when, and whether they were carrying. */
+    private final Map<UUID, long[]> warpCarry = new HashMap<>();
+
+    /**
+     * "/warp moloch" with a captive: put them down so the teleport isn't blocked by someone on your shoulders, and
+     * remember, so the capture survives the jump and they're brought along (and picked back up) on arrival.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onWarpWithCaptive(org.bukkit.event.player.PlayerCommandPreprocessEvent e) {
+        Capture cap = byCaptor.get(e.getPlayer().getUniqueId());
+        if (cap == null || carryWarps.isEmpty()) return;
+        String[] w = e.getMessage().substring(1).trim().toLowerCase(java.util.Locale.ROOT).split("\\s+");
+        String cmd = w[0].contains(":") ? w[0].substring(w[0].indexOf(':') + 1) : w[0];
+        if (!(cmd.equals("warp") || cmd.equals("warps") || cmd.equals("ewarp")) || w.length < 2 || !carryWarps.contains(w[1])) return;
+        boolean wasCarried = cap.carried;
+        if (wasCarried) stopCarry(cap, false);
+        warpCarry.put(e.getPlayer().getUniqueId(), new long[]{System.currentTimeMillis() + 15_000L, wasCarried ? 1 : 0});
     }
 
     /** Where the captive's body really is: on the captor's shoulder when carried. */
@@ -564,6 +590,12 @@ final class CaptureManager implements Listener {
     public void onCaptorTeleported(PlayerTeleportEvent e) {
         Capture cap = byCaptor.get(e.getPlayer().getUniqueId());
         if (portalCarry.contains(e.getPlayer().getUniqueId())) return;
+        long[] warp = warpCarry.remove(e.getPlayer().getUniqueId());
+        if (cap != null && warp != null && warp[0] > System.currentTimeMillis() && e.getTo() != null) {
+            Location to = e.getTo().clone();
+            Bukkit.getScheduler().runTask(plugin, () -> { if (isActive(cap)) bringAlong(cap, to, warp[1] == 1); });
+            return;
+        }
         if (cap != null && e.getFrom().getWorld() != null && e.getTo() != null
                 && (!e.getFrom().getWorld().equals(e.getTo().getWorld()) || e.getFrom().distance(e.getTo()) > snapDistance)) end(cap, End.MOVED);
     }

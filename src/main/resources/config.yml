@@ -42,6 +42,8 @@ capture:
   broadcast: true
   # The only commands a captive can use (everything else is blocked, so no /home or /spawn escapes).
   captive-allowed-commands: [msg, tell, w, r, reply, me, report, helpop, rules, list, ping, moloch]
+  # Warps a captor can take their captive along to (/warp <name>): they arrive together, still bound, back on your shoulder if carried.
+  warps-with-captive: [moloch]
   # Carrying a captive (sneak + right-click them): their body lies limp across your shoulders, a fireman's carry.
   # pose: SLEEPING (still, limp), FALL_FLYING (stiff, face down) or SWIMMING (swim strokes).
   # height/sideways/forward: where the body sits, in blocks from your feet (sideways = out to your left).
