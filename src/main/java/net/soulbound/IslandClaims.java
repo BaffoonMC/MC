@@ -14,7 +14,7 @@ import org.bukkit.plugin.Plugin;
 import java.lang.reflect.Method;
 
 /**
- * God's island can't be claimed. Any GriefPrevention claim that would touch the island's protected circle (island.radius
+ * God's island can't be claimed, and nor can Moloch's holy ground (the temple's square and his four roads). Any GriefPrevention claim that would touch the island's protected circle (island.radius
  * from the End's centre) is refused, whether it's being made or resized into it. Claims out in the Seven Heavens are
  * fine. Admins with soulbound.island.build can still claim there.
  *
@@ -52,13 +52,21 @@ final class IslandClaims implements Listener {
         }
         plugin.getServer().getPluginManager().registerEvent(type, this, EventPriority.HIGH, (l, e) -> {
             if (!type.isInstance(e) || ((Cancellable) e).isCancelled()) return;
-            if (!plugin.getConfig().getBoolean("island.no-claims", true)) return;
             Object claim = call(e, claimGetters);
-            if (claim == null || !touchesIsland(claim)) return;
+            if (claim == null) return;
             Object who = call(e, whoGetters);
-            if (who instanceof CommandSender s && s.hasPermission("soulbound.island.build")) return;
-            ((Cancellable) e).setCancelled(true);
-            if (who instanceof CommandSender s) s.sendMessage(Component.text("God's island can't be claimed.", NamedTextColor.RED));
+            if (plugin.getConfig().getBoolean("island.no-claims", true) && touchesIsland(claim)
+                    && !(who instanceof CommandSender s && s.hasPermission("soulbound.island.build"))) {
+                ((Cancellable) e).setCancelled(true);
+                if (who instanceof CommandSender s) s.sendMessage(Component.text("God's island can't be claimed.", NamedTextColor.RED));
+                return;
+            }
+            if (plugin.getConfig().getBoolean("realm-claims.protect", true) && touchesHolyGround(claim)
+                    && !(who instanceof CommandSender s && s.hasPermission("soulbound.realm.build"))) {
+                ((Cancellable) e).setCancelled(true);
+                if (who instanceof CommandSender s) s.sendMessage(Component.text("Moloch's temple and his roads can't be claimed. Claim further out (over "
+                        + (int) plugin.getConfig().getDouble("realm-claims.temple-radius", 400) + " blocks from the temple, and off the roads).", NamedTextColor.RED));
+            }
         }, plugin, false);
         return true;
     }
@@ -72,6 +80,25 @@ final class IslandClaims implements Listener {
         }
         return null;
     }
+
+    /**
+     * Does the claim's rectangle reach Moloch's holy ground: the square around the temple (realm-claims.temple-radius
+     * from the centre) or the four roads running out from it (roads.half-width either side, out to roads.length)?
+     */
+    private boolean touchesHolyGround(Object claim) {
+        Object a = call(claim, new String[]{"getLesserBoundaryCorner"}), b = call(claim, new String[]{"getGreaterBoundaryCorner"});
+        if (!(a instanceof Location lo) || !(b instanceof Location hi) || plugin.zones() == null || !plugin.zones().inRealm(lo)) return false;
+        var c = plugin.getConfig();
+        double r = c.getDouble("realm-claims.temple-radius", 400);
+        double w = c.getDouble("roads.half-width", 12) + c.getDouble("realm-claims.road-margin", 4), len = c.getDouble("roads.length", 1200);
+        double minX = Math.min(lo.getX(), hi.getX()), maxX = Math.max(lo.getX(), hi.getX()) + 1;
+        double minZ = Math.min(lo.getZ(), hi.getZ()), maxZ = Math.max(lo.getZ(), hi.getZ()) + 1;
+        return overlaps(minX, maxX, -r, r) && overlaps(minZ, maxZ, -r, r)            // the temple's square
+                || overlaps(minZ, maxZ, -w, w) && overlaps(minX, maxX, -len, len)   // the east-west roads
+                || overlaps(minX, maxX, -w, w) && overlaps(minZ, maxZ, -len, len);  // the north-south roads
+    }
+
+    private static boolean overlaps(double a0, double a1, double b0, double b1) { return a0 <= b1 && a1 >= b0; }
 
     /** Does the claim's rectangle reach into the island's circle? */
     private boolean touchesIsland(Object claim) {
