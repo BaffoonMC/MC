@@ -286,6 +286,7 @@ final class CaptureManager implements Listener {
                 Component.text("by " + captor.getName() + ". Tap sneak to struggle.", NamedTextColor.GRAY), t));
         victim.getInventory().setChestplate(items.wornChains(victim.getInventory().getChestplate()));
         sound(victim.getLocation(), "minecraft:block.chain.place", 1f, 0.7f);
+        if (killOnLogout) victim.sendMessage(Component.text("You've been captured. Don't log out: if you do, you die here and everything you're carrying drops for " + captor.getName() + ". Tap sneak to struggle free.", NamedTextColor.RED));
         captor.showTitle(Title.title(Component.empty(), Component.text("You captured " + victim.getName(), NamedTextColor.RED), t));
         grant(captor, "sacrifice:moloch/root");
         grant(captor, "sacrifice:moloch/stranger_danger");   // the first person you put in chains
