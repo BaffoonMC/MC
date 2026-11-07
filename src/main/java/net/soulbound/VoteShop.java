@@ -65,6 +65,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     private final Map<String, Integer> pendingByName = new HashMap<>();   // votes from players the server hasn't seen yet
     private final Map<UUID, PriceEdit> priceEdits = new HashMap<>();
     private final Map<UUID, long[]> confirm = new HashMap<>();           // {entry index, until}
+    private boolean stocked;                                             // the starter pages have been added
 
     VoteShop(Soulbound plugin) {
         this.plugin = plugin;
@@ -87,6 +88,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         }
         var ps = y.getConfigurationSection("points");
         if (ps != null) for (String k : ps.getKeys(false)) try { points.put(UUID.fromString(k), ps.getInt(k)); } catch (IllegalArgumentException ignored) {}
+        stocked = y.getBoolean("starter-stocked", false);
         var pn = y.getConfigurationSection("pending");
         if (pn != null) for (String k : pn.getKeys(false)) pendingByName.put(k, pn.getInt(k));
     }
@@ -101,6 +103,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
             list.add(m);
         }
         y.set("items", list);
+        if (stocked) y.set("starter-stocked", true);
         for (var en : points.entrySet()) y.set("points." + en.getKey(), en.getValue());
         for (var en : pendingByName.entrySet()) y.set("pending." + en.getKey(), en.getValue());
         try { plugin.getDataFolder().mkdirs(); y.save(file); }
@@ -382,6 +385,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
                 s.sendMessage(Component.text(t.getName() + " now has " + points(t.getUniqueId()) + " vote points.", NamedTextColor.GREEN));
             }
             case "reload" -> { load(); s.sendMessage(Component.text("Vote Shop reloaded.", NamedTextColor.GREEN)); }
+            case "stock" -> stock(s, a.length > 1 && a[1].equalsIgnoreCase("force"));
             case "help" -> help(s);
             default -> {
                 if (!(s instanceof Player p)) { help(s); return true; }
@@ -393,18 +397,50 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Adds the ready-made pages from voteshop.starter in config.yml after the last page. Each line is "MATERIAL amount price";
+     * a line starting with --- starts the next page. Only once, unless forced, so the pages don't end up in there twice.
+     */
+    private void stock(CommandSender s, boolean force) {
+        if (stocked && !force) {
+            s.sendMessage(Component.text("The starter pages are already in. /voteshop stock force adds them again.", NamedTextColor.RED));
+            return;
+        }
+        List<String> lines = plugin.getConfig().getStringList("voteshop.starter");
+        int page = onPage(pages()).isEmpty() ? pages() - 1 : pages();
+        int added = 0, first = -1, onThis = PER_PAGE;
+        for (String raw : lines) {
+            String l = raw.trim();
+            if (l.isEmpty()) continue;
+            if (l.startsWith("---")) { page++; onThis = 0; if (first < 0) first = page; continue; }
+            if (onThis >= PER_PAGE) { page++; onThis = 0; if (first < 0) first = page; }
+            String[] w = l.split("\\s+");
+            Material m = w.length >= 3 ? Material.matchMaterial(w[0]) : null;
+            if (m == null || !m.isItem()) { s.sendMessage(Component.text("Skipped \"" + l + "\" (unknown item).", NamedTextColor.GRAY)); continue; }
+            int amount, price;
+            try { amount = Math.max(1, Math.min(m.getMaxStackSize(), Integer.parseInt(w[1]))); price = Math.max(0, Integer.parseInt(w[2])); }
+            catch (NumberFormatException ex) { s.sendMessage(Component.text("Skipped \"" + l + "\" (amount and price must be numbers).", NamedTextColor.GRAY)); continue; }
+            entries.add(new Entry(new ItemStack(m, amount), price, page));
+            onThis++; added++;
+        }
+        stocked = true;
+        save();
+        s.sendMessage(Component.text("Added " + added + " things on pages " + first + " to " + page + ". /voteshop edit " + first + " to change prices.", NamedTextColor.GREEN));
+    }
+
     private void help(CommandSender s) {
         s.sendMessage(Component.text("Vote Shop", GOLD, TextDecoration.BOLD));
         s.sendMessage(line("/voteshop [page]", "  open it"));
         s.sendMessage(line("/voteshop add <price> [page]", "  sell what you're holding"));
         s.sendMessage(line("/voteshop edit [page]", "  take out, re-price or move things"));
+        s.sendMessage(line("/voteshop stock", "  add the ready-made pages of everyday things (config.yml)"));
         s.sendMessage(line("/voteshop points <player> [add|take|set] <n>", ""));
     }
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender s, @NotNull Command cmd, @NotNull String label, String @NotNull [] a) {
         if (!s.hasPermission("soulbound.admin")) return List.of();
-        if (a.length == 1) return filter(List.of("add", "edit", "points", "reload", "help"), a[0]);
+        if (a.length == 1) return filter(List.of("add", "edit", "stock", "points", "reload", "help"), a[0]);
         if (a.length == 2 && a[0].equalsIgnoreCase("add")) return filter(List.of("10", "25", "50", "100", "150"), a[1]);
         if (a.length == 3 && a[0].equalsIgnoreCase("add")) { List<String> l = new ArrayList<>(); for (int i = 1; i <= pages() + 1; i++) l.add(String.valueOf(i)); return filter(l, a[2]); }
         if (a.length == 2 && a[0].equalsIgnoreCase("points")) { List<String> l = new ArrayList<>(); for (Player p : Bukkit.getOnlinePlayers()) l.add(p.getName()); return filter(l, a[1]); }
