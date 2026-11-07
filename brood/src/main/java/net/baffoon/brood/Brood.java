@@ -73,6 +73,7 @@ public final class Brood extends JavaPlugin implements Listener {
     private final Set<UUID> leaving = new HashSet<>();
     private final Map<UUID, Location> lastPos = new HashMap<>();
     private Set<EntityType> allowed = new HashSet<>();
+    private final Set<UUID> masked = new HashSet<>();               // players whose gear we hide from others
     private long tick;
 
     private static final class Host {
@@ -125,6 +126,8 @@ public final class Brood extends JavaPlugin implements Listener {
                 line(" Right-click an animal to crawl inside.", NamedTextColor.GRAY),
                 line(" Steer it, feed on it, sneak to burst out.", NamedTextColor.GRAY),
                 line(" Press F inside to make it call out.", NamedTextColor.GRAY),
+                line(" Your inventory is sealed while you wear it.", NamedTextColor.GRAY),
+                line(" /brood shed to take it off.", NamedTextColor.GRAY),
                 Component.empty(),
                 line("Milk flushes a parasite out of its host.", NamedTextColor.DARK_GRAY)));
         String model = c.getString("item-model", "");
@@ -175,8 +178,11 @@ public final class Brood extends JavaPlugin implements Listener {
                 Bug b = bugs.remove(id);
                 if (b != null) { b.remove(); dropInvisibility(p); }
                 lastPos.remove(id);
+                if (masked.remove(id)) unmask(p);
                 continue;
             }
+            masked.add(id);
+            if (tick % 5 == 0) mask(p);
             Host h = hosts.get(id);
             if (h != null) { steer(p, h); continue; }
             crawl(p);
@@ -466,6 +472,87 @@ public final class Brood extends JavaPlugin implements Listener {
         if (isBrood(e.getPlayer())) { e.setCancelled(true); e.getPlayer().sendActionBar(Component.text("You're far too small to build.", NamedTextColor.GRAY)); }
     }
 
+    // ------------------------------------------------------------------ sealed inventory: a parasite has no hands
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInvClick(org.bukkit.event.inventory.InventoryClickEvent e) {
+        if (e.getWhoClicked() instanceof Player p && isBrood(p)) { e.setCancelled(true); sealed(p); }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInvDrag(org.bukkit.event.inventory.InventoryDragEvent e) {
+        if (e.getWhoClicked() instanceof Player p && isBrood(p)) { e.setCancelled(true); sealed(p); }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onOpen(org.bukkit.event.inventory.InventoryOpenEvent e) {
+        if (e.getPlayer() instanceof Player p && isBrood(p)) { e.setCancelled(true); sealed(p); }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onDrop(org.bukkit.event.player.PlayerDropItemEvent e) {
+        if (isBrood(e.getPlayer())) { e.setCancelled(true); sealed(e.getPlayer()); }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPickup(org.bukkit.event.entity.EntityPickupItemEvent e) {
+        if (e.getEntity() instanceof Player p && isBrood(p)) e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onSwap(PlayerSwapHandItemsEvent e) {
+        if (isBrood(e.getPlayer()) && !hosts.containsKey(e.getPlayer().getUniqueId())) { e.setCancelled(true); sealed(e.getPlayer()); }
+    }
+
+    /** No eating, throwing, drinking or putting other armour on over the skin. Doors and buttons still work. */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onUse(org.bukkit.event.player.PlayerInteractEvent e) {
+        if (e.getItem() == null || !isBrood(e.getPlayer())) return;
+        e.setUseItemInHand(org.bukkit.event.Event.Result.DENY);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onConsume(org.bukkit.event.player.PlayerItemConsumeEvent e) {
+        if (isBrood(e.getPlayer())) e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onHeld(org.bukkit.event.player.PlayerItemHeldEvent e) {
+        Player p = e.getPlayer();
+        if (isBrood(p)) Bukkit.getScheduler().runTask(this, () -> { if (p.isOnline() && isBrood(p)) mask(p); });
+    }
+
+    private void sealed(Player p) {
+        p.sendActionBar(Component.text("You have no hands. /brood shed to take the skin off.", NamedTextColor.GRAY));
+    }
+
+    /** Other players see a bug, not a floating sword and boots: tell them this player's slots are empty. */
+    private static final EquipmentSlot[] SHOWN = {EquipmentSlot.HAND, EquipmentSlot.OFF_HAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+
+    private void mask(Player p) {
+        Map<EquipmentSlot, ItemStack> empty = new HashMap<>();
+        for (EquipmentSlot s : SHOWN) empty.put(s, new ItemStack(Material.AIR));
+        for (Player v : p.getWorld().getPlayers())
+            if (v != p && v.getLocation().distanceSquared(p.getLocation()) < 96 * 96) v.sendEquipmentChange(p, empty);
+    }
+
+    private void unmask(Player p) {
+        Map<EquipmentSlot, ItemStack> real = new HashMap<>();
+        for (EquipmentSlot s : SHOWN) real.put(s, p.getInventory().getItem(s));
+        for (Player v : p.getWorld().getPlayers()) if (v != p) v.sendEquipmentChange(p, real);
+    }
+
+    private void shed(Player p) {
+        ItemStack worn = p.getInventory().getChestplate();
+        if (!isSkin(worn)) { p.sendMessage(Component.text("You aren't wearing a Brood Skin.", NamedTextColor.GRAY)); return; }
+        if (hosts.containsKey(p.getUniqueId())) leave(p, true);
+        p.getInventory().setChestplate(null);
+        p.getInventory().addItem(worn).values().forEach(x -> p.getWorld().dropItem(p.getLocation(), x));
+        p.getWorld().playSound(p.getLocation(), Sound.ENTITY_SLIME_SQUISH_SMALL, 0.8f, 0.6f);
+        p.getWorld().spawnParticle(Particle.SQUID_INK, p.getLocation().add(0, 0.2, 0), 10, 0.15, 0.1, 0.15, 0.02);
+        p.sendActionBar(Component.text("You peel the skin off.", NamedTextColor.DARK_PURPLE));
+    }
+
     // ------------------------------------------------------------------ cleanup
 
     @EventHandler
@@ -476,6 +563,7 @@ public final class Brood extends JavaPlugin implements Listener {
         if (b != null) b.remove();
         dropInvisibility(p);
         lastPos.remove(p.getUniqueId());
+        masked.remove(p.getUniqueId());
     }
 
     @EventHandler
@@ -504,6 +592,9 @@ public final class Brood extends JavaPlugin implements Listener {
                 to.getInventory().addItem(skin()).values().forEach(x -> to.getWorld().dropItem(to.getLocation(), x));
                 sender.sendMessage(Component.text("Gave a Brood Skin to " + to.getName() + ".", NamedTextColor.DARK_PURPLE));
             }
+            case "shed" -> {
+                if (sender instanceof Player p) shed(p);
+            }
             case "leave" -> {
                 if (!(sender instanceof Player p)) return true;
                 if (hosts.containsKey(p.getUniqueId())) leave(p, true);
@@ -515,14 +606,14 @@ public final class Brood extends JavaPlugin implements Listener {
                 readHosts();
                 sender.sendMessage(Component.text("Brood config reloaded. Old skins keep their old stats; /brood give a new one.", NamedTextColor.DARK_PURPLE));
             }
-            default -> sender.sendMessage(Component.text("/brood give [player] · /brood leave · /brood reload", NamedTextColor.GRAY));
+            default -> sender.sendMessage(Component.text("/brood give [player] · /brood shed · /brood leave · /brood reload", NamedTextColor.GRAY));
         }
         return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
-        if (args.length == 1) return List.of("give", "leave", "reload");
+        if (args.length == 1) return List.of("give", "shed", "leave", "reload");
         if (args.length == 2 && args[0].equalsIgnoreCase("give")) return null;
         return List.of();
     }

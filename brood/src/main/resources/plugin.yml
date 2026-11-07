@@ -6,8 +6,8 @@ description: Wear the Brood Skin, shrink to a parasite, and crawl inside animals
 authors: [BaffoonMC]
 commands:
   brood:
-    description: The Brood (test). /brood give [player], /brood leave
-    usage: /brood <give [player]|leave>
+    description: The Brood (test). /brood give [player], /brood shed, /brood leave
+    usage: /brood <give [player]|shed|leave|reload>
 permissions:
   brood.admin:
     description: Can give out Brood Skins.
