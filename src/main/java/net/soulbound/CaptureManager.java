@@ -62,6 +62,9 @@ final class CaptureManager implements Listener {
     private final Map<UUID, Capture> byCaptive = new HashMap<>();
     private final Map<UUID, Capture> byCaptor = new HashMap<>();
     private final Map<UUID, Long> immuneUntil = new HashMap<>();
+
+    /** Admin reset: forget that this player (or, with null, everyone) just escaped, so they can be caught again right away. */
+    void clearEscapeProtection(UUID id) { if (id == null) immuneUntil.clear(); else immuneUntil.remove(id); }
     /** Teleports this plugin makes itself, so the teleport guard lets them through. */
     private final Set<UUID> ownTeleport = new HashSet<>();
     /** Dismounts this plugin makes itself (putting a carried captive down). */

@@ -790,10 +790,12 @@ public final class Soulbound extends JavaPlugin {
                     org.bukkit.OfflinePlayer t = getServer().getOfflinePlayerIfCached(args[1]);
                     if (t == null) { sender.sendMessage(Component.text("No player called " + args[1] + ".", NamedTextColor.RED)); return true; }
                     sacrifices.resetLimits(t.getUniqueId());
-                    sender.sendMessage(Component.text("Cleared " + t.getName() + "'s sacrifice cooldown and daily count.", NamedTextColor.GREEN));
+                    if (captures != null) captures.clearEscapeProtection(t.getUniqueId());
+                    sender.sendMessage(Component.text("Cleared " + t.getName() + "'s escape protection, sacrifice cooldown and daily count.", NamedTextColor.GREEN));
                 } else {
                     sacrifices.resetLimits(null);
-                    sender.sendMessage(Component.text("Cleared every sacrifice cooldown and today's limits.", NamedTextColor.GREEN));
+                    if (captures != null) captures.clearEscapeProtection(null);
+                    sender.sendMessage(Component.text("Cleared everyone's escape protection, every sacrifice cooldown and today's limits.", NamedTextColor.GREEN));
                 }
                 return true;
             }

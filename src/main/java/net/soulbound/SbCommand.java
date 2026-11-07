@@ -301,7 +301,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             s.sendMessage(line("/sb player <player> inhuman [on|off]", "the Heart of Darkness, without eating it"));
             s.sendMessage(line("/sb player <player> deeper [off|on]", "Deeper Still: off lets them raise a homunculus again"));
             s.sendMessage(line("/sb player <player> grace [on|off]", "the Angel Engine's blessing, without eating it"));
-            s.sendMessage(line("/sb player <player> resetlimits", "sacrifice cooldown and daily count"));
+            s.sendMessage(line("/sb player <player> resetlimits", "escape protection, sacrifice cooldown and daily count"));
         }
         if (group == null || group.equals("moloch")) {
             s.sendMessage(line("/sb moloch status", "how hungry he is"));
@@ -309,7 +309,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             s.sendMessage(line("/sb moloch stop", "end the fight"));
             s.sendMessage(line("/sb moloch hunger <0-100>", "set his Hunger"));
             s.sendMessage(line("/sb moloch bloodmoon <hours|off>", "start or end a blood moon"));
-            s.sendMessage(line("/sb moloch resetlimits", "every sacrifice cooldown and today's limits"));
+            s.sendMessage(line("/sb moloch resetlimits", "everyone's escape protection, sacrifice cooldowns and limits"));
         }
         if (group == null || group.equals("god")) {
             s.sendMessage(line("/sb god test", "God's test spawn"));
