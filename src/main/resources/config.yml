@@ -988,10 +988,14 @@ vote-ranks:
   # group votes (Newcomer is the default group, so it isn't listed)
   ladder: ["beginner 5", "novice 35", "intermediate 100", "advanced 175", "adept 275", "expert 400", "seasoned 550",
            "veteran 750", "elder 1150", "ancient 2000"]
-  # The voting sites /vote lists, as "Name|link". Put the same sites in NuVotifier's server listings.
-  sites: []
-  #  - "Minecraft-MP|https://minecraft-mp.com/server/XXXX/vote/"
-  #  - "Minecraft Server List|https://minecraft-server-list.com/server/XXXX/vote/"
+  broadcast: true         # "minecraftmurdere voted for the server on Minecraft-MP!" in chat for every vote
+  # The voting sites /vote lists, as "Name|link". Each needs NuVotifier set up on its listing to count.
+  sites:
+    - "Minecraft-MP|https://minecraft-mp.com/server/366545/vote/"
+    - "MinecraftServers.org|https://minecraftservers.org/vote/695841"
+    - "Minecraft-Server-List|https://minecraft-server-list.com/server/524784/vote/"
+    - "TopG|https://topg.org/minecraft-servers/server-688102"
+    - "Play-Minecraft-Servers|https://play-minecraft-servers.com/minecraft-servers/baffoonmc/?tab=vote"
 # /sb player <name> reset: wipes someone back to brand new (inventory, ender chest, XP, advancements, stats and everything
 # Soulbound keeps on them). These console commands also run, for the other plugins ({player} = their name, {uuid} = their id).
 account-reset:

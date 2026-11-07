@@ -145,7 +145,10 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
                 try {
                     Object vote = e.getClass().getMethod("getVote").invoke(e);
                     String name = String.valueOf(vote.getClass().getMethod("getUsername").invoke(vote));
-                    Bukkit.getScheduler().runTask(plugin, () -> voted(name));
+                    String site;
+                    try { site = String.valueOf(vote.getClass().getMethod("getServiceName").invoke(vote)); } catch (ReflectiveOperationException ex) { site = ""; }
+                    String from = site;
+                    Bukkit.getScheduler().runTask(plugin, () -> { voted(name); announce(name, from); });
                 } catch (ReflectiveOperationException ex) { plugin.getLogger().warning("Vote Shop: couldn't read a vote: " + ex.getMessage()); }
             }, plugin, true);
             plugin.getLogger().info("Vote Shop: listening for votes from NuVotifier.");
@@ -173,6 +176,31 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
             online.playSound(online.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.2f);
         }
         if (plugin.voteRanks() != null) plugin.voteRanks().check(online);
+    }
+
+    /** Tell everyone online that someone voted, and on which site, so others remember to as well. */
+    private void announce(String name, String service) {
+        if (name == null || name.isBlank() || name.length() > 16 || !plugin.getConfig().getBoolean("vote-ranks.broadcast", true)) return;
+        String site = siteName(service);
+        Component msg = Component.text("✔ ", NamedTextColor.GREEN).append(Component.text(name, NamedTextColor.WHITE))
+                .append(Component.text(" voted for the server" + (site.isEmpty() ? "" : " on " + site) + "! ", NamedTextColor.GRAY))
+                .append(Component.text("/vote", NamedTextColor.YELLOW).clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/vote"))
+                        .hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(Component.text("Vote too: points for the Vote Shop, and climb the ranks", NamedTextColor.GRAY))));
+        Bukkit.broadcast(msg);
+    }
+
+    /** The list site's own name for itself (e.g. "Minecraft-MP.com"), matched to one of our /vote sites where possible. */
+    private String siteName(String service) {
+        if (service == null || service.isBlank() || service.equalsIgnoreCase("null")) return "";
+        String key = service.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]", "");
+        for (String line : plugin.getConfig().getStringList("vote-ranks.sites")) {
+            String[] w = line.split("\\|", 2);
+            if (w.length < 2) continue;
+            String host = w[1].toLowerCase(java.util.Locale.ROOT).replaceAll("^https?://(www\\.)?", "").split("/")[0].replaceAll("[^a-z0-9]", "");
+            String label = w[0].toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]", "");
+            if ((!host.isEmpty() && (key.equals(host) || key.contains(host) || host.contains(key))) || (!label.isEmpty() && (key.contains(label) || label.equals(key)))) return w[0].trim();
+        }
+        return service.trim();
     }
 
     @EventHandler
