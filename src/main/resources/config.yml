@@ -463,7 +463,6 @@ island:
   clear-water-on-wake: true
   # Blocks anyone may still mine on the island.
   breakable: [IRON_BARS]
-# Beds on the outer Heaven islands don't explode: you doze off and God carries you back to his island.
 # Moloch's realm: claims are fine out in the wilds (GriefPrevention must have the world in Survival mode), but not on
 # his holy ground: the square around the temple (temple-radius from the centre) or the four roads (roads.half-width +
 # road-margin either side, out to roads.length). soulbound.realm.build can still claim there.
@@ -472,6 +471,7 @@ realm-claims:
   temple-radius: 400
   road-margin: 4
 
+# Beds on the outer Heaven islands don't explode: you doze off and God carries you back to his island.
 heaven-beds:
   carried-home: true
 god:
