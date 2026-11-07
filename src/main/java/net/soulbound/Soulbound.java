@@ -762,7 +762,13 @@ public final class Soulbound extends JavaPlugin {
             }
             case "stop" -> {
                 if (!admin(sender)) return true;
-                boss.abort();
+                boolean was = boss.active(), booked = hunger.awakenAt() > 0 || hunger.value() >= 100;
+                if (was) boss.abort();
+                if (was || booked) {
+                    hunger.reset();   // back to sleep: the bar empties (offerings made during the fight still count for next time)
+                    if (!was) getServer().broadcast(Component.text("Moloch's awakening was called off.", NamedTextColor.GRAY));
+                    sender.sendMessage(Component.text("Stopped. His hunger is back to " + Math.round(hunger.value()) + "%.", NamedTextColor.GREEN));
+                } else sender.sendMessage(Component.text("He isn't awake or about to rise. (/moloch hunger <0-100> sets the meter.)", NamedTextColor.GRAY));
                 return true;
             }
             case "hunger" -> {
