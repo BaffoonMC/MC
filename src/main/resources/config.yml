@@ -865,6 +865,12 @@ account-reset:
     # - "lp user {player} parent set default"  # LuckPerms: back to Newcomer (this also takes away bought ranks!)
 # The Sleeper (/sb world sleeper): a homeless man asleep at spawn. Poke him and he gets grumpier; the 4th time he gets up
 # and shoves you away (no damage), then lies back down.
+# Jotun's Crown (the Jotun's prize): wearing it makes you this many times your size, and full blocks you place go down
+# 2x2 (one high), using a block from your hand for each. Sneak to place one. Crowns update themselves to a new scale.
+jotun-crown:
+  scale: 2.0
+  build-2x2: true
+
 # Jotun, the Giant Creaking (/sb world creaking [size|remove]): it turns to watch the nearest player it can see and charges a
 # guardian's beam from its eyes. Hold its gaze for charge-seconds and the beam hits for beam-damage (10000 = dead, though
 # a Totem of Undying still saves you). Break its line of sight and the beam fizzles. Fire and lava can't hurt it.

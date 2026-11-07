@@ -87,7 +87,7 @@ final class Cute implements Listener {
         // found, never made: two in every stronghold's chests
         GATEKEEPER("The Gatekeeper's Crown", "gatekeepers_crown", null, "Twelve eyes, and somehow still not watching where you're going."),
         // found, never made: for whoever hurt Jotun most
-        JOTUN("Jotun's Crown", "jotuns_crown", null, "Its eyes are still open. Try not to blink first.");
+        JOTUN("Jotun's Crown", "jotuns_crown", null, "Twice your size. Your blocks go down 2x2 (sneak to place one).");
         final String title, model, alt, perk;
         final EquipmentSlot slot;
         final int armor;
@@ -128,8 +128,10 @@ final class Cute implements Listener {
         m.displayName(Component.text(k.title, NAME_COLOURS.containsKey(k) ? NAME_COLOURS.get(k) : k == Kind.BAROQUE ? TextColor.color(0xD6AC48) : k == Kind.CROC ? TextColor.color(0x7FA84A) : k == Kind.SINNER ? TextColor.color(0xF2C04A) : k == Kind.BALLOON ? TextColor.color(0x3FA2EC)
                 : (k == Kind.BP_HAT || k.priest()) ? TextColor.color(0xB3122E) : PINK, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
         String where = switch (k.slot) { case CHEST -> "Worn on the chest"; case LEGS -> "Worn on the legs"; case FEET -> "Worn on the feet"; default -> "Worn on the head"; };
-        m.lore(List.of(Component.text(where, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false),
+        List<Component> lore = new java.util.ArrayList<>(List.of(Component.text(where, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false),
                 Component.text(k.perk, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
+        if (k == Kind.JOTUN) lore.add(Component.text("Its eyes are still open. Try not to blink first.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true));
+        m.lore(lore);
         m.setItemModel(new NamespacedKey("soulbound", k.model));
         if (k != Kind.BP_HAT) m.setMaxStackSize(1);
         EquippableComponent eq = m.getEquippable();
@@ -150,6 +152,9 @@ final class Cute implements Listener {
             m.addAttributeModifier(org.bukkit.attribute.Attribute.KNOCKBACK_RESISTANCE, new org.bukkit.attribute.AttributeModifier(new NamespacedKey(plugin, "blood_priest_hat_kb"), 0.15, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER, g));
             if (m instanceof org.bukkit.inventory.meta.Damageable d) d.setMaxDamage(600);
         }
+        if (k == Kind.JOTUN && jotunScale() > 1.0001)
+            m.addAttributeModifier(org.bukkit.attribute.Attribute.SCALE, new org.bukkit.attribute.AttributeModifier(
+                    jotunScaleKey(), jotunScale() - 1.0, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER, org.bukkit.inventory.EquipmentSlotGroup.HEAD));
         if (k == Kind.GUT) {
             eq.setModel(new NamespacedKey("soulbound", "bubble_gut"));
             m.addAttributeModifier(org.bukkit.attribute.Attribute.KNOCKBACK_RESISTANCE, new org.bukkit.attribute.AttributeModifier(
@@ -262,6 +267,7 @@ final class Cute implements Listener {
             if (k == Kind.BP_HAT && h.getType() == Material.ECHO_SHARD) {   // an old cosmetic hat: swap it for the real one
                 h = create(Kind.BP_HAT); p.getInventory().setHelmet(h);
             }
+            if (k == Kind.JOTUN && tick % 20 == 0 && !jotunUpToDate(h)) { h = create(Kind.JOTUN); p.getInventory().setHelmet(h); }   // crowns from before it made you big
             boolean alt = altUntil.getOrDefault(id, 0) > tick;
             switch (k) {
                 case CAT -> { if (!alt && r.nextInt(100) == 0) { altUntil.put(id, tick + 6); alt = true; } }   // a twitch every few seconds
@@ -284,6 +290,69 @@ final class Cute implements Listener {
             NamespacedKey wk = new NamespacedKey("soulbound", want);
             if (!wk.equals(m.getItemModel())) { m.setItemModel(wk); h.setItemMeta(m); p.getInventory().setHelmet(h); }
         }
+    }
+
+    // ---------------------------------------------------------------- Jotun's Crown: twice your size, and you build big
+
+    private double jotunScale() { return Math.max(1.0, plugin.getConfig().getDouble("jotun-crown.scale", 2.0)); }
+    private NamespacedKey jotunScaleKey() { return new NamespacedKey(plugin, "jotun_crown_scale"); }
+
+    /** Does this crown carry the current size? (Ones handed out before, or after a config change, get remade.) */
+    private boolean jotunUpToDate(ItemStack h) {
+        var mods = h.getItemMeta().getAttributeModifiers(org.bukkit.attribute.Attribute.SCALE);
+        double want = jotunScale() - 1.0;
+        if (mods == null || mods.isEmpty()) return want < 0.0001;
+        for (var mod : mods) if (mod.getKey().equals(jotunScaleKey())) return Math.abs(mod.getAmount() - want) < 0.0001;
+        return false;
+    }
+
+    private final java.util.Set<UUID> bigPlacing = new java.util.HashSet<>();
+
+    /**
+     * Wearing Jotun's Crown, a full block goes down as a 2x2 slab of four (one block high), spreading the way you're
+     * facing. Every extra block costs one from the stack in your hand (creative: free), it only fills air, water or
+     * grass, and each extra block goes through the normal place checks, so claims, protections and logging all apply.
+     * Sneak to place just the one.
+     */
+    @EventHandler(priority = org.bukkit.event.EventPriority.MONITOR, ignoreCancelled = true)
+    public void onJotunPlace(org.bukkit.event.block.BlockPlaceEvent e) {
+        Player p = e.getPlayer();
+        if (bigPlacing.contains(p.getUniqueId()) || p.isSneaking() || !plugin.getConfig().getBoolean("jotun-crown.build-2x2", true)) return;
+        if (kindOf(p.getInventory().getHelmet()) != Kind.JOTUN) return;
+        if (p.getGameMode() != org.bukkit.GameMode.SURVIVAL && p.getGameMode() != org.bukkit.GameMode.CREATIVE) return;
+        org.bukkit.block.Block b = e.getBlockPlaced();
+        Material type = b.getType();
+        if (!type.isSolid() || !type.isOccluding() || b.getState() instanceof org.bukkit.block.TileState) return;
+        org.bukkit.block.data.BlockData data = b.getBlockData().clone();
+        EquipmentSlot hand = e.getHand();
+        org.bukkit.block.Block against = e.getBlockAgainst();
+        org.bukkit.util.Vector dir = p.getLocation().getDirection();
+        int dx = dir.getX() >= 0 ? 1 : -1, dz = dir.getZ() >= 0 ? 1 : -1;
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!p.isOnline() || b.getType() != type) return;
+            for (int[] o : new int[][]{{dx, 0}, {0, dz}, {dx, dz}}) {
+                ItemStack held = hand == EquipmentSlot.OFF_HAND ? p.getInventory().getItemInOffHand() : p.getInventory().getItemInMainHand();
+                boolean free = p.getGameMode() == org.bukkit.GameMode.CREATIVE;
+                if (!free && (held == null || held.getType() != type || held.getAmount() < 1)) return;   // out of blocks
+                org.bukkit.block.Block at = b.getRelative(o[0], 0, o[1]);
+                if (!at.isReplaceable() || !at.getWorld().getWorldBorder().isInside(at.getLocation())) continue;
+                if (!at.getWorld().getNearbyEntities(at.getBoundingBox().expand(-0.01), en -> en instanceof org.bukkit.entity.LivingEntity).isEmpty()) continue;   // not inside anyone
+                org.bukkit.block.BlockState was = at.getState();
+                at.setBlockData(data, true);
+                bigPlacing.add(p.getUniqueId());
+                org.bukkit.event.block.BlockPlaceEvent ev;
+                try {
+                    ev = new org.bukkit.event.block.BlockPlaceEvent(at, was, against, held == null ? new ItemStack(type) : held, p, true, hand);
+                    Bukkit.getPluginManager().callEvent(ev);
+                } finally { bigPlacing.remove(p.getUniqueId()); }
+                if (ev.isCancelled() || !ev.canBuild()) { was.update(true, false); continue; }
+                if (!free) {
+                    held.setAmount(held.getAmount() - 1);
+                    if (hand == EquipmentSlot.OFF_HAND) p.getInventory().setItemInOffHand(held.getAmount() > 0 ? held : null);
+                    else p.getInventory().setItemInMainHand(held.getAmount() > 0 ? held : null);
+                }
+            }
+        });
     }
 
     /** Tomatoes spread: a player wearing the Tomato Helmet who hits another player turns them into a Tomato too. They get
