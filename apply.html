@@ -128,7 +128,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
   </div>
 </div>
 <script>
-const ACCESS_KEY = "__KEY__";
+const ACCESS_KEY = "1f2188ea-10fc-490d-a090-7f31f6f05697";
 const f = document.getElementById("f"), status = document.getElementById("status"), go = document.getElementById("go");
 const mark = (el, bad) => el.classList.toggle("bad", bad);
 function check() {
@@ -155,7 +155,7 @@ f.addEventListener("submit", async e => {
     status.textContent = age.value && +age.value < 16 ? "Staff need to be 16 or older." : "Please fill in everything marked with *.";
     first.focus(); return;
   }
-  if (!ACCESS_KEY || ACCESS_KEY.startsWith("__")) { status.className = "status no"; status.textContent = "Applications aren't open yet. Try again soon."; return; }
+  if (!ACCESS_KEY) { status.className = "status no"; status.textContent = "Applications aren't open yet. Try again soon."; return; }
   const data = { access_key: ACCESS_KEY, subject: "Staff application: " + document.getElementById("mc").value.trim(), from_name: "BaffoonMC applications", botcheck: false };
   for (const [k, v] of new FormData(f)) if (k !== "botcheck") data[k] = String(v).trim();
   go.disabled = true; status.className = "status"; status.textContent = "Sending...";
