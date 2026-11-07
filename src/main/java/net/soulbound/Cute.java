@@ -323,8 +323,8 @@ final class Cute implements Listener {
     private final java.util.Set<UUID> bigPlacing = new java.util.HashSet<>();
 
     /**
-     * Wearing Jotun's Crown, a full block goes down as a 2x2 slab of four (one block high), spreading the way you're
-     * facing. Every extra block costs one from the stack in your hand (creative: free), it only fills air, water or
+     * Wearing Jotun's Crown, a full block goes down as a 2x2 slab of four (one block high), filling the 2x2 square of a
+     * fixed grid that the block lands in, so giant blocks always line up when stacked or set side by side. Every extra block costs one from the stack in your hand (creative: free), it only fills air, water or
      * grass, and each extra block goes through the normal place checks, so claims, protections and logging all apply.
      * Sneak to place just the one.
      */
@@ -340,15 +340,16 @@ final class Cute implements Listener {
         org.bukkit.block.data.BlockData data = b.getBlockData().clone();
         EquipmentSlot hand = e.getHand();
         org.bukkit.block.Block against = e.getBlockAgainst();
-        org.bukkit.util.Vector dir = p.getLocation().getDirection();
-        int dx = dir.getX() >= 0 ? 1 : -1, dz = dir.getZ() >= 0 ? 1 : -1;
+        // a giant's blocks sit on a 2x2 grid, so they always line up: stack them, or put them side by side, and they meet flush
+        int cx = Math.floorDiv(b.getX(), 2) * 2, cz = Math.floorDiv(b.getZ(), 2) * 2;
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (!p.isOnline() || b.getType() != type) return;
-            for (int[] o : new int[][]{{dx, 0}, {0, dz}, {dx, dz}}) {
+            for (int[] o : new int[][]{{0, 0}, {1, 0}, {0, 1}, {1, 1}}) {
                 ItemStack held = hand == EquipmentSlot.OFF_HAND ? p.getInventory().getItemInOffHand() : p.getInventory().getItemInMainHand();
                 boolean free = p.getGameMode() == org.bukkit.GameMode.CREATIVE;
                 if (!free && (held == null || held.getType() != type || held.getAmount() < 1)) return;   // out of blocks
-                org.bukkit.block.Block at = b.getRelative(o[0], 0, o[1]);
+                org.bukkit.block.Block at = b.getWorld().getBlockAt(cx + o[0], b.getY(), cz + o[1]);
+                if (at.equals(b)) continue;
                 if (!at.isReplaceable() || !at.getWorld().getWorldBorder().isInside(at.getLocation())) continue;
                 if (!at.getWorld().getNearbyEntities(at.getBoundingBox().expand(-0.01), en -> en instanceof org.bukkit.entity.LivingEntity).isEmpty()) continue;   // not inside anyone
                 org.bukkit.block.BlockState was = at.getState();
