@@ -63,6 +63,8 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     private final List<Entry> entries = new ArrayList<>();
     private final Map<UUID, Integer> points = new HashMap<>();
     private final Map<String, Integer> pendingByName = new HashMap<>();   // votes from players the server hasn't seen yet
+    private final Map<UUID, Integer> votes = new HashMap<>();            // lifetime votes, never spent: these climb the ranks
+    private final Map<String, Integer> pendingVotes = new HashMap<>();
     private final Map<UUID, PriceEdit> priceEdits = new HashMap<>();
     private final Map<UUID, long[]> confirm = new HashMap<>();           // {entry index, until}
     private boolean stocked;                                             // the starter pages have been added
@@ -79,7 +81,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
 
     private void load() {
         YamlConfiguration y = YamlConfiguration.loadConfiguration(file);
-        entries.clear(); points.clear(); pendingByName.clear();
+        entries.clear(); points.clear(); pendingByName.clear(); votes.clear(); pendingVotes.clear();
         for (Map<?, ?> m : y.getMapList("items")) {
             try {
                 ItemStack it = ItemStack.deserializeBytes(Base64.getDecoder().decode(String.valueOf(m.get("item"))));
@@ -89,6 +91,16 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         var ps = y.getConfigurationSection("points");
         if (ps != null) for (String k : ps.getKeys(false)) try { points.put(UUID.fromString(k), ps.getInt(k)); } catch (IllegalArgumentException ignored) {}
         stocked = y.getBoolean("starter-stocked", false);
+        var vs = y.getConfigurationSection("votes");
+        if (vs != null) for (String k : vs.getKeys(false)) try { votes.put(UUID.fromString(k), vs.getInt(k)); } catch (IllegalArgumentException ignored) {}
+        var pv = y.getConfigurationSection("pending-votes");
+        if (pv != null) for (String k : pv.getKeys(false)) pendingVotes.put(k, pv.getInt(k));
+        if (!y.getBoolean("votes-counted", false)) {
+            // before ranks counted votes, the only record was points: start everyone's count from what they have
+            int per = Math.max(1, plugin.getConfig().getInt("voteshop.points-per-vote", 1));
+            for (var en : points.entrySet()) votes.putIfAbsent(en.getKey(), en.getValue() / per);
+            for (var en : pendingByName.entrySet()) pendingVotes.putIfAbsent(en.getKey(), en.getValue() / per);
+        }
         var pn = y.getConfigurationSection("pending");
         if (pn != null) for (String k : pn.getKeys(false)) pendingByName.put(k, pn.getInt(k));
     }
@@ -104,6 +116,9 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         }
         y.set("items", list);
         if (stocked) y.set("starter-stocked", true);
+        y.set("votes-counted", true);
+        for (var en : votes.entrySet()) y.set("votes." + en.getKey(), en.getValue());
+        for (var en : pendingVotes.entrySet()) y.set("pending-votes." + en.getKey(), en.getValue());
         for (var en : points.entrySet()) y.set("points." + en.getKey(), en.getValue());
         for (var en : pendingByName.entrySet()) y.set("pending." + en.getKey(), en.getValue());
         try { plugin.getDataFolder().mkdirs(); y.save(file); }
@@ -111,6 +126,8 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     }
 
     int points(UUID id) { return points.getOrDefault(id, 0); }
+    int votes(UUID id) { return votes.getOrDefault(id, 0); }
+    void setVotes(UUID id, int n) { votes.put(id, Math.max(0, n)); save(); }
     void forget(UUID id) { if (points.remove(id) != null) save(); }
     void setPoints(UUID id, int n) { points.put(id, Math.max(0, n)); save(); }
 
@@ -138,25 +155,35 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     private void voted(String name) {
         if (name == null || name.isBlank() || name.length() > 16) return;
         int add = Math.max(0, plugin.getConfig().getInt("voteshop.points-per-vote", 1));
-        if (add == 0) return;
         Player online = Bukkit.getPlayerExact(name);
         OfflinePlayer who = online != null ? online : Bukkit.getOfflinePlayerIfCached(name);
-        if (who == null) { pendingByName.merge(name.toLowerCase(java.util.Locale.ROOT), add, Integer::sum); save(); return; }
-        int now = points.merge(who.getUniqueId(), add, Integer::sum);
+        if (who == null) {
+            String key = name.toLowerCase(java.util.Locale.ROOT);
+            if (add > 0) pendingByName.merge(key, add, Integer::sum);
+            pendingVotes.merge(key, 1, Integer::sum);
+            save(); return;
+        }
+        votes.merge(who.getUniqueId(), 1, Integer::sum);
+        int now = add > 0 ? points.merge(who.getUniqueId(), add, Integer::sum) : points(who.getUniqueId());
         save();
-        if (online != null) {
+        if (online == null) return;
+        if (add > 0) {
             online.sendMessage(Component.text("Thanks for voting! ", GOLD).append(Component.text("+" + add + " point" + (add == 1 ? "" : "s"), NamedTextColor.GREEN))
                     .append(Component.text(" (you have " + now + ").  ", NamedTextColor.GRAY)).append(Component.text("/voteshop", NamedTextColor.YELLOW)));
             online.playSound(online.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.2f);
         }
+        if (plugin.voteRanks() != null) plugin.voteRanks().check(online);
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        Integer owed = pendingByName.remove(e.getPlayer().getName().toLowerCase(java.util.Locale.ROOT));
-        if (owed == null) return;
-        points.merge(e.getPlayer().getUniqueId(), owed, Integer::sum);
-        save();
+        String key = e.getPlayer().getName().toLowerCase(java.util.Locale.ROOT);
+        Integer owed = pendingByName.remove(key), cast = pendingVotes.remove(key);
+        if (owed != null) points.merge(e.getPlayer().getUniqueId(), owed, Integer::sum);
+        if (cast != null) votes.merge(e.getPlayer().getUniqueId(), cast, Integer::sum);
+        if (owed != null || cast != null) save();
+        Player p = e.getPlayer();   // LuckPerms needs a moment to load them before we can tell their rank
+        if (plugin.voteRanks() != null) Bukkit.getScheduler().runTaskLater(plugin, () -> { if (p.isOnline()) plugin.voteRanks().check(p); }, 60L);
     }
 
     // ---------------------------------------------------------------- the shop
@@ -384,6 +411,24 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
                 }
                 s.sendMessage(Component.text(t.getName() + " now has " + points(t.getUniqueId()) + " vote points.", NamedTextColor.GREEN));
             }
+            case "votes" -> {
+                if (a.length < 2) { s.sendMessage(Component.text("Usage: /voteshop votes <player> [add|take|set] <amount>", NamedTextColor.RED)); return true; }
+                OfflinePlayer t = Bukkit.getOfflinePlayerIfCached(a[1]);
+                if (t == null) { s.sendMessage(Component.text("Never seen " + a[1] + " here.", NamedTextColor.RED)); return true; }
+                if (a.length >= 4) {
+                    int n;
+                    try { n = Integer.parseInt(a[3]); } catch (NumberFormatException ex) { s.sendMessage(Component.text("That isn't a number.", NamedTextColor.RED)); return true; }
+                    int was = votes(t.getUniqueId());
+                    switch (a[2].toLowerCase(java.util.Locale.ROOT)) {
+                        case "add", "give" -> setVotes(t.getUniqueId(), was + n);
+                        case "take", "remove" -> setVotes(t.getUniqueId(), was - n);
+                        case "set" -> setVotes(t.getUniqueId(), n);
+                        default -> { s.sendMessage(Component.text("Usage: /voteshop votes <player> [add|take|set] <amount>", NamedTextColor.RED)); return true; }
+                    }
+                    if (t.getPlayer() != null && plugin.voteRanks() != null) plugin.voteRanks().check(t.getPlayer());
+                }
+                s.sendMessage(Component.text(t.getName() + " has voted " + votes(t.getUniqueId()) + " times (this is what ranks go by; points are separate).", GOLD));
+            }
             case "reload" -> { load(); s.sendMessage(Component.text("Vote Shop reloaded.", NamedTextColor.GREEN)); }
             case "stock" -> stock(s, a.length > 1 && a[1].equalsIgnoreCase("force"));
             case "help" -> help(s);
@@ -434,15 +479,18 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         s.sendMessage(line("/voteshop add <price> [page]", "  sell what you're holding"));
         s.sendMessage(line("/voteshop edit [page]", "  take out, re-price or move things"));
         s.sendMessage(line("/voteshop stock", "  add the ready-made pages of everyday things (config.yml)"));
-        s.sendMessage(line("/voteshop points <player> [add|take|set] <n>", ""));
+        s.sendMessage(line("/voteshop points <player> [add|take|set] <n>", "  points to spend"));
+        s.sendMessage(line("/voteshop votes <player> [add|take|set] <n>", "  lifetime votes, for ranks"));
     }
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender s, @NotNull Command cmd, @NotNull String label, String @NotNull [] a) {
         if (!s.hasPermission("soulbound.admin")) return List.of();
-        if (a.length == 1) return filter(List.of("add", "edit", "stock", "points", "reload", "help"), a[0]);
+        if (a.length == 1) return filter(List.of("add", "edit", "stock", "points", "votes", "reload", "help"), a[0]);
         if (a.length == 2 && a[0].equalsIgnoreCase("add")) return filter(List.of("10", "25", "50", "100", "150"), a[1]);
         if (a.length == 3 && a[0].equalsIgnoreCase("add")) { List<String> l = new ArrayList<>(); for (int i = 1; i <= pages() + 1; i++) l.add(String.valueOf(i)); return filter(l, a[2]); }
+        if (a.length == 2 && a[0].equalsIgnoreCase("votes")) { List<String> l = new ArrayList<>(); for (Player p : Bukkit.getOnlinePlayers()) l.add(p.getName()); return filter(l, a[1]); }
+        if (a.length == 3 && a[0].equalsIgnoreCase("votes")) return filter(List.of("add", "take", "set"), a[2]);
         if (a.length == 2 && a[0].equalsIgnoreCase("points")) { List<String> l = new ArrayList<>(); for (Player p : Bukkit.getOnlinePlayers()) l.add(p.getName()); return filter(l, a[1]); }
         if (a.length == 3 && a[0].equalsIgnoreCase("points")) return filter(List.of("add", "take", "set"), a[2]);
         return List.of();

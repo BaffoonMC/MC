@@ -977,6 +977,21 @@ voteshop:
     - "brewing_stand 1 10"
     - "anvil 1 12"
     - "enchanting_table 1 20"
+# Vote ranks: every vote counts towards your level, and you're moved up the LuckPerms track (settrack, so bought ranks
+# and staff ranks on other tracks are left alone) the moment you reach the number. Nobody is ever moved down.
+# Lifetime votes are separate from points, so spending points never costs you a level. /voteshop votes <player> to check or fix.
+vote-ranks:
+  enabled: true
+  track: ranks
+  announce: true          # tell everyone online when someone ranks up
+  levels-url: "https://store.playbaffoonmc.net/wiki.html#levels"
+  # group votes (Newcomer is the default group, so it isn't listed)
+  ladder: ["beginner 5", "novice 35", "intermediate 100", "advanced 175", "adept 275", "expert 400", "seasoned 550",
+           "veteran 750", "elder 1150", "ancient 2000"]
+  # The voting sites /vote lists, as "Name|link". Put the same sites in NuVotifier's server listings.
+  sites: []
+  #  - "Minecraft-MP|https://minecraft-mp.com/server/XXXX/vote/"
+  #  - "Minecraft Server List|https://minecraft-server-list.com/server/XXXX/vote/"
 # /sb player <name> reset: wipes someone back to brand new (inventory, ender chest, XP, advancements, stats and everything
 # Soulbound keeps on them). These console commands also run, for the other plugins ({player} = their name, {uuid} = their id).
 account-reset:

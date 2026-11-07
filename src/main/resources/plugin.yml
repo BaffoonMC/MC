@@ -39,6 +39,10 @@ commands:
     description: Get sent to a random safe spot in the overworld.
     usage: /rtp
     aliases: [wild, randomtp]
+  vote:
+    description: The voting links, how many times you've voted and how far it is to your next level.
+    usage: /vote
+    aliases: [votes]
   voteshop:
     description: The Vote Shop. Spend the points you get for voting (admins - /voteshop help).
     usage: /voteshop [page|add <price> [page]|edit [page]|points <player> [add|take|set] <n>]
