@@ -1,0 +1,25 @@
+# Brood (test plugin). /brood give <player> hands out a Brood Skin; wear it in the chest slot.
+# Changes to the size, health, fall and speed lines only apply to new skins: /brood reload, then /brood give again.
+
+scale: 0.2              # how big you are while wearing it (1 = normal)
+health: 2               # max health while worn (2 = one heart)
+safe-fall: 8            # extra blocks you can fall without getting hurt
+speed-bonus: 0.1        # +10% walking speed, little things scurry
+climb: true             # walk into a wall to crawl up it (hold sneak to cling still)
+item-model: soulbound:parasite   # the Black Filament sprite from the server pack; leave blank for a plain ink sac
+bug-lift: 0             # nudges the bug's body down (+) or up (-) if it floats or sinks
+
+# Animals you can crawl inside. Saddled ones and other people's tamed pets are always refused.
+hosts: [COW, MOOSHROOM, PIG, SHEEP, CHICKEN, GOAT, HORSE, DONKEY, MULE, LLAMA, CAMEL, RABBIT, FOX, WOLF, CAT, OCELOT,
+        PANDA, POLAR_BEAR, TURTLE, FROG, ARMADILLO, SNIFFER, HOGLIN, STRIDER]
+
+host-speed: 1.0         # multiplies the host's own speed
+host-speed-min: 0.13    # blocks per tick, so slow animals still get somewhere
+host-speed-max: 0.3
+host-sprint: 1.45       # sprinting inside a host
+
+feed-every-ticks: 100   # feed every 5 seconds while hungry or hurt
+feed-food: 2            # hunger points per feed
+feed-drain: 1           # health the host loses per feed
+host-min-health: 4      # hosts never go below this (2 hearts); you can't kill an animal by feeding
+reinfest-cooldown-seconds: 3
