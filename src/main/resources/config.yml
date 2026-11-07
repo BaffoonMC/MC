@@ -977,6 +977,11 @@ voteshop:
     - "brewing_stand 1 10"
     - "anvil 1 12"
     - "enchanting_table 1 20"
+# Hit someone and their hearts show above your hotbar (name, a row of hearts, and e.g. 7.5/10).
+hit-health:
+  enabled: true
+  mobs: false      # true = monsters and animals too, not just players (Moloch and his servants keep the boss bar)
+
 # Vote ranks: every vote counts towards your level, and you're moved up the LuckPerms track (settrack, so bought ranks
 # and staff ranks on other tracks are left alone) the moment you reach the number. Nobody is ever moved down.
 # Lifetime votes are separate from points, so spending points never costs you a level. /voteshop votes <player> to check or fix.
