@@ -878,6 +878,7 @@ account-reset:
 jotun-crown:
   scale: 2.0
   jump-bonus: 0.2    # extra jump strength per extra size (0.2 at 2x = twice as high, like Jump Boost II); steps and safe falls scale too
+  block-reach-bonus: 4.5   # extra reach for placing and breaking blocks per extra size (4.5 at 2x = twice as far); hitting stays normal
   build-2x2: true
 
 # Jotun, the Giant Creaking (/sb world creaking [size|remove]): it turns to watch the nearest player it can see and charges a

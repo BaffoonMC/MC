@@ -153,7 +153,7 @@ final class Cute implements Listener {
             if (m instanceof org.bukkit.inventory.meta.Damageable d) d.setMaxDamage(600);
         }
         if (k == Kind.JOTUN && jotunScale() > 1.0001) {
-            // a giant's body, not just a giant's look: jumps, steps and falls scale with you (reach and speed don't, for fair fights)
+            // a giant's body, not just a giant's look: jumps, steps, falls and building reach scale with you (attack reach and speed don't, for fair fights)
             double f = jotunScale(), x = f - 1.0;
             var head = org.bukkit.inventory.EquipmentSlotGroup.HEAD;
             var add = org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER;
@@ -164,6 +164,8 @@ final class Cute implements Listener {
                     new NamespacedKey(plugin, "jotun_crown_step"), 0.6 * x, add, head));                                                          // walk straight up a block
             m.addAttributeModifier(org.bukkit.attribute.Attribute.SAFE_FALL_DISTANCE, new org.bukkit.attribute.AttributeModifier(
                     new NamespacedKey(plugin, "jotun_crown_fall"), 3.0 * x, add, head));                                                          // twice the drop before it hurts
+            m.addAttributeModifier(org.bukkit.attribute.Attribute.BLOCK_INTERACTION_RANGE, new org.bukkit.attribute.AttributeModifier(
+                    new NamespacedKey(plugin, "jotun_crown_reach"), plugin.getConfig().getDouble("jotun-crown.block-reach-bonus", 4.5) * x, add, head));   // build at a giant's arm's length (hitting people stays normal)
         }
         if (k == Kind.GUT) {
             eq.setModel(new NamespacedKey("soulbound", "bubble_gut"));
@@ -309,7 +311,7 @@ final class Cute implements Listener {
 
     /** Does this crown carry the current size? (Ones handed out before, or after a config change, get remade.) */
     private boolean jotunUpToDate(ItemStack h) {
-        var jm = h.getItemMeta().getAttributeModifiers(org.bukkit.attribute.Attribute.JUMP_STRENGTH);
+        var jm = h.getItemMeta().getAttributeModifiers(org.bukkit.attribute.Attribute.BLOCK_INTERACTION_RANGE);
         if (jotunScale() > 1.0001 && (jm == null || jm.isEmpty())) return false;
         var mods = h.getItemMeta().getAttributeModifiers(org.bukkit.attribute.Attribute.SCALE);
         double want = jotunScale() - 1.0;
