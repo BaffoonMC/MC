@@ -52,7 +52,8 @@ final class Tartare implements Listener {
     void registerRecipe() {
         Bukkit.removeRecipe(recipeKey);
         ShapelessRecipe r = new ShapelessRecipe(recipeKey, create(1));
-        r.addIngredient(new RecipeChoice.MaterialChoice(Material.BEEF));
+        for (int i = 0; i < Math.max(1, Math.min(8, plugin.getConfig().getInt("tartare.beef", 3))); i++)
+            r.addIngredient(new RecipeChoice.MaterialChoice(Material.BEEF));   // a proper portion: three raw beef to one egg
         r.addIngredient(new RecipeChoice.MaterialChoice(Material.EGG, Material.BROWN_EGG, Material.BLUE_EGG));
         r.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.MISC);
         Bukkit.addRecipe(r);

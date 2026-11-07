@@ -58,9 +58,6 @@ final class Cute implements Listener {
         BP_HAT("Blood Priest's Hat", "blood_priest_hat", null, "Speed II in Moloch's realm, except while he's being fought."),
         SINNER("Sinner's Halo", "sinners_halo", null, "Too wicked for Heaven, too holy for the furnace. Cosmetic only."),
         BALLOON("Balloon Bonnet", "balloon_bonnet", null, "Proof you were here when it all began."),
-        LAB_COAT("Lab Coat", "lab_coat", null, "Lab outfit (1 of 3). Full outfit: potions last 50% longer.", EquipmentSlot.CHEST, 3),
-        LAB_PANTS("Lab Trousers", "lab_pants", null, "Lab outfit (2 of 3). Full outfit: potions last 50% longer.", EquipmentSlot.LEGS, 2),
-        LAB_SHOES("Lab Shoes", "lab_shoes", null, "Lab outfit (3 of 3). Full outfit: potions last 50% longer.", EquipmentSlot.FEET, 1),
         // token-only hats and masks (no recipes): cosmetic, each with a line of nonsense
         DUNCE("Dunce Cap", "dunce_cap", null, "Sit in the corner and think about what you did."),
         FOX("Furry Fox Mask", "furry_mask", null, "OwO. It's not a phase."),
@@ -98,7 +95,6 @@ final class Cute implements Listener {
         Kind(String title, String model, String alt, String perk, EquipmentSlot slot, int armor) {
             this.title = title; this.model = model; this.alt = alt; this.perk = perk; this.slot = slot; this.armor = armor;
         }
-        boolean lab() { return this == LAB_COAT || this == LAB_PANTS || this == LAB_SHOES; }
         boolean priest() { return false; }
     }
     private static final TextColor PINK = TextColor.color(0xF48FB1);
@@ -138,8 +134,8 @@ final class Cute implements Listener {
         if (k != Kind.BP_HAT) m.setMaxStackSize(1);
         EquippableComponent eq = m.getEquippable();
         eq.setSlot(k.slot);
-        if (k.lab() || k.priest()) {
-            eq.setModel(new NamespacedKey("soulbound", k.priest() ? "blood_priest" : "labcoat"));
+        if (k.priest()) {
+            eq.setModel(new NamespacedKey("soulbound", "blood_priest"));
             org.bukkit.inventory.EquipmentSlotGroup g = switch (k.slot) { case CHEST -> org.bukkit.inventory.EquipmentSlotGroup.CHEST;
                 case LEGS -> org.bukkit.inventory.EquipmentSlotGroup.LEGS; default -> org.bukkit.inventory.EquipmentSlotGroup.FEET; };
             m.addAttributeModifier(org.bukkit.attribute.Attribute.ARMOR, new org.bukkit.attribute.AttributeModifier(
@@ -185,9 +181,6 @@ final class Cute implements Listener {
         add(Kind.WIZARD, Material.BLUE_WOOL, Material.BLUE_WOOL, Material.BLUE_WOOL, Material.GLOWSTONE_DUST);
         add(Kind.TOPHAT, Material.BLACK_WOOL, Material.BLACK_WOOL, Material.BLACK_WOOL, Material.RED_DYE, Material.EMERALD);
         add(Kind.PROSPECTOR, Material.YELLOW_WOOL, Material.YELLOW_WOOL, Material.YELLOW_WOOL, Material.BLACK_DYE, Material.DIAMOND);
-        add(Kind.LAB_COAT, Material.WHITE_WOOL, Material.WHITE_WOOL, Material.WHITE_WOOL, Material.WHITE_WOOL, Material.PAPER);
-        add(Kind.LAB_PANTS, Material.GRAY_WOOL, Material.GRAY_WOOL, Material.GRAY_WOOL, Material.LEATHER);
-        add(Kind.LAB_SHOES, Material.LEATHER, Material.LEATHER, Material.BLACK_DYE);
     }
 
     private void add(Kind k, Material... in) {
@@ -217,9 +210,6 @@ final class Cute implements Listener {
             case "priesthat", "bloodpriesthat" -> Kind.BP_HAT;
             case "sinnershalo", "sinner", "sinnerhalo", "brokenhalo" -> Kind.SINNER;
             case "balloonbonnet", "balloon", "balloons" -> Kind.BALLOON;
-            case "labcoat", "coat" -> Kind.LAB_COAT;
-            case "labpants", "trousers", "pants" -> Kind.LAB_PANTS;
-            case "labshoes", "shoes" -> Kind.LAB_SHOES;
             case "duncecap", "dunce" -> Kind.DUNCE;
             case "furrymask", "furry", "fox", "foxmask" -> Kind.FOX;
             case "goldfishbowl", "fishbowl", "bowl", "goldfish" -> Kind.BOWL;
@@ -247,14 +237,9 @@ final class Cute implements Listener {
             case "bandana", "outlaw" -> Kind.BANDANA;
             case "gatekeeperscrown", "gatekeeper", "gatekeepercrown", "portalcrown" -> Kind.GATEKEEPER;
             case "jotunscrown", "jotun", "jotuncrown" -> Kind.JOTUN;
-            case "lab" -> {
-                for (Kind each : new Kind[]{Kind.LAB_COAT, Kind.LAB_PANTS, Kind.LAB_SHOES}) t.getInventory().addItem(create(each));
-                yield null;
-            }
             default -> null;
         };
         if (k == null) {
-            if (what.equalsIgnoreCase("lab")) return "Gave " + t.getName() + " the lab outfit.";
             for (Kind each : Kind.values()) t.getInventory().addItem(create(each));
             return "Gave " + t.getName() + " all the cosmetics.";
         }
@@ -339,19 +324,6 @@ final class Cute implements Listener {
         Kind k = kindOf(p.getInventory().getHelmet());
         if (k == Kind.CAT && e.getEntity() instanceof Creeper) e.setCancelled(true);
         if (k == Kind.CROWN && e.getEntity() instanceof Bee) e.setCancelled(true);
-    }
-
-    /** The full lab outfit: potions you drink last half as long again. */
-    @EventHandler(ignoreCancelled = true)
-    public void onPotion(org.bukkit.event.entity.EntityPotionEffectEvent e) {
-        if (e.getCause() != org.bukkit.event.entity.EntityPotionEffectEvent.Cause.POTION_DRINK || !(e.getEntity() instanceof Player p)) return;
-        var inv = p.getInventory();
-        if (kindOf(inv.getChestplate()) != Kind.LAB_COAT || kindOf(inv.getLeggings()) != Kind.LAB_PANTS || kindOf(inv.getBoots()) != Kind.LAB_SHOES) return;
-        PotionEffect ne = e.getNewEffect();
-        if (ne == null || ne.isInfinite() || ne.getDuration() < 20) return;
-        e.setCancelled(true);
-        PotionEffect longer = new PotionEffect(ne.getType(), (int) (ne.getDuration() * 1.5), ne.getAmplifier(), ne.isAmbient(), ne.hasParticles(), ne.hasIcon());
-        Bukkit.getScheduler().runTask(plugin, () -> p.addPotionEffect(longer));
     }
 
     /** Chef's Hat: food keeps you full longer (a little extra saturation from every meal). */

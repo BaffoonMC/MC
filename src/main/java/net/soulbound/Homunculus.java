@@ -65,7 +65,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Homunculi: a little wide-eyed thing grown in a flask, one per player.
  *
- * Crafted from a World Egg, a Tumour, a Tear of God and an Ember of Moloch: the Homunculus in a Flask. Use it on the
+ * Crafted from a World Egg, a Tumour and a Quantum Core: the Homunculus in a Flask. Use it on the
  * ground and it climbs out. It's a baby husk underneath (the resource pack redraws baby husks as homunculi, and wild
  * baby husks are swapped for baby zombies so the only ones in the world are these). It never attacks, monsters and
  * golems leave it alone, it doesn't drown into a zombie or burn, and it's silent except for its own little noises.
@@ -157,8 +157,7 @@ final class Homunculus implements Listener {
         ShapelessRecipe r = new ShapelessRecipe(key, flask());
         r.addIngredient(new RecipeChoice.MaterialChoice(Material.DRAGON_EGG));
         r.addIngredient(new RecipeChoice.ExactChoice(plugin.tumourCrop().tumour(1)));
-        r.addIngredient(new RecipeChoice.ExactChoice(plugin.quantum().material(QuantumGear.Mat.TEAR)));
-        r.addIngredient(new RecipeChoice.ExactChoice(plugin.quantum().material(QuantumGear.Mat.EMBER)));
+        r.addIngredient(new RecipeChoice.ExactChoice(plugin.quantum().material(QuantumGear.Mat.CORE)));   // fire and grace, already fused
         Bukkit.addRecipe(r);
         for (Player p : Bukkit.getOnlinePlayers()) p.discoverRecipe(key);
     }
