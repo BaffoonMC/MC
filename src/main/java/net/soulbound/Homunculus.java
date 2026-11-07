@@ -782,7 +782,7 @@ final class Homunculus implements Listener {
         }
     }
 
-    /** Into the summit fire: its owner has fed it to Moloch. He wakes; they go Deeper Still. */
+    /** Into the summit fire: its owner has fed it to Moloch. He wakes; they become Forsaken. */
     private void sacrificed(Husk h) {
         UUID o = owner(h);
         Player p = o == null ? null : Bukkit.getPlayer(o);

@@ -29,6 +29,7 @@ final class SoulboundPlaceholders extends PlaceholderExpansion {
         switch (id.toLowerCase(java.util.Locale.ROOT)) {
             case "state" -> {
                 if (p == null) return "";
+                if (plugin.deeperStill() != null && plugin.deeperStill().is(p)) return plugin.getConfig().getString("placeholders.forsaken", "&#8A2BE2Forsaken");
                 if (plugin.inhuman() != null && plugin.inhuman().is(p)) return plugin.getConfig().getString("placeholders.inhuman", "&#B3122EInhuman");
                 if (plugin.grace() != null && plugin.grace().is(p)) return plugin.getConfig().getString("placeholders.graced", "&#F0D987Graced");
                 return plugin.getConfig().getString("placeholders.human", "&fHuman");

@@ -41,7 +41,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Deeper Still: what you become when you feed your own homunculus to Moloch. It wakes him at once. You're marked for
+ * The Forsaken (once "Deeper Still"; the code still calls it that): what you become when you feed your own homunculus to Moloch. It wakes him at once. You're marked for
  * good: Speed II at night in the Overworld, two more hearts in Moloch's realm, and the Zombie Bell (it raises three
  * zombies to fight for you, then needs time). But the Angel Engine won't take you any more, you can never raise
  * another homunculus, and for a few days it still talks to you.
@@ -110,7 +110,7 @@ final class DeeperStill implements Listener {
         for (ItemStack left : p.getInventory().addItem(bell()).values()) p.getWorld().dropItem(p.getLocation(), left);
         org.bukkit.advancement.Advancement a = Bukkit.getAdvancement(new NamespacedKey("sacrifice", "moloch/deeper_still"));
         if (a != null) { var pr = p.getAdvancementProgress(a); for (String c : pr.getRemainingCriteria()) pr.awardCriteria(c); }
-        else Bukkit.broadcast(Component.text(p.getName() + " has gone ", NamedTextColor.DARK_PURPLE).append(Component.text("[Deeper Still]", NamedTextColor.DARK_PURPLE, TextDecoration.BOLD)));
+        else Bukkit.broadcast(Component.text(p.getName() + " has become ", NamedTextColor.DARK_PURPLE).append(Component.text("[Forsaken]", NamedTextColor.DARK_PURPLE, TextDecoration.BOLD)));
         tick();
     }
 
@@ -132,7 +132,7 @@ final class DeeperStill implements Listener {
                 Component.text("Ring it and the dead get up for you.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                 Component.text("Raises " + (int) cfg("bell-zombies", 4) + " axe-wielding dead for " + (int) cfg("bell-zombie-seconds", 120) + "s. Rests " + (int) (cfg("bell-cooldown-seconds", 300) / 60) + " min after.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false),
                 Component.text("They fight for you. Their bite starves.", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false),
-                Component.text("Only for the inhuman who went Deeper Still.", NamedTextColor.DARK_PURPLE).decoration(TextDecoration.ITALIC, true)));
+                Component.text("Only for the Forsaken.", NamedTextColor.DARK_PURPLE).decoration(TextDecoration.ITALIC, true)));
         m.setItemModel(new NamespacedKey("soulbound", "zombie_bell"));
         m.setMaxStackSize(1);
         m.getPersistentDataContainer().set(bellKey, PersistentDataType.BYTE, (byte) 1);

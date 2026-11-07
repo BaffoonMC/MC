@@ -50,7 +50,7 @@ final class AccountReset implements Listener {
             pending.put(key, new Object[]{t.getUniqueId(), t.getName(), System.currentTimeMillis() + 30_000});
             s.sendMessage(Component.text("Reset " + t.getName() + "'s whole account?", NamedTextColor.GOLD));
             s.sendMessage(Component.text("This wipes their inventory, ender chest, XP, advancements and stats; their soul (Graced/Inhuman), curse, "
-                    + "Deeper Still, homunculus, hat wardrobe" + (plugin.getConfig().getBoolean("account-reset.keep-wardrobe", false) ? " (kept: keep-wardrobe is on)" : "")
+                    + "Forsaken, homunculus, hat wardrobe" + (plugin.getConfig().getBoolean("account-reset.keep-wardrobe", false) ? " (kept: keep-wardrobe is on)" : "")
                     + ", vote points and everything else Soulbound remembers about them"
                     + (plugin.getConfig().getStringList("account-reset.commands").isEmpty() ? "." : ", and runs the other plugins' reset commands (claims, homes, money...)."), NamedTextColor.GRAY));
             s.sendMessage(Component.text("It can't be undone. To go ahead, within 30 seconds: ", NamedTextColor.RED)

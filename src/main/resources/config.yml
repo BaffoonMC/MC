@@ -995,7 +995,7 @@ rapture-crossbow:
   inhuman-glow-seconds: 5
   relift-cooldown-seconds: 3
 
-# Deeper Still: push your own homunculus into the summit fire. Moloch's hunger goes to 100% (he wakes in a few minutes),
+# The Forsaken (config section still named deeper-still): push your own homunculus into the summit fire. Moloch's hunger goes to 100% (he wakes in a few minutes),
 # and you're marked for good: Speed at night in the Overworld, extra health in Moloch's realm, and the Zombie Bell.
 # The Angel Engine won't take you any more, you can never raise another homunculus, and it still talks to you for a while.
 deeper-still:
