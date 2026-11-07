@@ -511,6 +511,7 @@ public final class Soulbound extends JavaPlugin {
         pm.registerEvents(new EndShips(this), this);
         pm.registerEvents(new NoHunger(this), this);
         pm.registerEvents(new CommandHider(this), this);
+        pm.registerEvents(new Motd(this), this);
         combatLog = new CombatLog(this);
         pm.registerEvents(combatLog, this);
         combatLog.start();
