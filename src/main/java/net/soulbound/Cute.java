@@ -152,9 +152,19 @@ final class Cute implements Listener {
             m.addAttributeModifier(org.bukkit.attribute.Attribute.KNOCKBACK_RESISTANCE, new org.bukkit.attribute.AttributeModifier(new NamespacedKey(plugin, "blood_priest_hat_kb"), 0.15, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER, g));
             if (m instanceof org.bukkit.inventory.meta.Damageable d) d.setMaxDamage(600);
         }
-        if (k == Kind.JOTUN && jotunScale() > 1.0001)
-            m.addAttributeModifier(org.bukkit.attribute.Attribute.SCALE, new org.bukkit.attribute.AttributeModifier(
-                    jotunScaleKey(), jotunScale() - 1.0, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER, org.bukkit.inventory.EquipmentSlotGroup.HEAD));
+        if (k == Kind.JOTUN && jotunScale() > 1.0001) {
+            // a giant's body, not just a giant's look: jumps, steps and falls scale with you (reach and speed don't, for fair fights)
+            double f = jotunScale(), x = f - 1.0;
+            var head = org.bukkit.inventory.EquipmentSlotGroup.HEAD;
+            var add = org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER;
+            m.addAttributeModifier(org.bukkit.attribute.Attribute.SCALE, new org.bukkit.attribute.AttributeModifier(jotunScaleKey(), x, add, head));
+            m.addAttributeModifier(org.bukkit.attribute.Attribute.JUMP_STRENGTH, new org.bukkit.attribute.AttributeModifier(
+                    new NamespacedKey(plugin, "jotun_crown_jump"), plugin.getConfig().getDouble("jotun-crown.jump-bonus", 0.2) * x, add, head));     // 0.42 -> 0.62: twice as high
+            m.addAttributeModifier(org.bukkit.attribute.Attribute.STEP_HEIGHT, new org.bukkit.attribute.AttributeModifier(
+                    new NamespacedKey(plugin, "jotun_crown_step"), 0.6 * x, add, head));                                                          // walk straight up a block
+            m.addAttributeModifier(org.bukkit.attribute.Attribute.SAFE_FALL_DISTANCE, new org.bukkit.attribute.AttributeModifier(
+                    new NamespacedKey(plugin, "jotun_crown_fall"), 3.0 * x, add, head));                                                          // twice the drop before it hurts
+        }
         if (k == Kind.GUT) {
             eq.setModel(new NamespacedKey("soulbound", "bubble_gut"));
             m.addAttributeModifier(org.bukkit.attribute.Attribute.KNOCKBACK_RESISTANCE, new org.bukkit.attribute.AttributeModifier(
@@ -299,6 +309,8 @@ final class Cute implements Listener {
 
     /** Does this crown carry the current size? (Ones handed out before, or after a config change, get remade.) */
     private boolean jotunUpToDate(ItemStack h) {
+        var jm = h.getItemMeta().getAttributeModifiers(org.bukkit.attribute.Attribute.JUMP_STRENGTH);
+        if (jotunScale() > 1.0001 && (jm == null || jm.isEmpty())) return false;
         var mods = h.getItemMeta().getAttributeModifiers(org.bukkit.attribute.Attribute.SCALE);
         double want = jotunScale() - 1.0;
         if (mods == null || mods.isEmpty()) return want < 0.0001;

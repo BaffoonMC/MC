@@ -877,6 +877,7 @@ account-reset:
 # 2x2 (one high), using a block from your hand for each. Sneak to place one. Crowns update themselves to a new scale.
 jotun-crown:
   scale: 2.0
+  jump-bonus: 0.2    # extra jump strength per extra size (0.2 at 2x = twice as high, like Jump Boost II); steps and safe falls scale too
   build-2x2: true
 
 # Jotun, the Giant Creaking (/sb world creaking [size|remove]): it turns to watch the nearest player it can see and charges a
