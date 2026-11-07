@@ -410,6 +410,13 @@ img.px { image-rendering: pixelated }
 .lv-p { color: var(--muted) }
 .lv-p em { font-style: normal; opacity: .75 }
 .lv-notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px }
+.votebox { margin-top: 18px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px }
+.votebox h3 { font: 700 22px/1.2 var(--display); color: var(--navy); margin: 0 0 4px }
+.votebox p { color: var(--muted); margin: 0 0 14px; font-size: 14.5px; line-height: 1.55 }
+.votegrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px }
+.votebtn { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; white-space: nowrap; font-size: 15px; background: #2b2412; border: 2px solid var(--gold); color: var(--gold); border-radius: 14px; padding: 12px 16px; text-decoration: none; font-weight: 800 }
+.votebtn span { font-size: 12px; font-weight: 700; opacity: .8 }
+.votebtn:hover { background: var(--gold); color: var(--sky) }
 .lv-note { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px }
 .lv-note h3 { font: 700 20px/1.2 var(--display); color: var(--navy); margin: 0 0 6px }
 .lv-note p { color: var(--muted); margin: 0; font-size: 14.5px; line-height: 1.55 }
@@ -430,7 +437,7 @@ img.px { image-rendering: pixelated }
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#top">Baffoon<span>MC</span></a>
-    <nav class="links" aria-label="Site"><a href="#ranks">Ranks</a><a href="#hats">Hats</a><a href="#levels">Levels</a><a href="#rules">Rules</a><details class="navmore"><summary>More</summary><div class="navmenu"><a href="#claims">Claims</a><a href="#custom">Custom hat</a><a href="#goal">Server goal</a><a href="apply.html">Apply for staff</a></div></details><span class="sep" aria-hidden="true"></span><span class="pages"><a class="page" href="map.html">Map</a><a class="page" href="wiki.html">Wiki</a></span></nav>
+    <nav class="links" aria-label="Site"><a href="#ranks">Ranks</a><a href="#hats">Hats</a><a href="#levels">Levels</a><a href="#vote">Vote</a><a href="#rules">Rules</a><details class="navmore"><summary>More</summary><div class="navmenu"><a href="#claims">Claims</a><a href="#custom">Custom hat</a><a href="#goal">Server goal</a><a href="apply.html">Apply for staff</a></div></details><span class="sep" aria-hidden="true"></span><span class="pages"><a class="page" href="map.html">Map</a><a class="page" href="wiki.html">Wiki</a></span></nav>
     <div class="spacer"></div>
     <a class="dc-btn" href="https://discord.gg/CSWgcxxrBY" target="_blank" rel="noopener" aria-label="Join the Discord"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M9 10h.01M15 10h.01" stroke-linecap="round" stroke-width="3"/></svg><span>Discord</span></a>
     <div class="online off" id="online"><i></i><span>Server status</span></div>
@@ -590,8 +597,9 @@ img.px { image-rendering: pixelated }
         <li class="lv"><span class="lv-n">10</span><span class="lv-tag"><i>[</i><b style="--a:#E8C547;--b:#F0D987">Elder</b><i>]</i></span><span class="lv-v">1,150 votes<small>about 8 months</small></span><span class="lv-h">6 homes</span><span class="lv-p">/enderchest: your ender chest anywhere</span></li>
         <li class="lv"><span class="lv-n">11</span><span class="lv-tag"><i>[</i><b style="--a:#FFF6D8;--b:#E8C547">Ancient</b><i>]</i></span><span class="lv-v">2,000 votes<small>about 13 months</small></span><span class="lv-h">6 homes</span><span class="lv-p">Claim flight: fly inside your own claims (switches off in fights), and the rarest tag on the server</span></li>
     </ol>
+    <div class="votebox" id="vote"><h3>Vote now</h3><p>Each site gives one vote a day, so that's five a day. Type your Minecraft name exactly as it is in game. Every vote is a point for the <b>/voteshop</b> and counts towards your next rank, and the whole server sees your thanks in chat.</p><div class="votegrid"><a class="votebtn" href="https://minecraft-mp.com/server/366545/vote/" target="_blank" rel="noopener">Minecraft-MP<span>Vote 1 ↗</span></a><a class="votebtn" href="https://minecraftservers.org/vote/695841" target="_blank" rel="noopener">MinecraftServers.org<span>Vote 2 ↗</span></a><a class="votebtn" href="https://minecraft-server-list.com/server/524784/vote/" target="_blank" rel="noopener">Minecraft-Server-List<span>Vote 3 ↗</span></a><a class="votebtn" href="https://topg.org/minecraft-servers/server-688102" target="_blank" rel="noopener">TopG<span>Vote 4 ↗</span></a><a class="votebtn" href="https://play-minecraft-servers.com/minecraft-servers/baffoonmc/?tab=vote" target="_blank" rel="noopener">Play-Minecraft-Servers<span>Vote 5 ↗</span></a></div></div>
     <div class="lv-notes">
-      <div class="lv-note"><h3>How voting works</h3><p>Type <b>/vote</b> in game for the links. There are five sites and each gives one vote a day, so that's up to five votes a day. The days shown assume you use all five. You rank up by yourself the moment you hit the number.</p></div>
+      <div class="lv-note"><h3>How voting works</h3><p>Type <b>/vote</b> in game for the links, or use the buttons above. There are five sites and each gives one vote a day, so that's up to five votes a day. The days shown assume you use all five. You rank up by yourself the moment you hit the number.</p></div>
       <div class="lv-note"><h3>Bought a rank too?</h3><p>Supporter, Patron and Chosen sit alongside your level, not instead of it. Your level tag stays, and your bronze, silver or gold stars appear next to it.</p></div>
       <div class="lv-note"><h3>Staff tags</h3><p><span class="lv-tag sm"><i>[</i><b style="--a:#F2D43C;--b:#F7E380">Helper</b><i>]</i></span> <span class="lv-tag sm"><i>[</i><b style="--a:#3F6CFF;--b:#829FFF">Mod</b><i>]</i></span> <span class="lv-tag sm"><i>[</i><b style="--a:#F04848;--b:#F58888">Admin</b><i>]</i></span> <span class="lv-tag sm"><i>[</i><b style="--a:#B01818;--b:#CC6969">Owner</b><i>]</i></span><br>These are the people to ask when something's wrong. They can't be bought or voted for.</p></div>
     </div>
@@ -601,7 +609,7 @@ img.px { image-rendering: pixelated }
 <footer>
   <div class="wrap">
     <div class="row">
-      <a href="#ranks">Ranks</a><a href="#hats">Hats</a><a href="#how">How it works</a><a href="#rules">Rules</a><a href="#levels">Levels</a><a href="map.html">Map</a><a href="wiki.html">Wiki</a><a href="apply.html">Apply for staff</a>
+      <a href="#ranks">Ranks</a><a href="#hats">Hats</a><a href="#how">How it works</a><a href="#rules">Rules</a><a href="#levels">Levels</a><a href="#vote">Vote</a><a href="map.html">Map</a><a href="wiki.html">Wiki</a><a href="apply.html">Apply for staff</a>
       <a id="lTerms" href="#" target="_blank" rel="noopener">Terms</a><a id="lPrivacy" href="#" target="_blank" rel="noopener">Privacy</a><a id="lRefunds" href="#" target="_blank" rel="noopener">Refunds</a>
     </div>
     <p class="legal">BaffoonMC is not an official Minecraft product and is not approved by or associated with Mojang or Microsoft. All purchases are cosmetic or convenience only and give no competitive advantage.</p>
