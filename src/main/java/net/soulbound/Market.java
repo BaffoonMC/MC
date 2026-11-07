@@ -243,7 +243,7 @@ final class Market implements Listener, CommandExecutor, TabCompleter {
         meta.displayName(name.decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
         it.setItemMeta(meta);
-        return it;
+        return MenuIcons.quiet(it);
     }
 
     private static ItemStack shown(ItemStack unit, int qty, List<Component> extra) {

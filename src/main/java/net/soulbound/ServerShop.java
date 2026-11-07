@@ -159,7 +159,7 @@ final class ServerShop implements Listener, CommandExecutor, TabCompleter {
         meta.displayName(name.decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
         it.setItemMeta(meta);
-        return it;
+        return MenuIcons.quiet(it);
     }
 
     private ItemStack display(Player p, Entry e, boolean edit) {

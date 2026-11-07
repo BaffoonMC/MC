@@ -213,7 +213,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         meta.displayName(name.decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
         it.setItemMeta(meta);
-        return it;
+        return MenuIcons.quiet(it);
     }
 
     private ItemStack display(Entry e, int pts, boolean edit) {

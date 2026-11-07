@@ -265,7 +265,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
         ItemMeta im = it.getItemMeta();
         im.displayName(Component.text(name, NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
         it.setItemMeta(im);
-        return it;
+        return MenuIcons.quiet(it);
     }
 
     @EventHandler

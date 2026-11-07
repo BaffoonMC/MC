@@ -432,7 +432,7 @@ final class Homunculus implements Listener {
         if (glow) im.setEnchantmentGlintOverride(true);
         im.getPersistentDataContainer().set(iconKey, PersistentDataType.BYTE, (byte) 1);
         it.setItemMeta(im);
-        return it;
+        return MenuIcons.quiet(it);
     }
 
     private boolean isIcon(ItemStack it) { return it != null && it.hasItemMeta() && it.getItemMeta().getPersistentDataContainer().has(iconKey, PersistentDataType.BYTE); }

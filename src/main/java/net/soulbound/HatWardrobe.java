@@ -198,7 +198,7 @@ final class HatWardrobe implements Listener, CommandExecutor, TabCompleter {
         if (model != null) m.setItemModel(new NamespacedKey("soulbound", model));
         m.setHideTooltip(false);
         it.setItemMeta(m);
-        return it;
+        return MenuIcons.quiet(it);
     }
 
     private static ItemStack pane() {
