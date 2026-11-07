@@ -27,7 +27,7 @@ final class Bug {
     private final Player owner;
     private final float lift;            // fine height adjustment from the config
     private final List<BlockDisplay> parts = new ArrayList<>();
-    private final BlockDisplay[] legs = new BlockDisplay[6];
+    private final BlockDisplay[] legs = new BlockDisplay[12];   // thigh and shin for each of six legs
     private final BlockDisplay[] feelers = new BlockDisplay[2];
     private int phase;
 
@@ -41,7 +41,7 @@ final class Bug {
         box(SHELL, 0, 0.08f, 0.16f, 0.12f, 0.08f, 0.09f, 0);
         box(EYE, 0.035f, 0.10f, 0.205f, 0.03f, 0.03f, 0.012f, 15);
         box(EYE, -0.035f, 0.10f, 0.205f, 0.03f, 0.03f, 0.012f, 15);
-        for (int i = 0; i < 6; i++) legs[i] = stick(SHELL);
+        for (int i = 0; i < 12; i++) legs[i] = stick(SHELL);
         for (int i = 0; i < 2; i++) feelers[i] = stick(SHELL);
         pose(false);
     }
@@ -79,19 +79,27 @@ final class Bug {
         d.setTransformation(new Transformation(tr, q, new Vector3f(len, t, t), new Quaternionf()));
     }
 
-    /** Six legs in a tripod gait, two feelers that twitch. Call every couple of ticks. */
+    /** Six jointed legs in a tripod gait, two feelers that twitch. Call every couple of ticks. */
     void pose(boolean walking) {
         if (walking) phase++;
-        float swing = walking ? (float) Math.sin(phase * 1.3) * 0.45f : 0f;
-        float[] base = {0.75f, 0.05f, -0.65f};   // front, middle, back, in radians off sideways
+        double t = phase * 1.3;
+        float swing = walking ? (float) Math.sin(t) * 0.4f : 0f;
+        float lift = walking ? (float) Math.cos(t) * 0.035f : 0f;
+        float[] base = {0.8f, 0.05f, -0.7f};    // front, middle, back, in radians off sideways
         float[] hipZ = {0.08f, 0.02f, -0.05f};
         for (int i = 0; i < 6; i++) {
             int row = i % 3;
             float side = i < 3 ? 1 : -1;
             boolean group = (row % 2 == 0) == (side > 0);
             float a = base[row] + (group ? swing : -swing);
-            Vector3f dir = new Vector3f(side * (float) Math.cos(a), -0.75f, (float) Math.sin(a));
-            aim(legs[i], new Vector3f(side * 0.09f, 0.08f, hipZ[row]), dir, 0.17f, 0.022f);
+            Vector3f out = new Vector3f(side * (float) Math.cos(a), 0, (float) Math.sin(a));
+            Vector3f hip = new Vector3f(side * 0.08f, 0.09f, hipZ[row]);
+            Vector3f knee = new Vector3f(out).mul(0.11f).add(hip).add(0, 0.07f, 0);
+            Vector3f foot = new Vector3f(out).mul(0.25f).add(hip);
+            foot.y = 0.004f + Math.max(0, group ? lift : -lift);
+            Vector3f thigh = new Vector3f(knee).sub(hip), shin = new Vector3f(foot).sub(knee);
+            aim(legs[i * 2], hip, thigh, thigh.length() + 0.01f, 0.024f);
+            aim(legs[i * 2 + 1], knee, shin, shin.length(), 0.018f);
         }
         float tw = (float) Math.sin(phase * 0.7 + owner.getTicksLived() * 0.05) * 0.15f;
         for (int i = 0; i < 2; i++) {
