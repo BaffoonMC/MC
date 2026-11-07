@@ -149,16 +149,12 @@ td.tag span { color: #555 }
 <body>
 <div class="wrap">
   <nav class="sitebar" aria-label="Site"><a class="sb-brand" href="./">Baffoon<span>MC</span></a>
-    <div class="sb-links"><a href="./">Store</a><a href="map.html">Map</a><a href="wiki.html" aria-current="page">Wiki</a><a href="encyclopedia.html">Encyclopedia</a><a href="items.html">Items</a></div></nav>
+    <div class="sb-links"><a href="./">Store</a><a href="map.html">Map</a><a href="wiki.html" aria-current="page">Wiki</a></div></nav>
+  <script src="wiki-shell.js"></script>
 
   <div class="layout">
     <aside class="side closed" id="side">
-      <div class="label">The BaffoonMC wiki</div>
-      <div class="searchbox">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input class="search" id="q" type="search" placeholder="Search, e.g. home, claim, sell" aria-label="Search the wiki" autocomplete="off">
-      </div>
-      <div class="results" id="results" hidden></div>
+      <div class="label">The guide</div>
       <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="toc">Contents</button>
       <ol class="toc" id="toc"></ol>
     </aside>
@@ -452,6 +448,8 @@ function renderCmds() {
 }
 ["#lvl", "#don", "#onlyMine"].forEach(s => $(s).addEventListener("change", renderCmds));
 renderCmds();
+function toCmd() { const h = location.hash.slice(1); if (!h.startsWith("cmd-")) return; if (!document.getElementById(h)) { $("#onlyMine").checked = false; renderCmds(); } const el = document.getElementById(h); if (el) { el.scrollIntoView({ block: "center" }); el.animate([{ boxShadow: "0 0 0 3px #f2c04a" }, { boxShadow: "0 0 0 0 transparent" }], { duration: 1600 }); } }
+window.addEventListener("hashchange", toCmd); setTimeout(toCmd, 0);
 $("#cmdlist").addEventListener("click", e => {
   const b = e.target.closest(".copy"); if (!b) return;
   const t = b.dataset.copy;
@@ -459,25 +457,5 @@ $("#cmdlist").addEventListener("click", e => {
   if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, () => {}); else done();
 });
 
-/* search */
-const INDEX = [];
-chapters.slice(1).forEach(ch => INDEX.push({ kind: "page", title: ch.dataset.title, sub: ch.dataset.sub || "", href: "#" + ch.id, text: ch.textContent.toLowerCase() }));
-GROUPS.forEach(g => g.cmds.forEach(cmd => INDEX.push({ kind: "cmd", title: cmd.c, sub: cmd.d, href: "#cmd-" + cmd.c.replace(/[^a-z]/gi, ""), text: (cmd.c + " " + cmd.d + " " + (cmd.n || "") + " " + g.name).toLowerCase() })));
-$("#q").addEventListener("input", () => {
-  const q = $("#q").value.trim().toLowerCase(), box = $("#results");
-  if (!q) { box.hidden = true; box.innerHTML = ""; return; }
-  const words = q.split(/\s+/);
-  const hits = INDEX.filter(it => words.every(w => it.text.includes(w)))
-    .sort((a, b) => (b.title.toLowerCase().includes(q) - a.title.toLowerCase().includes(q)) || (a.kind === "cmd" ? -1 : 1))
-    .slice(0, 8);
-  box.hidden = false;
-  box.innerHTML = hits.length ? hits.map(h => `<a href="${h.href}">${h.kind === "cmd" ? `<b>${esc(h.title)}</b>` : esc(h.title)}<small>${esc(h.sub)}</small></a>`).join("") : `<div class="none">Nothing found. Try another word.</div>`;
-});
-$("#results").addEventListener("click", e => {
-  const a = e.target.closest("a"); if (!a) return;
-  if (a.getAttribute("href").startsWith("#cmd-")) { $("#onlyMine").checked = false; renderCmds(); }
-  const el = document.querySelector(a.getAttribute("href"));
-  if (el) { e.preventDefault(); el.scrollIntoView({ block: "center" }); el.animate([{ boxShadow: "0 0 0 3px var(--gold)" }, { boxShadow: "0 0 0 0 transparent" }], { duration: 1400 }); }
-});
 </script>
 </body></html>
