@@ -36,6 +36,22 @@ final class SafeZones implements Listener {
 
     private boolean inClaim(Location l) { return claimAt(l) != null; }
 
+    /** False when GriefPrevention has land claims switched off in this world (its Claims.Mode is Disabled). */
+    boolean claimsAllowed(org.bukkit.World w) {
+        org.bukkit.plugin.Plugin gp = plugin.getServer().getPluginManager().getPlugin("GriefPrevention");
+        if (gp == null || !gp.isEnabled()) return false;
+        try { return (Boolean) gp.getClass().getMethod("claimsEnabledForWorld", org.bukkit.World.class).invoke(gp, w); }
+        catch (ReflectiveOperationException | RuntimeException ex) { return true; }
+    }
+
+    /** Who owns the claim here ("an administrator" for admin claims), or null outside claims. */
+    String claimOwner(Location l) {
+        Object c = claimAt(l);
+        if (c == null) return null;
+        try { return String.valueOf(c.getClass().getMethod("getOwnerName").invoke(c)); }
+        catch (ReflectiveOperationException | RuntimeException ex) { return "someone"; }
+    }
+
     /** The GriefPrevention claim at this spot (the same object for every spot in one claim), or null. */
     Object claimAt(Location l) {
         if (dataStore == null) {

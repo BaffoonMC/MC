@@ -34,6 +34,15 @@ final class SoulboundPlaceholders extends PlaceholderExpansion {
                 if (plugin.grace() != null && plugin.grace().is(p)) return plugin.getConfig().getString("placeholders.graced", "&#F0D987Graced");
                 return plugin.getConfig().getString("placeholders.human", "&fHuman");
             }
+            case "claim" -> {
+                if (p == null || plugin.safeZones() == null) return "";
+                var c = plugin.getConfig();
+                if (!plugin.safeZones().claimsAllowed(p.getWorld())) return c.getString("placeholders.claim-none", "&8No claims here");
+                String owner = plugin.safeZones().claimOwner(p.getLocation());
+                if (owner == null) return c.getString("placeholders.claim-wild", "&7Wilderness");
+                if (owner.equalsIgnoreCase(p.getName())) return c.getString("placeholders.claim-yours", "&#FBE5ABYours");
+                return c.getString("placeholders.claim-owner", "&#FBE5AB{owner}").replace("{owner}", owner);
+            }
             case "realm" -> {
                 if (p == null) return "";
                 World w = p.getWorld();
