@@ -38,7 +38,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * The Laestrygonians: man-eating giants out of the Odyssey, summoned by staff (/sb summon laestrygonians [count]).
- * Zombies twice a player's size in silver Spartan helms, fast, strong and hard to kill; most carry spears, every third
+ * Zombies twice a player's size in silver Spartan helms and iron armour, fast, strong and hard to kill; most carry spears, every third
  * a sword and shield. They never hurt or turn on each other. They drop iron blocks, Human Flesh and their helm.
  */
 final class Laestrygonians implements Listener {
@@ -126,6 +126,9 @@ final class Laestrygonians implements Listener {
             z.setHealth(c.getDouble("laestrygonians.health", 120));
             EntityEquipment eq = z.getEquipment();
             eq.setHelmet(plugin.cute().create(Cute.Kind.LAESTRYGONIAN));
+            eq.setChestplate(new ItemStack(Material.IRON_CHESTPLATE));   // iron armour you can see (the toughness is set above)
+            eq.setLeggings(new ItemStack(Material.IRON_LEGGINGS));
+            eq.setBoots(new ItemStack(Material.IRON_BOOTS));
             if (shieldBearer) {
                 eq.setItemInMainHand(new ItemStack(Material.IRON_SWORD));
                 eq.setItemInOffHand(new ItemStack(Material.SHIELD));
