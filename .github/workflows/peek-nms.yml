@@ -1,0 +1,24 @@
+name: peek-nms
+on: workflow_dispatch
+jobs:
+  peek:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '25' }
+      - name: Fetch Paper and decompile a few classes
+        run: |
+          set -e
+          V=$(curl -s https://fill.papermc.io/v3/projects/paper | python3 -c "import sys,json;d=json.load(sys.stdin)['versions'];print([v for k in d for v in d[k] if v.startswith('26.3')][0])")
+          echo "version $V"
+          URL=$(curl -s https://fill.papermc.io/v3/projects/paper/versions/$V/builds/latest | python3 -c "import sys,json;print(json.load(sys.stdin)['downloads']['server:default']['url'])")
+          curl -sL -o paper.jar "$URL"
+          java -Dpaperclip.patchonly=true -jar paper.jar || true
+          J=$(find versions -name '*.jar' | head -1); echo "server jar $J"
+          curl -sL -o vf.jar https://repo1.maven.org/maven2/org/vineflower/vineflower/1.11.1/vineflower-1.11.1.jar
+          mkdir cls out
+          cd cls && unzip -q ../$J 'net/minecraft/world/entity/Entity*.class' 'net/minecraft/world/entity/LivingEntity*.class' 'net/minecraft/network/syncher/SynchedEntityData*.class' 'net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket*.class' 'net/minecraft/client/*' 2>/dev/null || true; cd ..
+          java -jar vf.jar cls/net/minecraft/world/entity/Entity.class cls/net/minecraft/world/entity/LivingEntity.class cls/net/minecraft/network/syncher/SynchedEntityData.class cls/net/minecraft/network/syncher/SynchedEntityData\$DataValue.class cls/net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket.class out/ >/dev/null 2>&1 || true
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with: { name: nms, path: out }
