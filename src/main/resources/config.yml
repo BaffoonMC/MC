@@ -1071,6 +1071,7 @@ laestrygonians:
   flesh-saturation: 4.0
   iron-gut-seconds: 30   # eat Human Flesh while wearing a Laestrygonian Helm: Strength for this long
   iron-gut-level: 3      # ...at this level (3 = Strength III)
+  helm-scale: 0.1        # wearing the helm makes you this much bigger (0.1 = 10%)
   drops:
     iron-blocks-min: 1
     iron-blocks-max: 3

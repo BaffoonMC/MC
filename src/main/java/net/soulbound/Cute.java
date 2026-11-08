@@ -89,7 +89,7 @@ final class Cute implements Listener {
         // found, never made: for whoever hurt Jotun most
         JOTUN("Jotun's Crown", "jotuns_crown", null, "Twice your size. Your blocks go down 2x2 (sneak to place one)."),
         // found, never made: worn by the Laestrygonians
-        LAESTRYGONIAN("Laestrygonian Helm", "laestrygonian_helm", null, "As strong as netherite. Eat Human Flesh in it for Strength III.");
+        LAESTRYGONIAN("Laestrygonian Helm", "laestrygonian_helm", null, "As strong as netherite, and 10% bigger. Eat Human Flesh in it for Strength III.");
         final String title, model, alt, perk;
         final EquipmentSlot slot;
         final int armor;
@@ -162,6 +162,8 @@ final class Cute implements Listener {
             m.addAttributeModifier(org.bukkit.attribute.Attribute.ARMOR, new org.bukkit.attribute.AttributeModifier(new NamespacedKey(plugin, "laestrygonian_helm_armor"), 3, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER, g));
             m.addAttributeModifier(org.bukkit.attribute.Attribute.ARMOR_TOUGHNESS, new org.bukkit.attribute.AttributeModifier(new NamespacedKey(plugin, "laestrygonian_helm_toughness"), 3, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER, g));
             m.addAttributeModifier(org.bukkit.attribute.Attribute.KNOCKBACK_RESISTANCE, new org.bukkit.attribute.AttributeModifier(new NamespacedKey(plugin, "laestrygonian_helm_kb"), 0.1, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER, g));
+            m.addAttributeModifier(org.bukkit.attribute.Attribute.SCALE, new org.bukkit.attribute.AttributeModifier(new NamespacedKey(plugin, "laestrygonian_helm_scale"),
+                    plugin.getConfig().getDouble("laestrygonians.helm-scale", 0.1), org.bukkit.attribute.AttributeModifier.Operation.ADD_SCALAR, g));   // a touch of the giant: 10% bigger
         }
         if (k == Kind.JOTUN && jotunScale() > 1.0001) {
             // a giant's body, not just a giant's look: jumps, steps, falls and building reach scale with you (attack reach and speed don't, for fair fights)
@@ -190,6 +192,14 @@ final class Cute implements Listener {
         m.getPersistentDataContainer().set(key, PersistentDataType.STRING, k.name());
         it.setItemMeta(m);
         return it;
+    }
+
+    /** Has the 10% size boost (helms dropped before it don't). */
+    private boolean laestrygonianUpToDate(ItemStack it) {
+        var mods = it.getItemMeta().getAttributeModifiers(org.bukkit.attribute.Attribute.SCALE);
+        if (mods == null) return false;
+        for (var am : mods) if (am.getKey().getKey().equals("laestrygonian_helm_scale")) return true;
+        return false;
     }
 
     Kind kindOf(ItemStack it) {
@@ -292,7 +302,7 @@ final class Cute implements Listener {
                 h = create(Kind.BP_HAT); p.getInventory().setHelmet(h);
             }
             if (k == Kind.JOTUN && tick % 20 == 0 && !jotunUpToDate(h)) { h = create(Kind.JOTUN); p.getInventory().setHelmet(h); }   // crowns from before it made you big
-            if (k == Kind.LAESTRYGONIAN && tick % 20 == 0 && h.getType() != Material.NETHERITE_HELMET) {   // helms from before they were netherite: keep their enchantments
+            if (k == Kind.LAESTRYGONIAN && tick % 20 == 0 && (h.getType() != Material.NETHERITE_HELMET || !laestrygonianUpToDate(h))) {   // older helms: remade, keeping their enchantments
                 ItemStack fresh = create(Kind.LAESTRYGONIAN);
                 h.getEnchantments().forEach((en, lvl) -> fresh.addUnsafeEnchantment(en, lvl));
                 h = fresh; p.getInventory().setHelmet(h);
