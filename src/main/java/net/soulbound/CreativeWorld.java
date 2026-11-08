@@ -209,7 +209,7 @@ final class CreativeWorld implements Listener {
         if (e.getTo() == null || bypass(p) || !isCreative(e.getTo().getWorld()) || isCreative(e.getFrom().getWorld())) return;
         if (!canEnter(p)) {   // a donor perk: /warp creative, /tpa to someone there, anything
             e.setCancelled(true);
-            say(p, "The Creative world is for supporters. Any rank from the store unlocks it: store.playbaffoonmc.net");
+            refuse(p);
             return;
         }
         var cm = plugin.captures();
@@ -221,8 +221,33 @@ final class CreativeWorld implements Listener {
         if (!plugin.getConfig().getBoolean("creative-world.donors-only", true)) return true;
         if (p.hasPermission("soulbound.creative.access")) return true;
         for (String g : plugin.getConfig().getStringList("creative-world.donor-groups").isEmpty() ? List.of("supporter", "patron", "chosen") : plugin.getConfig().getStringList("creative-world.donor-groups"))
-            if (p.hasPermission("group." + g)) return true;
+            if (p.isPermissionSet("group." + g) && p.hasPermission("group." + g)) return true;   // isPermissionSet: an op isn't a donor just by being op
         return false;
+    }
+
+    private void refuse(Player p) {
+        p.sendMessage(Component.text("🔒 The Creative world is a perk for ", NamedTextColor.RED)
+                .append(Component.text("Supporter", net.kyori.adventure.text.format.TextColor.color(0xD8935A))).append(Component.text(", ", NamedTextColor.RED))
+                .append(Component.text("Patron", net.kyori.adventure.text.format.TextColor.color(0xC9D3DD))).append(Component.text(" and ", NamedTextColor.RED))
+                .append(Component.text("Chosen", net.kyori.adventure.text.format.TextColor.color(0xF2C04A))).append(Component.text(". Any store rank unlocks it.  ", NamedTextColor.RED))
+                .append(Component.text("[Open the store]", NamedTextColor.GOLD).clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl("https://store.playbaffoonmc.net/#ranks"))
+                        .hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(Component.text("store.playbaffoonmc.net", NamedTextColor.GRAY)))));
+        p.playSound(p.getLocation(), org.bukkit.Sound.BLOCK_CHEST_LOCKED, 0.7f, 1f);
+    }
+
+    /** "/warp creative" from a non-donor: say no before Essentials says "Warping to Creative". */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onWarpCommand(PlayerCommandPreprocessEvent e) {
+        Player p = e.getPlayer();
+        String[] w = e.getMessage().substring(1).trim().toLowerCase(Locale.ROOT).split("\\s+");
+        String cmd = w[0].contains(":") ? w[0].substring(w[0].indexOf(':') + 1) : w[0];
+        if (w.length < 2 || !(cmd.equals("warp") || cmd.equals("warps") || cmd.equals("ewarp"))) return;
+        boolean toCreative = false;
+        for (String n : plugin.getConfig().getStringList("creative-world.worlds").isEmpty() ? List.of("creative") : plugin.getConfig().getStringList("creative-world.worlds"))
+            if (n.equalsIgnoreCase(w[1])) toCreative = true;
+        if (!toCreative || bypass(p) || canEnter(p)) return;
+        e.setCancelled(true);
+        refuse(p);
     }
 
     /** Only getting around and talking: everything else stays outside. */

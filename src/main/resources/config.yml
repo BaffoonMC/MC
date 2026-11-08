@@ -1127,6 +1127,24 @@ hit-health:
   enabled: true
   mobs: false      # true = monsters and animals too, not just players (Moloch and his servants keep the boss bar)
 
+# Rank perks that aren't unlocked yet: instead of "You do not have access to that command", players are told which
+# rank unlocks it (and how many votes away it is), and which store rank has it too. Command: permission, rank, donor.
+locked-commands:
+  back: {permission: essentials.back, rank: beginner}
+  workbench: {permission: essentials.workbench, rank: novice, donor: Patron}
+  craft: {permission: essentials.workbench, rank: novice, donor: Patron}
+  wb: {permission: essentials.workbench, rank: novice, donor: Patron}
+  disposal: {permission: essentials.disposal, rank: intermediate}
+  trash: {permission: essentials.disposal, rank: intermediate}
+  hat: {permission: essentials.hat, rank: seasoned, donor: Supporter}
+  enderchest: {permission: essentials.enderchest, rank: elder, donor: Chosen}
+  ec: {permission: essentials.enderchest, rank: elder, donor: Chosen}
+  echest: {permission: essentials.enderchest, rank: elder, donor: Chosen}
+  claimfly: {permission: soulbound.claimfly, rank: ancient, donor: Patron}
+  fly: {permission: essentials.fly, donor: Chosen}
+  nick: {permission: essentials.nick, donor: Supporter}
+  hdb: {permission: headdb.open, donor: Chosen}
+
 # Vote ranks: every vote counts towards your level, and you're moved up the LuckPerms track (settrack, so bought ranks
 # and staff ranks on other tracks are left alone) the moment you reach the number. Nobody is ever moved down.
 # Lifetime votes are separate from points, so spending points never costs you a level. /voteshop votes <player> to check or fix.

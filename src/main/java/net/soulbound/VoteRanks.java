@@ -42,6 +42,44 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
         Bukkit.getScheduler().runTaskTimer(plugin, this::remind, 20L * 60, 20L * 60);
     }
 
+    // ---------------------------------------------------------------- locked commands
+
+    /**
+     * A rank perk someone hasn't unlocked yet (/back as a Newcomer): instead of "You do not have access to that
+     * command", say which rank unlocks it, how many votes away that is, and (if a store rank also has it) which one.
+     */
+    @EventHandler(priority = org.bukkit.event.EventPriority.LOWEST, ignoreCancelled = true)
+    public void onLocked(org.bukkit.event.player.PlayerCommandPreprocessEvent e) {
+        var sec = plugin.getConfig().getConfigurationSection("locked-commands");
+        if (sec == null) return;
+        Player p = e.getPlayer();
+        String label = e.getMessage().substring(1).trim().split("\\s+")[0].toLowerCase(Locale.ROOT);
+        if (label.contains(":")) label = label.substring(label.indexOf(':') + 1);
+        var c = sec.getConfigurationSection(label);
+        if (c == null) return;
+        String perm = c.getString("permission");
+        if (perm == null || p.hasPermission(perm)) return;
+        e.setCancelled(true);
+        String rank = c.getString("rank"), donor = c.getString("donor");
+        Component msg = Component.text("🔒 /" + label + " isn't unlocked yet. ", NamedTextColor.RED);
+        if (rank != null) {
+            int need = 0;
+            for (Step st : ladder()) if (st.group().equalsIgnoreCase(rank)) need = st.votes();
+            int have = plugin.voteShop().votes(p.getUniqueId());
+            msg = msg.append(Component.text("It comes with ", NamedTextColor.GRAY)).append(Component.text(nice(rank.toLowerCase(Locale.ROOT)), GOLD))
+                    .append(Component.text(need > 0 ? " (" + need + " votes" + (need > have ? ", " + (need - have) + " to go" : "") + ")" : "", NamedTextColor.GRAY));
+            if (donor != null) msg = msg.append(Component.text(" or any " + donor + " rank", NamedTextColor.GRAY));
+            msg = msg.append(Component.text(".  ", NamedTextColor.GRAY)).append(Component.text("[Vote now]", NamedTextColor.GREEN, TextDecoration.BOLD)
+                    .clickEvent(ClickEvent.runCommand("/vote")).hoverEvent(HoverEvent.showText(Component.text("Open the vote menu", NamedTextColor.GRAY))));
+        } else if (donor != null) {
+            msg = msg.append(Component.text("It's a " + donor + " perk (or any rank above it).  ", NamedTextColor.GRAY));
+        }
+        if (donor != null) msg = msg.append(Component.text(rank != null ? " " : "").append(Component.text("[Store]", NamedTextColor.GOLD)
+                .clickEvent(ClickEvent.openUrl("https://store.playbaffoonmc.net/#ranks")).hoverEvent(HoverEvent.showText(Component.text("store.playbaffoonmc.net", NamedTextColor.GRAY)))));
+        p.sendMessage(msg);
+        p.playSound(p.getLocation(), Sound.BLOCK_CHEST_LOCKED, 0.6f, 1f);
+    }
+
     // ---------------------------------------------------------------- reminders
 
     private final java.util.Map<java.util.UUID, Long> joinedAt = new java.util.HashMap<>(), remindedAt = new java.util.HashMap<>();
