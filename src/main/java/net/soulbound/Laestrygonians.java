@@ -171,7 +171,8 @@ final class Laestrygonians implements Listener {
             z.addScoreboardTag(TAG);
             z.customName(Component.text("Laestrygonian", SILVER));
             z.setCustomNameVisible(false);
-            set(z, Attribute.SCALE, c.getDouble("laestrygonians.scale", 2.0));
+            // their helm makes its wearer bigger too, so take that back off here: the giants stay the size set above
+            set(z, Attribute.SCALE, c.getDouble("laestrygonians.scale", 2.0) / (1 + Math.max(0, c.getDouble("laestrygonians.helm-scale", 0.1))));
             set(z, Attribute.MAX_HEALTH, c.getDouble("laestrygonians.health", 120));
             set(z, Attribute.ATTACK_DAMAGE, c.getDouble("laestrygonians.damage", 9));
             set(z, Attribute.MOVEMENT_SPEED, c.getDouble("laestrygonians.speed", 0.31));

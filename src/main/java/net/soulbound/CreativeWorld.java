@@ -207,8 +207,22 @@ final class CreativeWorld implements Listener {
     public void onTeleport(PlayerTeleportEvent e) {
         Player p = e.getPlayer();
         if (e.getTo() == null || bypass(p) || !isCreative(e.getTo().getWorld()) || isCreative(e.getFrom().getWorld())) return;
+        if (!canEnter(p)) {   // a donor perk: /warp creative, /tpa to someone there, anything
+            e.setCancelled(true);
+            say(p, "The Creative world is for supporters. Any rank from the store unlocks it: store.playbaffoonmc.net");
+            return;
+        }
         var cm = plugin.captures();
         if (cm != null && (cm.isCaptive(p) || cm.heldBy(p) != null)) { e.setCancelled(true); say(p, "You can't go to the Creative world while a capture is going on."); }
+    }
+
+    /** Supporter, Patron or Chosen (or anyone given soulbound.creative.access). */
+    private boolean canEnter(Player p) {
+        if (!plugin.getConfig().getBoolean("creative-world.donors-only", true)) return true;
+        if (p.hasPermission("soulbound.creative.access")) return true;
+        for (String g : plugin.getConfig().getStringList("creative-world.donor-groups").isEmpty() ? List.of("supporter", "patron", "chosen") : plugin.getConfig().getStringList("creative-world.donor-groups"))
+            if (p.hasPermission("group." + g)) return true;
+        return false;
     }
 
     /** Only getting around and talking: everything else stays outside. */

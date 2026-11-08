@@ -799,6 +799,9 @@ sulfur-strawberry:
 # soulbound.creative.bypass (ops) skips all of it.
 creative-world:
   enabled: true
+  # Only donors get in (/warp creative, /tpa to someone there, anything): these LuckPerms groups, or soulbound.creative.access.
+  donors-only: true
+  donor-groups: [supporter, patron, chosen]
   # The world name(s), as Multiverse made them.
   worlds: [creative]
   # auto: swap inventories here unless Multiverse-Inventories is installed (then it does it). true / false to force.
@@ -943,6 +946,45 @@ voteshop:
     - "sea_pickle 8 6"
     - "cherry_leaves 32 6"
     - "sb:hat_token 1 2555"
+  # One more page, of building blocks: /voteshop stock blocks.
+  blocks:
+    - "--- More building blocks"
+    - "stone_bricks 64 5"
+    - "mossy_stone_bricks 64 7"
+    - "cracked_stone_bricks 64 6"
+    - "chiseled_stone_bricks 32 6"
+    - "cobbled_deepslate 64 3"
+    - "polished_deepslate 64 6"
+    - "deepslate_tiles 64 7"
+    - "tuff 64 4"
+    - "polished_tuff 64 6"
+    - "nether_bricks 64 8"
+    - "red_nether_bricks 64 9"
+    - "polished_blackstone_bricks 64 8"
+    - "end_stone_bricks 64 10"
+    - "purpur_block 64 10"
+    - "quartz_bricks 32 10"
+    - "quartz_pillar 32 10"
+    - "chiseled_quartz_block 16 8"
+    - "dark_prismarine 32 12"
+    - "red_sandstone 64 5"
+    - "smooth_sandstone 64 6"
+    - "cut_sandstone 64 6"
+    - "packed_mud 64 5"
+    - "dripstone_block 64 5"
+    - "smooth_basalt 64 6"
+    - "orange_terracotta 64 7"
+    - "cyan_terracotta 64 7"
+    - "blue_glazed_terracotta 16 6"
+    - "black_concrete 64 7"
+    - "gray_concrete 64 7"
+    - "red_concrete 64 7"
+    - "blue_concrete 64 7"
+    - "clay 32 6"
+    - "white_stained_glass 32 6"
+    - "tinted_glass 8 8"
+    - "copper_block 16 10"
+    - "cut_copper 32 10"
   # Ready-made pages of everyday things. /voteshop stock adds them after the last page (only once). Change prices
   # here first, or afterwards in /voteshop edit. Each line: ITEM amount price. A line starting with --- starts a new page.
   # About 150 points a month at most (5 votes a day), so a stack of logs is a day of voting.

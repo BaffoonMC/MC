@@ -57,6 +57,9 @@ permissions:
   soulbound.combatlog.bypass:
     description: Logging out mid-fight doesn't kill you, and escape commands still work in combat.
     default: false
+  soulbound.creative.access:
+    description: Can go to the Creative world (Supporter, Patron and Chosen get in anyway).
+    default: false
   soulbound.creative.bypass:
     description: Not locked down in the Creative world (keeps your own inventory, ender chest and commands there).
     default: op
