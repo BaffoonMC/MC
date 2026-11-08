@@ -274,7 +274,16 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
         Site st = m.slots.get(e.getRawSlot());
         if (st == null) return;
         p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 0.6f, 1.2f);
-        Bukkit.getScheduler().runTask(plugin, () -> showSite(p, st));
+        p.closeInventory();
+        // always the link in chat too, in case the box can't show on this player's game
+        p.sendMessage(Component.text("» ", NamedTextColor.GREEN).append(Component.text("Click here to vote on " + st.name(), NamedTextColor.GREEN, TextDecoration.UNDERLINED)
+                .clickEvent(ClickEvent.openUrl(st.url())).hoverEvent(HoverEvent.showText(Component.text(st.url(), NamedTextColor.GRAY))))
+                .append(Component.text("  then /vote for the next one", NamedTextColor.GRAY)));
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!p.isOnline()) return;
+            try { showSite(p, st); }
+            catch (Throwable ex) { plugin.getLogger().warning("Vote menu: couldn't show the vote box (" + ex + "); the chat link was sent instead."); }
+        }, 2L);
     }
 
     /** Who's looking at a site's "open the vote page" box right now, so their menu can come back by itself when the vote lands. */
