@@ -245,5 +245,19 @@ final class Laestrygonians implements Listener {
         l.getWorld().playSound(l, Sound.ENTITY_RAVAGER_DEATH, 1.5f, 0.7f);
     }
 
+    /** Iron Gut: Human Flesh eaten in a Laestrygonian Helm gives Strength I for 30 seconds. */
+    @EventHandler(ignoreCancelled = true)
+    public void onEat(org.bukkit.event.player.PlayerItemConsumeEvent e) {
+        Player p = e.getPlayer();
+        if (!isFlesh(e.getItem()) || plugin.cute().kindOf(p.getInventory().getHelmet()) != Cute.Kind.LAESTRYGONIAN) return;
+        int secs = plugin.getConfig().getInt("laestrygonians.iron-gut-seconds", 30);
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!p.isOnline()) return;
+            p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.STRENGTH, secs * 20, 0, false, true, true));
+            p.sendActionBar(Component.text("Iron Gut: Strength for " + secs + "s", SILVER));
+            p.playSound(p.getLocation(), Sound.ENTITY_RAVAGER_ROAR, 0.4f, 1.4f);
+        });
+    }
+
     private static int between(ThreadLocalRandom r, int lo, int hi) { return hi <= lo ? Math.max(0, lo) : r.nextInt(Math.max(0, lo), hi + 1); }
 }
