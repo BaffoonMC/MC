@@ -520,6 +520,9 @@ public final class Soulbound extends JavaPlugin {
         inhumanPoison = new InhumanPoison(this);
         pm.registerEvents(inhumanPoison, this);
         inhumanPoison.start();
+        GraceHearts graceHearts = new GraceHearts(this);
+        pm.registerEvents(graceHearts, this);
+        graceHearts.start();
         quantumStand = new QuantumStand(this);
         pm.registerEvents(quantumStand, this);
         quantumStand.start();

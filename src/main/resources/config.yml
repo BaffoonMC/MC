@@ -666,6 +666,8 @@ inhuman:
 # Eating the Heart of Darkness takes Grace away. /sb player <player> grace [on|off] to set it by hand.
 grace:
   undead-damage-multiplier: 1.2
+  # The Graced see their own hearts icy blue (only they see it; they aren't really frozen). The pack hides the snowflake frame.
+  frozen-hearts: true
   # Extra max health the Graced carry while in Heaven (the End). 6 = three hearts; 0 turns it off.
   heaven-extra-health: 6
   # Second Wind: at or below this much health (6 = 3 hearts) you get Regeneration I for this long, once per cooldown.
