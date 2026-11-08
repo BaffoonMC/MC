@@ -1069,7 +1069,8 @@ laestrygonians:
   bar-radius: 96     # players this close to the band see its bar ("Laestrygonians · 4 of 6 left")
   flesh-hunger: 6    # Human Flesh: hunger points per bite (it can still give humans food poisoning, like rotten flesh)
   flesh-saturation: 4.0
-  iron-gut-seconds: 30   # eat Human Flesh while wearing a Laestrygonian Helm: Strength I for this long
+  iron-gut-seconds: 30   # eat Human Flesh while wearing a Laestrygonian Helm: Strength for this long
+  iron-gut-level: 3      # ...at this level (3 = Strength III)
   drops:
     iron-blocks-min: 1
     iron-blocks-max: 3

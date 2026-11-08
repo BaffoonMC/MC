@@ -89,7 +89,7 @@ final class Cute implements Listener {
         // found, never made: for whoever hurt Jotun most
         JOTUN("Jotun's Crown", "jotuns_crown", null, "Twice your size. Your blocks go down 2x2 (sneak to place one)."),
         // found, never made: worn by the Laestrygonians
-        LAESTRYGONIAN("Laestrygonian Helm", "laestrygonian_helm", null, "As strong as diamond. Eat Human Flesh in it for 30s of Strength.");
+        LAESTRYGONIAN("Laestrygonian Helm", "laestrygonian_helm", null, "As strong as netherite. Eat Human Flesh in it for Strength III.");
         final String title, model, alt, perk;
         final EquipmentSlot slot;
         final int armor;
@@ -125,7 +125,7 @@ final class Cute implements Listener {
     ItemStack create(Kind k) {
         // the Blood Priest's Hat is real armour (a Quantum Helm's worth), so it sits on a netherite helmet: enchantable,
         // repairable, damageable. The equippable has no armour layer, so its own 3D model is what's worn.
-        ItemStack it = new ItemStack(k == Kind.BP_HAT ? Material.NETHERITE_HELMET : k == Kind.LAESTRYGONIAN ? Material.DIAMOND_HELMET : Material.ECHO_SHARD);
+        ItemStack it = new ItemStack(k == Kind.BP_HAT ? Material.NETHERITE_HELMET : k == Kind.LAESTRYGONIAN ? Material.NETHERITE_HELMET : Material.ECHO_SHARD);
         ItemMeta m = it.getItemMeta();
         m.displayName(Component.text(k.title, NAME_COLOURS.containsKey(k) ? NAME_COLOURS.get(k) : k == Kind.BAROQUE ? TextColor.color(0xD6AC48) : k == Kind.CROC ? TextColor.color(0x7FA84A) : k == Kind.SINNER ? TextColor.color(0xF2C04A) : k == Kind.BALLOON ? TextColor.color(0x3FA2EC)
                 : (k == Kind.BP_HAT || k.priest()) ? TextColor.color(0xB3122E) : PINK, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
@@ -156,11 +156,12 @@ final class Cute implements Listener {
             if (m instanceof org.bukkit.inventory.meta.Damageable d) d.setMaxDamage(600);
         }
         if (k == Kind.LAESTRYGONIAN) {
-            // real armour, a diamond helmet's worth, on a diamond helmet: enchantable, repairable, wears down. Its own 3D model is what's worn.
+            // real armour, a netherite helmet's worth, on a netherite helmet: enchantable, repairable, wears down, survives lava. Its own 3D model is what's worn.
             eq.setModel(null);
             org.bukkit.inventory.EquipmentSlotGroup g = org.bukkit.inventory.EquipmentSlotGroup.HEAD;
             m.addAttributeModifier(org.bukkit.attribute.Attribute.ARMOR, new org.bukkit.attribute.AttributeModifier(new NamespacedKey(plugin, "laestrygonian_helm_armor"), 3, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER, g));
-            m.addAttributeModifier(org.bukkit.attribute.Attribute.ARMOR_TOUGHNESS, new org.bukkit.attribute.AttributeModifier(new NamespacedKey(plugin, "laestrygonian_helm_toughness"), 2, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER, g));
+            m.addAttributeModifier(org.bukkit.attribute.Attribute.ARMOR_TOUGHNESS, new org.bukkit.attribute.AttributeModifier(new NamespacedKey(plugin, "laestrygonian_helm_toughness"), 3, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER, g));
+            m.addAttributeModifier(org.bukkit.attribute.Attribute.KNOCKBACK_RESISTANCE, new org.bukkit.attribute.AttributeModifier(new NamespacedKey(plugin, "laestrygonian_helm_kb"), 0.1, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER, g));
         }
         if (k == Kind.JOTUN && jotunScale() > 1.0001) {
             // a giant's body, not just a giant's look: jumps, steps, falls and building reach scale with you (attack reach and speed don't, for fair fights)
@@ -291,7 +292,11 @@ final class Cute implements Listener {
                 h = create(Kind.BP_HAT); p.getInventory().setHelmet(h);
             }
             if (k == Kind.JOTUN && tick % 20 == 0 && !jotunUpToDate(h)) { h = create(Kind.JOTUN); p.getInventory().setHelmet(h); }   // crowns from before it made you big
-            if (k == Kind.LAESTRYGONIAN && tick % 20 == 0 && h.getType() != Material.DIAMOND_HELMET) { h = create(Kind.LAESTRYGONIAN); p.getInventory().setHelmet(h); }   // helms from before they were real armour
+            if (k == Kind.LAESTRYGONIAN && tick % 20 == 0 && h.getType() != Material.NETHERITE_HELMET) {   // helms from before they were netherite: keep their enchantments
+                ItemStack fresh = create(Kind.LAESTRYGONIAN);
+                h.getEnchantments().forEach((en, lvl) -> fresh.addUnsafeEnchantment(en, lvl));
+                h = fresh; p.getInventory().setHelmet(h);
+            }
             boolean alt = altUntil.getOrDefault(id, 0) > tick;
             switch (k) {
                 case CAT -> { if (!alt && r.nextInt(100) == 0) { altUntil.put(id, tick + 6); alt = true; } }   // a twitch every few seconds
