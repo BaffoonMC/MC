@@ -175,7 +175,7 @@ final class Laestrygonians implements Listener {
             set(z, Attribute.SCALE, c.getDouble("laestrygonians.scale", 2.0) / (1 + Math.max(0, c.getDouble("laestrygonians.helm-scale", 0.1))));
             set(z, Attribute.MAX_HEALTH, c.getDouble("laestrygonians.health", 120));
             set(z, Attribute.ATTACK_DAMAGE, c.getDouble("laestrygonians.damage", 9));
-            set(z, Attribute.MOVEMENT_SPEED, c.getDouble("laestrygonians.speed", 0.38));
+            set(z, Attribute.MOVEMENT_SPEED, c.getDouble("laestrygonians.speed", 0.34));
             set(z, Attribute.ARMOR, c.getDouble("laestrygonians.armor", 12));
             set(z, Attribute.ARMOR_TOUGHNESS, 4);
             set(z, Attribute.KNOCKBACK_RESISTANCE, 0.8);
