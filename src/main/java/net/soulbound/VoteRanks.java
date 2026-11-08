@@ -120,7 +120,7 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
         Menu menu = new Menu();
         int done = 0;
         for (Site st : list) if (wait(p, st) > 0) done++;
-        Inventory inv = Bukkit.createInventory(menu, 27, Component.text("Vote for BaffoonMC  ·  " + done + "/" + list.size() + " today", NamedTextColor.DARK_GRAY));
+        Inventory inv = Bukkit.createInventory(menu, 27, Component.text("Vote for BaffoonMC (" + done + "/" + list.size() + ")", NamedTextColor.DARK_GRAY));
         menu.inv = inv;
         ItemStack pane = icon(Material.GRAY_STAINED_GLASS_PANE, Component.text(" "), List.of());
         for (int i = 0; i < 27; i++) inv.setItem(i, pane);
