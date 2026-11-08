@@ -1006,6 +1006,7 @@ vote-ranks:
     - "TopG|https://topg.org/minecraft-servers/server-688102"
     - "Play-Minecraft-Servers|https://play-minecraft-servers.com/minecraft-servers/baffoonmc/?tab=vote"
     - "Best-Minecraft-Servers|https://best-minecraft-servers.co/server-baffoonmc.33610/vote"
+    - "CurseForge|https://www.curseforge.com/servers/minecraft/game/baffoonmc/vote"
 # /sb player <name> reset: wipes someone back to brand new (inventory, ender chest, XP, advancements, stats and everything
 # Soulbound keeps on them). These console commands also run, for the other plugins ({player} = their name, {uuid} = their id).
 account-reset:
