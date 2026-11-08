@@ -387,7 +387,7 @@ final class Bestiary implements Listener, CommandExecutor {
         return page("laestrygonian", false,
                 List.of(title("LAESTRY-"), title("GONIANS"), t("Man-eating", LABEL), t("giants", LABEL), Component.empty(), label("Where"), t("The staff")),
                 List.of(t("call up a band."), label("Fight"), t("Twice your size,"), t("fast and iron-hard."),
-                        row(t("Spears "), icon("iron_spear", "Spear", "Most of the band."), t(", swords "), icon("laestrygonian_longsword", "Laestrygonian Longsword", "Every third, with a shield."))),
+                        row(t("Spears "), icon("iron_spear", "Spear", "Most of the band."), t(", swords "), icon("laestrygonian_longsword", "Laestrygonian Longsword", "Every third, with a shield.")),
                         row(label("Drops "), icon("human_flesh", "Human Flesh", "Food. Bad food."), t(" "),
                                 icon("laestrygonian_helm", "Laestrygonian Helm", "30% chance. Netherite-strong,", "10% bigger. Eat Human Flesh", "in it for Strength III."), t(" iron blocks"))));
     }
