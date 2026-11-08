@@ -493,6 +493,28 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
                 s.sendMessage(Component.text(t.getName() + " has voted " + votes(t.getUniqueId()) + " times (this is what ranks go by; points are separate).", GOLD));
             }
             case "reload" -> { load(); s.sendMessage(Component.text("Vote Shop reloaded.", NamedTextColor.GREEN)); }
+            case "reprice" -> {
+                String set = a.length > 1 ? a[1].toLowerCase(java.util.Locale.ROOT) : "starter";
+                List<String> lines = plugin.getConfig().getStringList("voteshop." + set);
+                if (lines.isEmpty()) { s.sendMessage(Component.text("There's no voteshop." + set + " list in config.yml.", NamedTextColor.RED)); return true; }
+                int changed = 0;
+                for (String raw : lines) {
+                    String[] w = raw.trim().split("\\s+");
+                    if (w.length < 3 || w[0].startsWith("---")) continue;
+                    Material m = Material.matchMaterial(w[0]);
+                    if (m == null) continue;
+                    int amount, price;
+                    try { amount = Integer.parseInt(w[1]); price = Integer.parseInt(w[2]); } catch (NumberFormatException ex) { continue; }
+                    for (int i = 0; i < entries.size(); i++) {   // the same plain stack in the shop: give it the list's price
+                        Entry en = entries.get(i);
+                        if (en.item().getType() == m && en.item().getAmount() == Math.min(m.getMaxStackSize(), amount) && !en.item().hasItemMeta() && en.price() != price) {
+                            entries.set(i, new Entry(en.item(), price, en.page())); changed++;
+                        }
+                    }
+                }
+                save();
+                s.sendMessage(Component.text("Updated " + changed + " price" + (changed == 1 ? "" : "s") + " from voteshop." + set + ".", NamedTextColor.GREEN));
+            }
             case "stock" -> {
                 String set = a.length > 1 && !a[1].equalsIgnoreCase("force") ? a[1].toLowerCase(java.util.Locale.ROOT) : "starter";
                 stock(s, set, a[a.length - 1].equalsIgnoreCase("force"));
@@ -557,6 +579,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         s.sendMessage(line("/voteshop stock", "  add the ready-made pages of everyday things (config.yml)"));
         s.sendMessage(line("/voteshop stock extra", "  add the two pages of treasures, pets, music and decor"));
         s.sendMessage(line("/voteshop stock blocks", "  add a page of building blocks"));
+        s.sendMessage(line("/voteshop reprice <starter|extra|blocks>", "  set stocked things to the prices in config.yml"));
         s.sendMessage(line("/voteshop points <player> [add|take|set] <n>", "  points to spend"));
         s.sendMessage(line("/voteshop votes <player> [add|take|set] <n>", "  lifetime votes, for ranks"));
     }
@@ -564,10 +587,11 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender s, @NotNull Command cmd, @NotNull String label, String @NotNull [] a) {
         if (!s.hasPermission("soulbound.admin")) return List.of();
-        if (a.length == 1) return filter(List.of("add", "edit", "stock", "points", "votes", "reload", "help"), a[0]);
+        if (a.length == 1) return filter(List.of("add", "edit", "stock", "reprice", "points", "votes", "reload", "help"), a[0]);
         if (a.length == 2 && a[0].equalsIgnoreCase("add")) return filter(List.of("10", "25", "50", "100", "150"), a[1]);
         if (a.length == 3 && a[0].equalsIgnoreCase("add")) { List<String> l = new ArrayList<>(); for (int i = 1; i <= pages() + 1; i++) l.add(String.valueOf(i)); return filter(l, a[2]); }
         if (a.length == 2 && a[0].equalsIgnoreCase("stock")) return filter(List.of("extra", "blocks", "force"), a[1]);
+        if (a.length == 2 && a[0].equalsIgnoreCase("reprice")) return filter(List.of("starter", "extra", "blocks"), a[1]);
         if (a.length == 2 && a[0].equalsIgnoreCase("votes")) { List<String> l = new ArrayList<>(); for (Player p : Bukkit.getOnlinePlayers()) l.add(p.getName()); return filter(l, a[1]); }
         if (a.length == 3 && a[0].equalsIgnoreCase("votes")) return filter(List.of("add", "take", "set"), a[2]);
         if (a.length == 2 && a[0].equalsIgnoreCase("points")) { List<String> l = new ArrayList<>(); for (Player p : Bukkit.getOnlinePlayers()) l.add(p.getName()); return filter(l, a[1]); }
