@@ -87,7 +87,9 @@ final class Cute implements Listener {
         // found, never made: two in every stronghold's chests
         GATEKEEPER("The Gatekeeper's Crown", "gatekeepers_crown", null, "Twelve eyes, and somehow still not watching where you're going."),
         // found, never made: for whoever hurt Jotun most
-        JOTUN("Jotun's Crown", "jotuns_crown", null, "Twice your size. Your blocks go down 2x2 (sneak to place one).");
+        JOTUN("Jotun's Crown", "jotuns_crown", null, "Twice your size. Your blocks go down 2x2 (sneak to place one)."),
+        // found, never made: worn by the Laestrygonians
+        LAESTRYGONIAN("Laestrygonian Helm", "laestrygonian_helm", null, "Pried off a man-eating giant. Still smells of supper.");
         final String title, model, alt, perk;
         final EquipmentSlot slot;
         final int armor;
@@ -107,7 +109,7 @@ final class Cute implements Listener {
             Kind.DUNCE, TextColor.color(0xECE6D4), Kind.FOX, TextColor.color(0xE9792B), Kind.BOWL, TextColor.color(0x7FD3EA),
             Kind.PIGEON, TextColor.color(0x9AA3B4), Kind.LAMPSHADE, TextColor.color(0xE36B8A), Kind.VISITOR, TextColor.color(0x9FD39A),
             Kind.BAG, TextColor.color(0xC49A63), Kind.FROG, TextColor.color(0x7CC56A), Kind.BULL, TextColor.color(0xB07A4E),
-            Kind.HEADFIRST, TextColor.color(0x3B4FA6), Kind.HYPNO, TextColor.color(0xA45BE6), Kind.SHROOM, TextColor.color(0xC42A2A), Kind.TROLL, TextColor.color(0x7E9A6A), Kind.FATSTEVE, TextColor.color(0x6FB6C8), Kind.VILLAGER, TextColor.color(0x5BA04A), Kind.VINDICATOR, TextColor.color(0x8A9A9C), Kind.HATCEPTION, TextColor.color(0xB3122E), Kind.VILLAGERBRINE, TextColor.color(0xE8F4FF), Kind.SPARTAN, TextColor.color(0xDFA84E), Kind.LAURELS, TextColor.color(0xF2C24A), Kind.PHARAOH, TextColor.color(0x2A5CC0), Kind.GUESSWHO, TextColor.color(0x2FA7A3), Kind.FLYLLAGER, TextColor.color(0x9BD23A), Kind.BALACLAVA, TextColor.color(0x3A3A44), Kind.BANDANA, TextColor.color(0xC4232C), Kind.GATEKEEPER, TextColor.color(0xE2B33C), Kind.JOTUN, TextColor.color(0xFF9A3A));
+            Kind.HEADFIRST, TextColor.color(0x3B4FA6), Kind.HYPNO, TextColor.color(0xA45BE6), Kind.SHROOM, TextColor.color(0xC42A2A), Kind.TROLL, TextColor.color(0x7E9A6A), Kind.FATSTEVE, TextColor.color(0x6FB6C8), Kind.VILLAGER, TextColor.color(0x5BA04A), Kind.VINDICATOR, TextColor.color(0x8A9A9C), Kind.HATCEPTION, TextColor.color(0xB3122E), Kind.VILLAGERBRINE, TextColor.color(0xE8F4FF), Kind.SPARTAN, TextColor.color(0xDFA84E), Kind.LAURELS, TextColor.color(0xF2C24A), Kind.PHARAOH, TextColor.color(0x2A5CC0), Kind.GUESSWHO, TextColor.color(0x2FA7A3), Kind.FLYLLAGER, TextColor.color(0x9BD23A), Kind.BALACLAVA, TextColor.color(0x3A3A44), Kind.BANDANA, TextColor.color(0xC4232C), Kind.GATEKEEPER, TextColor.color(0xE2B33C), Kind.JOTUN, TextColor.color(0xFF9A3A), Kind.LAESTRYGONIAN, TextColor.color(0xD9DDE6));
 
     private final Soulbound plugin;
     private final NamespacedKey key;
@@ -254,6 +256,7 @@ final class Cute implements Listener {
             case "bandana", "outlaw" -> Kind.BANDANA;
             case "gatekeeperscrown", "gatekeeper", "gatekeepercrown", "portalcrown" -> Kind.GATEKEEPER;
             case "jotunscrown", "jotun", "jotuncrown" -> Kind.JOTUN;
+            case "laestrygonianhelm", "laestrygonian", "silverspartan" -> Kind.LAESTRYGONIAN;
             default -> null;
         };
         if (k == null) {

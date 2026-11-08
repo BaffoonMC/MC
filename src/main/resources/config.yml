@@ -980,6 +980,24 @@ voteshop:
     - "brewing_stand 1 10"
     - "anvil 1 12"
     - "enchanting_table 1 20"
+# The Laestrygonians (/sb summon laestrygonians [count] [player]): man-eating giants in silver Spartan helms, twice a
+# player's size. Most carry spears, every third a sword and shield. They never hurt each other, don't burn in daylight.
+laestrygonians:
+  scale: 2.0
+  health: 120        # hit points (a player has 20)
+  damage: 9          # per hit, before armour
+  speed: 0.31        # a normal zombie is 0.23
+  armor: 12
+  flesh-hunger: 6    # Human Flesh: hunger points per bite (it can still give humans food poisoning, like rotten flesh)
+  flesh-saturation: 4.0
+  drops:
+    iron-blocks-min: 1
+    iron-blocks-max: 3
+    flesh-min: 2
+    flesh-max: 4
+    helm-chance: 1.0   # 1.0 = every one drops its Laestrygonian Helm, 0.25 = one in four
+    xp: 40
+
 # Hit someone and their hearts show above your hotbar (name, a row of hearts, and e.g. 7.5/10).
 hit-health:
   enabled: true

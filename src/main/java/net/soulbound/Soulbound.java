@@ -48,6 +48,7 @@ public final class Soulbound extends JavaPlugin {
     private ThiefKey thiefKey;
     private KrakenBeard kraken;
     private Cute cute;
+    private Laestrygonians laestrygonians;
     private GodGear godGear;
     private QuantumGear quantum;
     private PotentialBlade potentialBlade;
@@ -473,6 +474,8 @@ public final class Soulbound extends JavaPlugin {
         pm.registerEvents(kraken, this);
         kraken.start();
         cute = new Cute(this);
+        laestrygonians = new Laestrygonians(this);
+        pm.registerEvents(laestrygonians, this);
         pm.registerEvents(cute, this);
         cute.registerRecipes();
         cute.start();
@@ -663,6 +666,7 @@ public final class Soulbound extends JavaPlugin {
     SacrificeManager sacrifices() { return sacrifices; }
     LeashItem leash() { return leash; }
     Cute cute() { return cute; }
+    Laestrygonians laestrygonians() { return laestrygonians; }
     KrakenBeard kraken() { return kraken; }
     Parasite parasite() { return parasite; }
     CurseManager curses() { return curses; }

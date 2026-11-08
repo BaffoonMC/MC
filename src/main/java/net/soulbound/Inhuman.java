@@ -163,6 +163,7 @@ final class Inhuman implements Listener {
         if (!is(p) || !food.getType().isEdible()) return;
         boolean tartare = plugin.tartare() != null && plugin.tartare().is(food);
         if (plugin.tumourPie() != null && plugin.tumourPie().is(food)) tartare = true;   // their kind of pie: counts as raw flesh
+        if (plugin.laestrygonians() != null && plugin.laestrygonians().isFlesh(food)) tartare = true;   // the real thing
         Material t = food.getType();
         boolean raw = tartare || switch (t) {
             case BEEF, PORKCHOP, MUTTON, CHICKEN, RABBIT, COD, SALMON, TROPICAL_FISH -> true;
