@@ -1155,7 +1155,7 @@ vote-ranks:
   levels-url: "https://store.playbaffoonmc.net/wiki.html#levels"
   # group votes (Newcomer is the default group, so it isn't listed)
   # Set for seven sites (up to 7 votes a day): Beginner in a day, Novice in a week, Ancient in about 13 months.
-  ladder: ["beginner 7", "novice 50", "intermediate 140", "advanced 250", "adept 400", "expert 575", "seasoned 775",
+  ladder: ["beginner 5", "novice 50", "intermediate 140", "advanced 250", "adept 400", "expert 575", "seasoned 775",
            "veteran 1050", "elder 1600", "ancient 2800"]
   broadcast: true         # "minecraftmurdere voted for the server on Minecraft-MP!" in chat for every vote
   cooldown-hours: 24      # /vote shows a site red (done) for this long after you vote on it, then green again
