@@ -988,6 +988,7 @@ laestrygonians:
   damage: 9          # per hit, before armour
   speed: 0.31        # a normal zombie is 0.23
   armor: 12
+  bar-radius: 96     # players this close to the band see its bar ("Laestrygonians · 4 of 6 left")
   flesh-hunger: 6    # Human Flesh: hunger points per bite (it can still give humans food poisoning, like rotten flesh)
   flesh-saturation: 4.0
   drops:

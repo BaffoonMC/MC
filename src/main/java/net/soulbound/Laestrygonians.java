@@ -33,7 +33,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.components.FoodComponent;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import net.kyori.adventure.bossbar.BossBar;
+import org.bukkit.Bukkit;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -50,7 +56,56 @@ final class Laestrygonians implements Listener {
     Laestrygonians(Soulbound plugin) {
         this.plugin = plugin;
         this.fleshKey = new NamespacedKey(plugin, "human_flesh");
+        Bukkit.getScheduler().runTaskTimer(plugin, this::tickBars, 20L, 10L);
     }
+
+    // ---------------------------------------------------------------- the war band's bar
+
+    /** One summoning: who's in it, and the bar everyone nearby sees ("Laestrygonians · 4 of 6 left"). */
+    private static final class Band {
+        final List<UUID> members = new ArrayList<>();
+        final Set<UUID> dead = new HashSet<>();
+        final Set<UUID> viewers = new HashSet<>();
+        final BossBar bar = BossBar.bossBar(Component.empty(), 1f, BossBar.Color.WHITE, BossBar.Overlay.PROGRESS);
+        org.bukkit.World world;
+        Location last;
+    }
+    private final List<Band> bands = new ArrayList<>();
+
+    private void tickBars() {
+        double r = plugin.getConfig().getDouble("laestrygonians.bar-radius", 96), r2 = r * r;
+        for (Band b : new ArrayList<>(bands)) {
+            List<Location> alive = new ArrayList<>();
+            for (UUID id : b.members) {
+                if (b.dead.contains(id)) continue;
+                Entity e = Bukkit.getEntity(id);
+                if (e != null && (!e.isValid() || e.isDead())) { if (e.isDead()) b.dead.add(id); continue; }
+                if (e != null) alive.add(e.getLocation());
+                else if (b.last != null) alive.add(b.last);   // in unloaded land: still out there
+            }
+            int left = b.members.size() - b.dead.size();
+            if (left <= 0 || alive.isEmpty()) {   // the band is beaten (or every one of them is gone)
+                for (UUID v : b.viewers) { Player p = Bukkit.getPlayer(v); if (p != null) p.hideBossBar(b.bar); }
+                if (left <= 0 && b.last != null)
+                    for (Player p : b.world.getPlayers()) if (p.getLocation().distanceSquared(b.last) < r2)
+                        p.sendMessage(Component.text("The last Laestrygonian falls. The mountains are quiet again.", SILVER, TextDecoration.ITALIC));
+                bands.remove(b);
+                continue;
+            }
+            b.last = alive.get(0);
+            b.bar.name(Component.text("Laestrygonians", SILVER, TextDecoration.BOLD).append(Component.text("  ·  " + left + " of " + b.members.size() + " left", NamedTextColor.GRAY)));
+            b.bar.progress(Math.max(0f, Math.min(1f, left / (float) b.members.size())));
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                boolean near = false;
+                if (p.getWorld().equals(b.world)) for (Location l : alive) if (l.getWorld() == p.getWorld() && l.distanceSquared(p.getLocation()) < r2) { near = true; break; }
+                if (near && b.viewers.add(p.getUniqueId())) p.showBossBar(b.bar);
+                if (!near && b.viewers.remove(p.getUniqueId())) p.hideBossBar(b.bar);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onQuitBar(org.bukkit.event.player.PlayerQuitEvent e) { for (Band b : bands) b.viewers.remove(e.getPlayer().getUniqueId()); }
 
     static boolean is(Entity e) { return e != null && e.getScoreboardTags().contains(TAG); }
 
@@ -85,16 +140,19 @@ final class Laestrygonians implements Listener {
         if (w == null) return "That world isn't loaded.";
         count = Math.max(1, Math.min(30, count));
         double r = Math.max(3, count * 0.8);
+        Band band = new Band();
+        band.world = w; band.last = at.clone();
         for (int i = 0; i < count; i++) {
             double a = Math.PI * 2 * i / count;
             Location l = at.clone().add(Math.cos(a) * r, 0, Math.sin(a) * r);
             l.setY(Math.max(at.getY(), w.getHighestBlockYAt(l) + 1 > at.getY() + 4 ? at.getY() : w.getHighestBlockYAt(l) + 1));
             if (!l.getBlock().isPassable() || !l.clone().add(0, 1, 0).getBlock().isPassable()) l = at.clone();
             l.setYaw((float) Math.toDegrees(Math.atan2(at.getX() - l.getX(), l.getZ() - at.getZ())));
-            spawn(l, (i + 1) % 3 == 0);
+            band.members.add(spawn(l, (i + 1) % 3 == 0).getUniqueId());
             w.spawnParticle(Particle.CLOUD, l.clone().add(0, 1, 0), 30, 0.6, 1.2, 0.6, 0.02);
             w.spawnParticle(Particle.BLOCK, l, 40, 0.8, 0.2, 0.8, 0, Material.STONE.createBlockData());
         }
+        bands.add(band);
         w.playSound(at, Sound.ENTITY_RAVAGER_ROAR, 2.5f, 0.6f);
         w.playSound(at, Sound.EVENT_RAID_HORN, 3f, 0.8f);
         for (Player p : w.getPlayers())
@@ -168,6 +226,7 @@ final class Laestrygonians implements Listener {
     @EventHandler
     public void onDeath(EntityDeathEvent e) {
         if (!is(e.getEntity())) return;
+        for (Band b : bands) if (b.members.contains(e.getEntity().getUniqueId())) { b.dead.add(e.getEntity().getUniqueId()); b.last = e.getEntity().getLocation(); }
         FileConfiguration c = plugin.getConfig();
         ThreadLocalRandom r = ThreadLocalRandom.current();
         e.getDrops().clear();
