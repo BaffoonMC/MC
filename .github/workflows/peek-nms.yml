@@ -1,5 +1,7 @@
 name: peek-nms
 on: workflow_dispatch
+permissions:
+  contents: write
 jobs:
   peek:
     runs-on: ubuntu-latest
@@ -20,5 +22,9 @@ jobs:
           cd cls && unzip -q ../$J 'net/minecraft/world/entity/Entity*.class' 'net/minecraft/world/entity/LivingEntity*.class' 'net/minecraft/network/syncher/SynchedEntityData*.class' 'net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket*.class' 'net/minecraft/client/*' 2>/dev/null || true; cd ..
           java -jar vf.jar cls/net/minecraft/world/entity/Entity.class cls/net/minecraft/world/entity/LivingEntity.class cls/net/minecraft/network/syncher/SynchedEntityData.class cls/net/minecraft/network/syncher/SynchedEntityData\$DataValue.class cls/net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket.class out/ >/dev/null 2>&1 || true
           ls -la out
-      - uses: actions/upload-artifact@v4
-        with: { name: nms, path: out }
+      - name: Push the output to a scratch branch
+        run: |
+          cd out
+          git init -q -b nms-peek && git add -A
+          git -c user.name=ci -c user.email=ci@localhost commit -qm peek
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" nms-peek
