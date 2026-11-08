@@ -108,7 +108,10 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
         int v = plugin.voteShop().votes(p.getUniqueId());
         Step target = null;
         for (Step s : ladder()) if (v >= s.votes()) target = s;
-        if (target == null || p.hasPermission("group." + target.group())) return;   // already there (or higher, or staff with *)
+        // already there (or higher)? isPermissionSet so an operator, who "has" every permission, isn't mistaken for one who has the rank
+        if (target == null) return;
+        String node = "group." + target.group();
+        if (p.isPermissionSet(node) && p.hasPermission(node)) return;
         String track = plugin.getConfig().getString("vote-ranks.track", "ranks");
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + p.getName() + " parent settrack " + track + " " + target.group());
         String name = nice(target.group());
