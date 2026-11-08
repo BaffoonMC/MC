@@ -49,16 +49,23 @@ import java.util.Set;
  */
 final class Bestiary implements Listener, CommandExecutor {
     // generated from the resource pack's bestiary font (soulbound:bestiary)
-    private static final Map<String, String> PORTRAIT = Map.ofEntries(Map.entry("god", "\uE100"), Map.entry("moloch", "\uE102"), Map.entry("priest", "\uE104"), Map.entry("peacekeeper", "\uE106"), Map.entry("archangel", "\uE108"), Map.entry("zephyr", "\uE10A"), Map.entry("champion", "\uE10C"), Map.entry("quantum", "\uE10E"), Map.entry("inhuman", "\uE10F"), Map.entry("graced", "\uE110"));
-    private static final Map<String, Integer> PORTRAIT_HEIGHT = Map.ofEntries(Map.entry("god", 56), Map.entry("moloch", 56), Map.entry("priest", 56), Map.entry("peacekeeper", 40), Map.entry("archangel", 40), Map.entry("zephyr", 36), Map.entry("champion", 32), Map.entry("quantum", 56), Map.entry("inhuman", 36), Map.entry("graced", 36));
-    private static final Map<String, String> SILHOUETTE = Map.ofEntries(Map.entry("god", "\uE101"), Map.entry("moloch", "\uE103"), Map.entry("priest", "\uE105"), Map.entry("peacekeeper", "\uE107"), Map.entry("archangel", "\uE109"), Map.entry("zephyr", "\uE10B"), Map.entry("champion", "\uE10D"));
-    private static final Map<String, String> ICON = Map.ofEntries(Map.entry("halo", "\uE111"), Map.entry("tear_of_god", "\uE112"), Map.entry("vestments_helmet", "\uE113"), Map.entry("vestments_chestplate", "\uE114"), Map.entry("moloch_horns", "\uE115"), Map.entry("ember_of_moloch", "\uE116"), Map.entry("moloch_helmet", "\uE117"), Map.entry("moloch_chestplate", "\uE118"), Map.entry("sack_front", "\uE119"), Map.entry("cudgel", "\uE11A"), Map.entry("capture_leash", "\uE11B"), Map.entry("cultist_axe_3", "\uE11C"), Map.entry("blood_priest_hat", "\uE11D"), Map.entry("tumour_seed", "\uE11E"), Map.entry("blood_emerald", "\uE11F"), Map.entry("heart_of_light", "\uE120"), Map.entry("heart_of_darkness", "\uE121"), Map.entry("quantum_core", "\uE122"), Map.entry("quantum_chestplate", "\uE123"), Map.entry("cloud_cotton_seeds", "\uE124"), Map.entry("tumour", "\uE125"), Map.entry("potential_blade", "\uE126"));
-    private static final Map<String, String> INDENT = Map.ofEntries(Map.entry("god", "\uE127"), Map.entry("moloch", "\uE128"), Map.entry("priest", "\uE129"), Map.entry("peacekeeper", "\uE12A"), Map.entry("archangel", "\uE12B"), Map.entry("zephyr", "\uE12C"), Map.entry("champion", "\uE12D"), Map.entry("quantum", "\uE12E"), Map.entry("inhuman", "\uE12F"), Map.entry("graced", "\uE130"));
+    private static final Map<String, String> PORTRAIT = Map.ofEntries(Map.entry("god", "\uE100"), Map.entry("moloch", "\uE102"), Map.entry("priest", "\uE104"), Map.entry("peacekeeper", "\uE106"), Map.entry("archangel", "\uE108"), Map.entry("zephyr", "\uE10A"), Map.entry("champion", "\uE10C"), Map.entry("quantum", "\uE10E"), Map.entry("inhuman", "\uE10F"), Map.entry("graced", "\uE110"),
+            Map.entry("laestrygonian", "\uE131"), Map.entry("creaking", "\uE133"), Map.entry("brimstone", "\uE135"), Map.entry("bloodmoon", "\uE137"), Map.entry("homunculus", "\uE139"), Map.entry("sleeper", "\uE13B"));
+    private static final Map<String, Integer> PORTRAIT_HEIGHT = Map.ofEntries(Map.entry("god", 56), Map.entry("moloch", 56), Map.entry("priest", 56), Map.entry("peacekeeper", 40), Map.entry("archangel", 40), Map.entry("zephyr", 36), Map.entry("champion", 32), Map.entry("quantum", 56), Map.entry("inhuman", 36), Map.entry("graced", 36),
+            Map.entry("laestrygonian", 56), Map.entry("creaking", 56), Map.entry("brimstone", 32), Map.entry("bloodmoon", 32), Map.entry("homunculus", 40), Map.entry("sleeper", 32));
+    private static final Map<String, String> SILHOUETTE = Map.ofEntries(Map.entry("god", "\uE101"), Map.entry("moloch", "\uE103"), Map.entry("priest", "\uE105"), Map.entry("peacekeeper", "\uE107"), Map.entry("archangel", "\uE109"), Map.entry("zephyr", "\uE10B"), Map.entry("champion", "\uE10D"),
+            Map.entry("laestrygonian", "\uE132"), Map.entry("creaking", "\uE134"), Map.entry("brimstone", "\uE136"), Map.entry("bloodmoon", "\uE138"), Map.entry("homunculus", "\uE13A"), Map.entry("sleeper", "\uE13C"));
+    private static final Map<String, String> ICON = Map.ofEntries(Map.entry("halo", "\uE111"), Map.entry("tear_of_god", "\uE112"), Map.entry("vestments_helmet", "\uE113"), Map.entry("vestments_chestplate", "\uE114"), Map.entry("moloch_horns", "\uE115"), Map.entry("ember_of_moloch", "\uE116"), Map.entry("moloch_helmet", "\uE117"), Map.entry("moloch_chestplate", "\uE118"), Map.entry("sack_front", "\uE119"), Map.entry("cudgel", "\uE11A"), Map.entry("capture_leash", "\uE11B"), Map.entry("cultist_axe_3", "\uE11C"), Map.entry("blood_priest_hat", "\uE11D"), Map.entry("tumour_seed", "\uE11E"), Map.entry("blood_emerald", "\uE11F"), Map.entry("heart_of_light", "\uE120"), Map.entry("heart_of_darkness", "\uE121"), Map.entry("quantum_core", "\uE122"), Map.entry("quantum_chestplate", "\uE123"), Map.entry("cloud_cotton_seeds", "\uE124"), Map.entry("tumour", "\uE125"), Map.entry("potential_blade", "\uE126"),
+            Map.entry("human_flesh", "\uE13D"), Map.entry("laestrygonian_helm", "\uE13E"), Map.entry("laestrygonian_longsword", "\uE13F"), Map.entry("iron_spear", "\uE140"), Map.entry("homunculus_flask", "\uE141"),
+            Map.entry("mini_creaking", "\uE148"), Map.entry("mini_brimstone", "\uE149"), Map.entry("mini_bloodmoon", "\uE14A"), Map.entry("mini_sleeper", "\uE14B"));
+    private static final Map<String, String> INDENT = Map.ofEntries(Map.entry("god", "\uE127"), Map.entry("moloch", "\uE128"), Map.entry("priest", "\uE129"), Map.entry("peacekeeper", "\uE12A"), Map.entry("archangel", "\uE12B"), Map.entry("zephyr", "\uE12C"), Map.entry("champion", "\uE12D"), Map.entry("quantum", "\uE12E"), Map.entry("inhuman", "\uE12F"), Map.entry("graced", "\uE130"),
+            Map.entry("laestrygonian", "\uE142"), Map.entry("creaking", "\uE143"), Map.entry("brimstone", "\uE144"), Map.entry("bloodmoon", "\uE145"), Map.entry("homunculus", "\uE146"), Map.entry("sleeper", "\uE147"));
 
     private static final Key FONT = Key.key("soulbound", "bestiary");
     private static final TextColor DARK_RED = NamedTextColor.DARK_RED, LABEL = NamedTextColor.DARK_GRAY, LINK = NamedTextColor.DARK_AQUA, QUOTE = NamedTextColor.DARK_PURPLE;
     /** creatures you have to meet before their page opens, in book order */
-    private static final List<String> CREATURES = List.of("god", "moloch", "priest", "peacekeeper", "archangel", "zephyr", "champion");
+    private static final List<String> CREATURES = List.of("god", "peacekeeper", "archangel", "zephyr", "brimstone", "moloch", "priest", "champion",
+            "laestrygonian", "creaking", "bloodmoon", "sleeper", "homunculus");
 
     private final Soulbound plugin;
     private final NamespacedKey itemKey, seenKey;
@@ -123,8 +130,11 @@ final class Bestiary implements Listener, CommandExecutor {
         p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
     }
 
-    private static final Map<String, String> NAMES = Map.of("god", "God", "moloch", "Moloch", "priest", "The Blood Priest", "peacekeeper", "The Peacekeeper",
-            "archangel", "Archangels", "zephyr", "Zephyrs", "champion", "Moloch's Champions");
+    private static final Map<String, String> NAMES = Map.ofEntries(Map.entry("god", "God"), Map.entry("moloch", "Moloch"), Map.entry("priest", "The Blood Priest"),
+            Map.entry("peacekeeper", "The Peacekeeper"), Map.entry("archangel", "Archangels"), Map.entry("zephyr", "Zephyrs"), Map.entry("champion", "Moloch's Champions"),
+            Map.entry("brimstone", "Brimstone Cubes"), Map.entry("laestrygonian", "The Laestrygonians"), Map.entry("creaking", "The Giant Creaking"),
+            Map.entry("bloodmoon", "Blood Moon Beasts"), Map.entry("sleeper", "The Sleeper"), Map.entry("homunculus", "Homunculi"),
+            Map.entry("how", "How it works"), Map.entry("inhuman", "The Inhuman"), Map.entry("graced", "The Graced"), Map.entry("quantum", "Quantum Humanity"));
 
     /** every two seconds: has anyone come near something they haven't met? */
     private void scan() {
@@ -147,7 +157,18 @@ final class Bestiary implements Listener, CommandExecutor {
         if (plugin.archangels() != null && plugin.archangels().isArchangel(e)) return "archangel";
         if (end && e instanceof Shulker) return "archangel";
         if (plugin.zephyrs() != null && plugin.zephyrs().is(e)) return "zephyr";
+        if (plugin.brimstone() != null && plugin.brimstone().is(e)) return "brimstone";
+        if (Laestrygonians.is(e)) return "laestrygonian";
+        if (plugin.giantCreaking() != null && plugin.giantCreaking().is(e)) return "creaking";
+        if (plugin.homunculus() != null && plugin.homunculus().is(e)) return "homunculus";
+        if (plugin.sleeper() != null && plugin.sleeper().is(e)) return "sleeper";
+        if (livestock(e) && plugin.boss() != null && plugin.boss().bloodMoon() && plugin.boss().bloodMoonWorld(e.getWorld())) return "bloodmoon";
         return null;
+    }
+
+    private static boolean livestock(Entity e) {
+        return e instanceof org.bukkit.entity.Cow || e instanceof org.bukkit.entity.Pig || e instanceof org.bukkit.entity.Sheep || e instanceof org.bukkit.entity.Chicken
+                || e instanceof org.bukkit.entity.Goat || e instanceof org.bukkit.entity.Rabbit || e instanceof org.bukkit.entity.AbstractHorse;
     }
 
     // ---------------------------------------------------------------- building pages
@@ -165,7 +186,7 @@ final class Bestiary implements Listener, CommandExecutor {
     }
     private static Component row(Component... parts) { TextComponent.Builder b = Component.text(); for (Component c : parts) b.append(c); return b.build(); }
 
-    /** a page with a picture top-left: side lines run beside it, the rest below */
+    /** a page with a picture top-left: side lines run beside it, the rest below, and a way back to the contents at the foot */
     private Component page(String pid, boolean locked, List<Component> side, List<Component> rest) {
         int rows = (int) Math.ceil(PORTRAIT_HEIGHT.get(pid) / 9.0);
         List<Component> lines = new ArrayList<>();
@@ -175,8 +196,17 @@ final class Bestiary implements Listener, CommandExecutor {
             lines.add(row(lead, Component.text(" "), i < side.size() ? side.get(i) : Component.empty()));
         }
         lines.addAll(rest);
+        return withFooter(lines, contentsPageOf(pid));
+    }
+
+    /** pad to the foot of the page (14 lines) and add the link back to the contents */
+    private static Component withFooter(List<Component> lines, int contentsPage) {
+        List<Component> l = new ArrayList<>(lines);
+        while (l.size() < 13) l.add(Component.empty());
+        if (l.size() < 14) l.add(Component.text("\u25C0 Contents", LINK).clickEvent(ClickEvent.changePage(contentsPage))
+                .hoverEvent(HoverEvent.showText(Component.text("Back to the contents"))));
         TextComponent.Builder b = Component.text();
-        for (int i = 0; i < lines.size(); i++) { if (i > 0) b.append(Component.newline()); b.append(lines.get(i)); }
+        for (int i = 0; i < l.size(); i++) { if (i > 0) b.append(Component.newline()); b.append(l.get(i)); }
         return b.build();
     }
 
@@ -185,42 +215,86 @@ final class Bestiary implements Listener, CommandExecutor {
                 List.of(Component.empty(), label("Hint"), t(hint1), t(hint2)));
     }
 
-    // book order: 1 contents, 2 how it works, then the entries
-    private static final List<String> ORDER = List.of("how", "god", "moloch", "priest", "peacekeeper", "archangel", "zephyr", "champion", "inhuman", "graced", "quantum");
+    // the contents, in sections; the entries follow in the same order
+    private static final String[][][] SECTIONS = {
+            {{"HEAVEN"}, {"god", "halo"}, {"peacekeeper", "heart_of_light"}, {"archangel", "tear_of_god"}, {"zephyr", "cloud_cotton_seeds"}, {"brimstone", "mini_brimstone"}},
+            {{"MOLOCH'S REALM"}, {"moloch", "moloch_horns"}, {"priest", "blood_priest_hat"}, {"champion", "moloch_helmet"}},
+            {{"THE WORLD"}, {"laestrygonian", "laestrygonian_helm"}, {"creaking", "mini_creaking"}, {"bloodmoon", "mini_bloodmoon"}, {"sleeper", "mini_sleeper"}, {"homunculus", "homunculus_flask"}},
+            {{"PATHS"}, {"inhuman", "heart_of_darkness"}, {"graced", "heart_of_light"}, {"quantum", "quantum_core"}}};
+    /** contents page 1 holds the first two sections, page 2 the rest */
+    private static final int CONTENTS_SPLIT = 2;
+    // book order: 1-2 contents, 3 how it works, then the entries
+    private static final List<String> ORDER = order();
+    private static List<String> order() {
+        List<String> o = new ArrayList<>(List.of("how"));
+        for (String[][] sec : SECTIONS) for (int i = 1; i < sec.length; i++) o.add(sec[i][0]);
+        return o;
+    }
+    private static int pageOf(String id) { return ORDER.indexOf(id) + 3; }
+    private static int contentsPageOf(String id) {
+        for (int s = 0; s < SECTIONS.length; s++) for (int i = 1; i < SECTIONS[s].length; i++) if (SECTIONS[s][i][0].equals(id)) return s < CONTENTS_SPLIT ? 1 : 2;
+        return 1;
+    }
 
     void open(Player p) {
         List<Component> pages = new ArrayList<>();
-        pages.add(contents(p));
+        pages.add(contents(p, 0));
+        pages.add(contents(p, 1));
         pages.add(how());
-        pages.add(knows(p, "god") ? god() : lockedPage("god", "Fly to the End.", ""));
-        pages.add(knows(p, "moloch") ? moloch() : lockedPage("moloch", "Feed the fire", "until he wakes."));
-        pages.add(knows(p, "priest") ? priest() : lockedPage("priest", "He waits in", "Moloch's realm."));
-        pages.add(knows(p, "peacekeeper") ? peacekeeper() : lockedPage("peacekeeper", "Climb to Heaven's", "gates."));
-        pages.add(knows(p, "archangel") ? archangels() : lockedPage("archangel", "Wander the Seven", "Heavens."));
-        pages.add(knows(p, "zephyr") ? zephyrs() : lockedPage("zephyr", "Feel the wind on", "the outer islands."));
-        pages.add(knows(p, "champion") ? champions() : lockedPage("champion", "Wound Moloch", "badly."));
-        pages.add(inhuman());
-        pages.add(graced());
-        pages.add(quantum());
+        for (String id : ORDER) if (!id.equals("how")) pages.add(entry(p, id));
         p.openBook(Book.book(Component.text("Bestiary"), Component.text("BaffoonMC"), pages));
     }
 
-    private Component contents(Player p) {
+    private Component entry(Player p, String id) {
+        boolean k = knows(p, id);
+        return switch (id) {
+            case "god" -> k ? god() : lockedPage(id, "Fly to the End.", "");
+            case "moloch" -> k ? moloch() : lockedPage(id, "Feed the fire", "until he wakes.");
+            case "priest" -> k ? priest() : lockedPage(id, "He waits in", "Moloch's realm.");
+            case "peacekeeper" -> k ? peacekeeper() : lockedPage(id, "Climb to Heaven's", "gates.");
+            case "archangel" -> k ? archangels() : lockedPage(id, "Wander the Seven", "Heavens.");
+            case "zephyr" -> k ? zephyrs() : lockedPage(id, "Feel the wind on", "the outer islands.");
+            case "brimstone" -> k ? brimstone() : lockedPage(id, "Something yellow", "hops on the islands.");
+            case "champion" -> k ? champions() : lockedPage(id, "Wound Moloch", "badly.");
+            case "laestrygonian" -> k ? laestrygonians() : lockedPage(id, "Giants walk when", "the staff say so.");
+            case "creaking" -> k ? creaking() : lockedPage(id, "Walk to the edge", "of the world.");
+            case "bloodmoon" -> k ? bloodMoon() : lockedPage(id, "Stay out under", "a red moon.");
+            case "sleeper" -> k ? sleeper() : lockedPage(id, "Someone's asleep", "at spawn.");
+            case "homunculus" -> k ? homunculus() : lockedPage(id, "Grow one in", "a flask.");
+            case "inhuman" -> inhuman();
+            case "graced" -> graced();
+            default -> quantum();
+        };
+    }
+
+    private Component contents(Player p, int half) {
         List<Component> l = new ArrayList<>();
-        l.add(row(Component.text("     "), Component.text("BESTIARY", DARK_RED, TextDecoration.BOLD)));
-        l.add(row(Component.text("     "), t("of BaffoonMC", LABEL)));
-        l.add(Component.empty());
-        String[][] rows = {{"how", "halo", "How it works"}, {"god", "halo", "God"}, {"moloch", "moloch_horns", "Moloch"}, {"priest", "blood_priest_hat", "The Blood Priest"},
-                {"peacekeeper", "heart_of_light", "The Peacekeeper"}, {"archangel", "tear_of_god", "Archangels"}, {"zephyr", "cloud_cotton_seeds", "Zephyrs"},
-                {"champion", "moloch_helmet", "Moloch's Champions"}, {"inhuman", "heart_of_darkness", "The Inhuman"}, {"graced", "heart_of_light", "The Graced"},
-                {"quantum", "quantum_core", "Quantum Humanity"}};
-        for (String[] r : rows) {
-            int page = ORDER.indexOf(r[0]) + 2;
-            boolean open = knows(p, r[0]);
-            Component name = open
-                    ? Component.text(r[2], LINK, TextDecoration.UNDERLINED).clickEvent(ClickEvent.changePage(page)).hoverEvent(HoverEvent.showText(Component.text("Turn to page " + page)))
-                    : Component.text("???", LABEL);
-            l.add(row(open ? glyph(ICON.get(r[1])) : Component.text("  "), Component.text(" "), name));
+        if (half == 0) {
+            int met = 0;
+            for (String c : CREATURES) if (seen(p).contains(c) || p.hasPermission("soulbound.bestiary.all")) met++;
+            l.add(row(Component.text("BESTIARY", DARK_RED, TextDecoration.BOLD), t("  met ", LABEL),
+                    t(met + "/" + CREATURES.size(), met == CREATURES.size() ? NamedTextColor.DARK_GREEN : NamedTextColor.BLACK)));
+            l.add(Component.text("How it works", LINK, TextDecoration.UNDERLINED).clickEvent(ClickEvent.changePage(3)));
+        } else {
+            l.add(row(Component.text("BESTIARY", DARK_RED, TextDecoration.BOLD), t("  continued", LABEL)));
+        }
+        int from = half == 0 ? 0 : CONTENTS_SPLIT, to = half == 0 ? CONTENTS_SPLIT : SECTIONS.length;
+        for (int s = from; s < to; s++) {
+            l.add(Component.text(SECTIONS[s][0][0], LABEL, TextDecoration.BOLD));
+            for (int i = 1; i < SECTIONS[s].length; i++) {
+                String id = SECTIONS[s][i][0];
+                int page = pageOf(id);
+                boolean open = knows(p, id);
+                Component name = open
+                        ? Component.text(NAMES.get(id), LINK, TextDecoration.UNDERLINED).clickEvent(ClickEvent.changePage(page)).hoverEvent(HoverEvent.showText(Component.text("Turn to page " + page)))
+                        : Component.text("???", LABEL).clickEvent(ClickEvent.changePage(page)).hoverEvent(HoverEvent.showText(Component.text("Not met yet. Turn to page " + page + " for a hint.")));
+                l.add(row(open ? glyph(ICON.get(SECTIONS[s][i][1])) : Component.text("  "), Component.text(" "), name));
+            }
+        }
+        if (half == 0) l.add(Component.text("Next page \u25B6", LINK).clickEvent(ClickEvent.changePage(2)));
+        else {
+            while (l.size() < 13) l.add(Component.empty());
+            l.add(Component.text("\u25C0 Back", LINK).clickEvent(ClickEvent.changePage(1)));
         }
         TextComponent.Builder b = Component.text();
         for (int i = 0; i < l.size(); i++) { if (i > 0) b.append(Component.newline()); b.append(l.get(i)); }
@@ -228,14 +302,12 @@ final class Bestiary implements Listener, CommandExecutor {
     }
 
     private Component how() {
-        TextComponent.Builder b = Component.text();
         Component[] l = {
                 title("HOW IT WORKS"), Component.empty(),
                 t("PvP, kidnapping and"), t("stealing: allowed."), t("Griefing: not. Claim"), t("with a golden shovel."), Component.empty(),
                 t("Moloch hungers. Fed,"), t("he wakes, and all of"), t("you fight him."), Component.empty(),
                 t("God waits in the End."), t("Stay Human, or eat"), t("the Heart of Darkness.")};
-        for (int i = 0; i < l.length; i++) { if (i > 0) b.append(Component.newline()); b.append(l[i]); }
-        return b.build();
+        return withFooter(List.of(l), 1);
     }
 
     private Component god() {
@@ -302,6 +374,51 @@ final class Bestiary implements Listener, CommandExecutor {
                 List.of(title("MOLOCH'S"), title("CHAMPIONS"), t("Gilded guard", LABEL), Component.empty()),
                 List.of(label("When"), t("At 75% health they"), t("march in and shield"), t("him. Kill them all"), t("to break his guard."),
                         Component.empty(), t("Then his Demons"), t("swoop from the dark.")));
+    }
+
+    private Component brimstone() {
+        return page("brimstone", false,
+                List.of(title("BRIMSTONE"), title("CUBES"), t("Hell's sulfur", LABEL), Component.empty()),
+                List.of(label("Where"), t("Heaven's outer"), t("islands."), t("Touch one and it"), t("swallows you, burns"),
+                        t("you, then spits you"), t("out, maybe over the"), t("void.")));
+    }
+
+    private Component laestrygonians() {
+        return page("laestrygonian", false,
+                List.of(title("LAESTRY-"), title("GONIANS"), t("Man-eating", LABEL), t("giants", LABEL), Component.empty(), label("Where"), t("The staff")),
+                List.of(t("call up a band."), label("Fight"), t("Twice your size,"), t("fast and iron-hard."),
+                        row(t("Spears "), icon("iron_spear", "Spear", "Most of the band."), t(", swords "), icon("laestrygonian_longsword", "Laestrygonian Longsword", "Every third, with a shield."))),
+                        row(label("Drops "), icon("human_flesh", "Human Flesh", "Food. Bad food."), t(" "),
+                                icon("laestrygonian_helm", "Laestrygonian Helm", "30% chance. Netherite-strong,", "10% bigger. Eat Human Flesh", "in it for Strength III."), t(" iron blocks"))));
+    }
+
+    private Component creaking() {
+        return page("creaking", false,
+                List.of(title("GIANT"), title("CREAKING"), t("The watcher", LABEL), Component.empty(), label("Where"), t("The world's"), t("edge")),
+                List.of(t("It watches you and"), t("its eyes charge a"), t("beam. Hold its gaze"), t("and you die. Break"), t("its line of sight."),
+                        t("Fire can't hurt it.")));
+    }
+
+    private Component bloodMoon() {
+        return page("bloodmoon", false,
+                List.of(title("BLOOD"), title("MOON"), t("Livestock,", LABEL), t("turned", LABEL)),
+                List.of(label("When"), t("The moon goes red."), t("Cows, pigs, sheep,"), t("chickens, goats,"), t("rabbits and horses"), t("hunt you down."),
+                        t("Nobody sleeps until"), t("it sets.")));
+    }
+
+    private Component sleeper() {
+        return page("sleeper", false,
+                List.of(title("SLEEPER"), t("Lives at", LABEL), t("spawn", LABEL), Component.empty()),
+                List.of(t("Asleep on his"), t("cardboard. Poke him"), t("and he gets grumpier."), t("Four times and he'll"), t("get up and shove you."),
+                        Component.empty(), quote("\"Five more"), quote(" minutes.\"")));
+    }
+
+    private Component homunculus() {
+        return page("homunculus", false,
+                List.of(title("HOMUN-"), title("CULUS"), t("Grown in", LABEL), t("a flask", LABEL), Component.empty()),
+                List.of(row(label("Made "), icon("potential_blade", "World Egg"), t(" + "), icon("tumour", "Tumour"), t(" + "), icon("quantum_core", "Quantum Core"), t(" \u2192 "),
+                                icon("homunculus_flask", "Homunculus in a Flask", "One per player, bound to its maker.")),
+                        t("Right-click for its"), t("menu. It follows,"), t("waits, farms your"), t("claim or guards it,"), t("and carries nine"), t("pockets of things.")));
     }
 
     private Component inhuman() {
