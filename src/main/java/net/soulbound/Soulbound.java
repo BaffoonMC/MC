@@ -410,6 +410,7 @@ public final class Soulbound extends JavaPlugin {
         bestiary = new Bestiary(this);
         pm.registerEvents(bestiary, this);
         bestiary.start();
+        LongArms.start(this);
         if (getCommand("bestiary") != null) getCommand("bestiary").setExecutor(bestiary);
         gate = new StrongholdGate(this, store);
         pm.registerEvents(gate, this);
