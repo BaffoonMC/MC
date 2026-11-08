@@ -188,7 +188,12 @@ final class Laestrygonians implements Listener {
             eq.setLeggings(new ItemStack(Material.IRON_LEGGINGS));
             eq.setBoots(new ItemStack(Material.IRON_BOOTS));
             if (shieldBearer) {
-                eq.setItemInMainHand(new ItemStack(Material.IRON_SWORD));
+                ItemStack sword = new ItemStack(Material.IRON_SWORD);   // a long iron sword, half as long again as a normal one
+                ItemMeta sm = sword.getItemMeta();
+                sm.setItemModel(new NamespacedKey("soulbound", "laestrygonian_longsword"));
+                sm.displayName(Component.text("Laestrygonian Longsword", SILVER).decoration(TextDecoration.ITALIC, false));
+                sword.setItemMeta(sm);
+                eq.setItemInMainHand(sword);
                 eq.setItemInOffHand(new ItemStack(Material.SHIELD));
             } else {
                 Material spear = Material.matchMaterial("iron_spear");
