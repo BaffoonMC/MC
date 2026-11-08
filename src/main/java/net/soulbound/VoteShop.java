@@ -140,6 +140,8 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     int votes(UUID id) { return votes.getOrDefault(id, 0); }
     /** When this player last voted on the /vote site with this label (0 = not that we know of). */
     long lastVote(UUID id, String siteLabel) { Map<String, Long> m = siteVotes.get(id); return m == null ? 0 : m.getOrDefault(siteKey(siteLabel), 0L); }
+    /** When this player last voted anywhere (0 = not that we know of). */
+    long lastAnyVote(UUID id) { Map<String, Long> m = siteVotes.get(id); return m == null ? 0 : m.values().stream().mapToLong(Long::longValue).max().orElse(0); }
     static String siteKey(String label) { return label == null ? "" : label.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]", ""); }
     void setVotes(UUID id, int n) { votes.put(id, Math.max(0, n)); save(); }
     void forget(UUID id) { boolean a = points.remove(id) != null, b = votes.remove(id) != null, c = siteVotes.remove(id) != null; if (a || b || c) save(); }
@@ -182,7 +184,9 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         }
         votes.merge(who.getUniqueId(), 1, Integer::sum);
         String site = siteKey(siteName(service));
-        if (!site.isEmpty()) siteVotes.computeIfAbsent(who.getUniqueId(), k -> new HashMap<>()).put(site, System.currentTimeMillis());
+        Map<String, Long> mine = siteVotes.computeIfAbsent(who.getUniqueId(), k -> new HashMap<>());
+        mine.put("any", System.currentTimeMillis());   // voted somewhere, even if we can't tell which site
+        if (!site.isEmpty()) mine.put(site, System.currentTimeMillis());
         int now = add > 0 ? points.merge(who.getUniqueId(), add, Integer::sum) : points(who.getUniqueId());
         save();
         double cash = plugin.getConfig().getDouble("voteshop.money-per-vote", 100);

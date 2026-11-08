@@ -998,6 +998,11 @@ vote-ranks:
            "veteran 750", "elder 1150", "ancient 2000"]
   broadcast: true         # "minecraftmurdere voted for the server on Minecraft-MP!" in chat for every vote
   cooldown-hours: 24      # /vote shows a site red (done) for this long after you vote on it, then green again
+  # A nudge in chat for anyone who hasn't voted in a day: first after this long online, then again every so often.
+  reminder:
+    enabled: true
+    first-after-minutes: 20
+    every-minutes: 60
   # The voting sites /vote lists, as "Name|link". Each needs NuVotifier set up on its listing to count.
   sites:
     - "Minecraft-MP|https://minecraft-mp.com/server/366545/vote/"

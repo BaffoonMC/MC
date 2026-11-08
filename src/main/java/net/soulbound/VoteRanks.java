@@ -37,7 +37,51 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
 
     private final Soulbound plugin;
 
-    VoteRanks(Soulbound plugin) { this.plugin = plugin; }
+    VoteRanks(Soulbound plugin) {
+        this.plugin = plugin;
+        Bukkit.getScheduler().runTaskTimer(plugin, this::remind, 20L * 60, 20L * 60);
+    }
+
+    // ---------------------------------------------------------------- reminders
+
+    private final java.util.Map<java.util.UUID, Long> joinedAt = new java.util.HashMap<>(), remindedAt = new java.util.HashMap<>();
+
+    @EventHandler
+    public void onJoin(org.bukkit.event.player.PlayerJoinEvent e) { joinedAt.put(e.getPlayer().getUniqueId(), System.currentTimeMillis()); remindedAt.remove(e.getPlayer().getUniqueId()); }
+
+    @EventHandler
+    public void onQuit(org.bukkit.event.player.PlayerQuitEvent e) { joinedAt.remove(e.getPlayer().getUniqueId()); remindedAt.remove(e.getPlayer().getUniqueId()); inDialog.remove(e.getPlayer().getUniqueId()); }
+
+    /** Once a minute: anyone who's been on a while and hasn't voted in a day gets a friendly nudge (then again every so often). */
+    private void remind() {
+        var c = plugin.getConfig();
+        if (!c.getBoolean("vote-ranks.reminder.enabled", true)) return;
+        List<Site> list = sites();
+        if (list.isEmpty()) return;
+        long now = System.currentTimeMillis();
+        long first = (long) (c.getDouble("vote-ranks.reminder.first-after-minutes", 20) * 60_000L);
+        long every = (long) (c.getDouble("vote-ranks.reminder.every-minutes", 60) * 60_000L);
+        long day = (long) (c.getDouble("vote-ranks.cooldown-hours", 24) * 3_600_000L);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            java.util.UUID id = p.getUniqueId();
+            long joined = joinedAt.computeIfAbsent(id, k -> now);
+            if (now - joined < first) continue;
+            Long last = remindedAt.get(id);
+            if (last != null && now - last < every) continue;
+            if (now - plugin.voteShop().lastAnyVote(id) < day) continue;   // voted somewhere in the last day: leave them be
+            int open = 0;
+            for (Site st : list) if (wait(p, st) == 0) open++;
+            if (open == 0) continue;
+            remindedAt.put(id, now);
+            double cash = c.getDouble("voteshop.money-per-vote", 100);
+            Component msg = Component.text("✦ ", GOLD).append(Component.text("You haven't voted today! ", NamedTextColor.YELLOW))
+                    .append(Component.text(open + " site" + (open == 1 ? " is" : "s are") + " waiting" + (cash > 0 ? ", " + Money.fmt(cash) + " each" : "") + ", and every vote climbs your rank. ", NamedTextColor.GRAY))
+                    .append(Component.text("[Vote now]", NamedTextColor.GREEN, TextDecoration.BOLD).clickEvent(ClickEvent.runCommand("/vote"))
+                            .hoverEvent(HoverEvent.showText(Component.text("Open the vote menu", NamedTextColor.GRAY))));
+            p.sendMessage(msg);
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.6f, 1.4f);
+        }
+    }
 
     private List<Step> ladder() {
         List<Step> l = new ArrayList<>();
