@@ -170,6 +170,15 @@ final class GlowPortal implements Listener {
 
     // ---------------------------------------------------------------- closing it
 
+    /** The glowstone portal is switched off: close any that were already made (gateway blocks back to air) and forget them. */
+    int dismantleAll() {
+        int n = portals.size();
+        for (Portal p : new ArrayList<>(portals)) close(p);
+        portals.clear();
+        save();
+        return n;
+    }
+
     private void close(Portal p) {
         World w = Bukkit.getWorld(p.world());
         if (w != null) {

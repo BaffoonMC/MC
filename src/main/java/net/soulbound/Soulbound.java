@@ -496,9 +496,10 @@ public final class Soulbound extends JavaPlugin {
         OuterDaylight outerDay = new OuterDaylight(this);
         pm.registerEvents(outerDay, this);
         outerDay.start();
+        // the glowstone (Aether-style) portal is switched off: water in a glowstone frame does nothing, and any made before are closed
         GlowPortal glowPortal = new GlowPortal(this);
-        pm.registerEvents(glowPortal, this);
-        glowPortal.start();
+        if (getConfig().getBoolean("glow-portal.enabled", false)) { pm.registerEvents(glowPortal, this); glowPortal.start(); }
+        else getServer().getScheduler().runTaskLater(this, () -> { int n = glowPortal.dismantleAll(); if (n > 0) getLogger().info("Closed " + n + " old glowstone portal(s)."); }, 40L);
         pm.registerEvents(new WorldEgg(this), this);
         inhumanHearts = new InhumanHearts(this);   // off for now: not started
         inhuman = new Inhuman(this, captures);
