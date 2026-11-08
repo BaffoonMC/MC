@@ -441,6 +441,7 @@ public final class Soulbound extends JavaPlugin {
         pm.registerEvents(voteShop, this);
         voteShop.start();
         voteRanks = new VoteRanks(this);
+        pm.registerEvents(voteRanks, this);
         accountReset = new AccountReset(this);
         pm.registerEvents(accountReset, this);
         Rtp rtp = new Rtp(this);
