@@ -41,6 +41,11 @@ final class VoteRanks implements CommandExecutor {
         return l;
     }
 
+    private static String hm(long ms) {
+        long m = Math.max(1, (ms + 59_999) / 60_000), h = m / 60;
+        return h > 0 ? h + "h " + (m % 60) + "m" : m + "m";
+    }
+
     private static String nice(String group) { return Character.toUpperCase(group.charAt(0)) + group.substring(1); }
 
     /** Move them up if their votes have earned a level they don't have yet. Never moves anyone down. */
@@ -67,27 +72,46 @@ final class VoteRanks implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender s, @NotNull Command cmd, @NotNull String label, String @NotNull [] a) {
-        s.sendMessage(Component.text("Vote for BaffoonMC", GOLD).append(Component.text("  (each site once a day)", NamedTextColor.GRAY)));
         List<String> sites = plugin.getConfig().getStringList("vote-ranks.sites");
-        if (sites.isEmpty()) s.sendMessage(Component.text(" Voting links are coming soon.", NamedTextColor.GRAY));
-        int i = 1;
+        Player p = s instanceof Player pl ? pl : null;
+        long now = System.currentTimeMillis(), cool = (long) (plugin.getConfig().getDouble("vote-ranks.cooldown-hours", 24) * 3_600_000L);
+        int done = 0;
+        List<Component> rows = new ArrayList<>();
         for (String site : sites) {
             String[] w = site.split("\\|", 2);
             String name = w[0].trim(), url = w.length > 1 ? w[1].trim() : w[0].trim();
-            s.sendMessage(Component.text(" " + i++ + ". ", NamedTextColor.GRAY).append(Component.text(name, NamedTextColor.YELLOW)
-                    .clickEvent(ClickEvent.openUrl(url)).hoverEvent(HoverEvent.showText(Component.text("Click to vote on " + name, NamedTextColor.GRAY)))));
+            long last = p == null ? 0 : plugin.voteShop().lastVote(p.getUniqueId(), name);
+            long left = last == 0 ? 0 : last + cool - now;
+            if (left > 0) {   // done today: a red bar, and when it opens again
+                done++;
+                rows.add(Component.text(" ██████ ", TextColor.color(0xD83A3A)).append(Component.text(name, TextColor.color(0xFF8A8A)))
+                        .append(Component.text("  ✔ voted · again in " + hm(left), NamedTextColor.GRAY))
+                        .clickEvent(ClickEvent.openUrl(url)).hoverEvent(HoverEvent.showText(Component.text("Already voted here today. Open the page anyway", NamedTextColor.GRAY))));
+            } else {          // open: a green bar to click
+                rows.add(Component.text(" ██████ ", TextColor.color(0x3FCF5A)).append(Component.text(name, TextColor.color(0x8DF59D)))
+                        .append(Component.text("  » click to vote", NamedTextColor.GREEN))
+                        .clickEvent(ClickEvent.openUrl(url)).hoverEvent(HoverEvent.showText(Component.text("Click to vote on " + name, NamedTextColor.GRAY))));
+            }
         }
-        if (!(s instanceof Player p)) return true;
+        Component head = Component.text("Vote for BaffoonMC", GOLD);
+        if (!sites.isEmpty() && p != null) {
+            Component prog = Component.text("  ");
+            for (int i = 0; i < sites.size(); i++) prog = prog.append(Component.text("■", i < done ? TextColor.color(0xD83A3A) : TextColor.color(0x3FCF5A)));
+            head = head.append(prog).append(Component.text("  " + done + "/" + sites.size() + " done today", NamedTextColor.GRAY));
+        }
+        s.sendMessage(Component.empty());
+        s.sendMessage(head);
+        if (sites.isEmpty()) s.sendMessage(Component.text(" Voting links are coming soon.", NamedTextColor.GRAY));
+        rows.forEach(s::sendMessage);
+        if (p == null) return true;
         int v = plugin.voteShop().votes(p.getUniqueId());
-        Step now = null, next = null;
-        for (Step st : ladder()) { if (v >= st.votes()) now = st; else if (next == null) next = st; }
+        Step now2 = null, next = null;
+        for (Step st : ladder()) { if (v >= st.votes()) now2 = st; else if (next == null) next = st; }
         Component line = Component.text("You've voted " + v + " time" + (v == 1 ? "" : "s"), NamedTextColor.GRAY);
-        if (now != null) line = line.append(Component.text(" and you're ", NamedTextColor.GRAY)).append(Component.text(nice(now.group()), NamedTextColor.WHITE));
+        if (now2 != null) line = line.append(Component.text(" and you're ", NamedTextColor.GRAY)).append(Component.text(nice(now2.group()), NamedTextColor.WHITE));
+        if (next != null) line = line.append(Component.text(". " + (next.votes() - v) + " more to ", NamedTextColor.GRAY)).append(Component.text(nice(next.group()), GOLD));
         s.sendMessage(line.append(Component.text(".", NamedTextColor.GRAY)));
-        if (next != null) s.sendMessage(Component.text((next.votes() - v) + " more to ", NamedTextColor.GRAY).append(Component.text(nice(next.group()), GOLD))
-                .append(Component.text(".  Points to spend: " + plugin.voteShop().points(p.getUniqueId()) + " ", NamedTextColor.GRAY))
-                .append(Component.text("/voteshop", NamedTextColor.YELLOW).clickEvent(ClickEvent.runCommand("/voteshop"))));
-        else s.sendMessage(Component.text("You've reached the top. Points to spend: " + plugin.voteShop().points(p.getUniqueId()) + " ", NamedTextColor.GRAY)
+        s.sendMessage(Component.text("Points to spend: " + plugin.voteShop().points(p.getUniqueId()) + "  ", NamedTextColor.GRAY)
                 .append(Component.text("/voteshop", NamedTextColor.YELLOW).clickEvent(ClickEvent.runCommand("/voteshop"))));
         return true;
     }

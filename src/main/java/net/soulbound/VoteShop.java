@@ -65,6 +65,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     private final Map<String, Integer> pendingByName = new HashMap<>();   // votes from players the server hasn't seen yet
     private final Map<UUID, Integer> votes = new HashMap<>();            // lifetime votes, never spent: these climb the ranks
     private final Map<String, Integer> pendingVotes = new HashMap<>();
+    private final Map<UUID, Map<String, Long>> siteVotes = new HashMap<>();   // when each player last voted on each site
     private final Map<UUID, PriceEdit> priceEdits = new HashMap<>();
     private final Map<UUID, long[]> confirm = new HashMap<>();           // {entry index, until}
     private boolean stocked;                                             // the starter pages have been added
@@ -81,7 +82,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
 
     private void load() {
         YamlConfiguration y = YamlConfiguration.loadConfiguration(file);
-        entries.clear(); points.clear(); pendingByName.clear(); votes.clear(); pendingVotes.clear();
+        entries.clear(); points.clear(); pendingByName.clear(); votes.clear(); pendingVotes.clear(); siteVotes.clear();
         for (Map<?, ?> m : y.getMapList("items")) {
             try {
                 ItemStack it = ItemStack.deserializeBytes(Base64.getDecoder().decode(String.valueOf(m.get("item"))));
@@ -93,6 +94,13 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         stocked = y.getBoolean("starter-stocked", false);
         var vs = y.getConfigurationSection("votes");
         if (vs != null) for (String k : vs.getKeys(false)) try { votes.put(UUID.fromString(k), vs.getInt(k)); } catch (IllegalArgumentException ignored) {}
+        var sv = y.getConfigurationSection("site-votes");
+        if (sv != null) for (String k : sv.getKeys(false)) {
+            var one = sv.getConfigurationSection(k);
+            if (one == null) continue;
+            try { Map<String, Long> m = new HashMap<>(); for (String site : one.getKeys(false)) m.put(site, one.getLong(site)); siteVotes.put(UUID.fromString(k), m); }
+            catch (IllegalArgumentException ignored) {}
+        }
         var pv = y.getConfigurationSection("pending-votes");
         if (pv != null) for (String k : pv.getKeys(false)) pendingVotes.put(k, pv.getInt(k));
         if (!y.getBoolean("votes-counted", false)) {
@@ -119,6 +127,9 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         y.set("votes-counted", true);
         for (var en : votes.entrySet()) y.set("votes." + en.getKey(), en.getValue());
         for (var en : pendingVotes.entrySet()) y.set("pending-votes." + en.getKey(), en.getValue());
+        long old = System.currentTimeMillis() - 3L * 86_400_000L;   // only the last few days matter
+        for (var en : siteVotes.entrySet()) for (var sv : en.getValue().entrySet())
+            if (sv.getValue() > old) y.set("site-votes." + en.getKey() + "." + sv.getKey(), sv.getValue());
         for (var en : points.entrySet()) y.set("points." + en.getKey(), en.getValue());
         for (var en : pendingByName.entrySet()) y.set("pending." + en.getKey(), en.getValue());
         try { plugin.getDataFolder().mkdirs(); y.save(file); }
@@ -127,8 +138,11 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
 
     int points(UUID id) { return points.getOrDefault(id, 0); }
     int votes(UUID id) { return votes.getOrDefault(id, 0); }
+    /** When this player last voted on the /vote site with this label (0 = not that we know of). */
+    long lastVote(UUID id, String siteLabel) { Map<String, Long> m = siteVotes.get(id); return m == null ? 0 : m.getOrDefault(siteKey(siteLabel), 0L); }
+    static String siteKey(String label) { return label == null ? "" : label.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]", ""); }
     void setVotes(UUID id, int n) { votes.put(id, Math.max(0, n)); save(); }
-    void forget(UUID id) { if (points.remove(id) != null) save(); }
+    void forget(UUID id) { boolean a = points.remove(id) != null, b = votes.remove(id) != null, c = siteVotes.remove(id) != null; if (a || b || c) save(); }
     void setPoints(UUID id, int n) { points.put(id, Math.max(0, n)); save(); }
 
     // ---------------------------------------------------------------- votes
@@ -148,14 +162,14 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
                     String site;
                     try { site = String.valueOf(vote.getClass().getMethod("getServiceName").invoke(vote)); } catch (ReflectiveOperationException ex) { site = ""; }
                     String from = site;
-                    Bukkit.getScheduler().runTask(plugin, () -> { voted(name); announce(name, from); });
+                    Bukkit.getScheduler().runTask(plugin, () -> { voted(name, from); announce(name, from); });
                 } catch (ReflectiveOperationException ex) { plugin.getLogger().warning("Vote Shop: couldn't read a vote: " + ex.getMessage()); }
             }, plugin, true);
             plugin.getLogger().info("Vote Shop: listening for votes from NuVotifier.");
         } catch (ClassNotFoundException ex) { plugin.getLogger().warning("Vote Shop: NuVotifier is here but its vote event wasn't found."); }
     }
 
-    private void voted(String name) {
+    private void voted(String name, String service) {
         if (name == null || name.isBlank() || name.length() > 16) return;
         int add = Math.max(0, plugin.getConfig().getInt("voteshop.points-per-vote", 1));
         Player online = Bukkit.getPlayerExact(name);
@@ -167,6 +181,8 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
             save(); return;
         }
         votes.merge(who.getUniqueId(), 1, Integer::sum);
+        String site = siteKey(siteName(service));
+        if (!site.isEmpty()) siteVotes.computeIfAbsent(who.getUniqueId(), k -> new HashMap<>()).put(site, System.currentTimeMillis());
         int now = add > 0 ? points.merge(who.getUniqueId(), add, Integer::sum) : points(who.getUniqueId());
         save();
         double cash = plugin.getConfig().getDouble("voteshop.money-per-vote", 100);
