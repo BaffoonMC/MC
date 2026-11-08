@@ -996,7 +996,7 @@ laestrygonians:
     iron-blocks-max: 3
     flesh-min: 2
     flesh-max: 4
-    helm-chance: 1.0   # 1.0 = every one drops its Laestrygonian Helm, 0.25 = one in four
+    helm-chance: 0.3   # 30% of them drop their Laestrygonian Helm (1.0 = every one)
     xp: 40
 
 # Hit someone and their hearts show above your hotbar (name, a row of hearts, and e.g. 7.5/10).

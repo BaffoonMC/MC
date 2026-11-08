@@ -239,7 +239,7 @@ final class Laestrygonians implements Listener {
         int meat = between(r, c.getInt("laestrygonians.drops.flesh-min", 2), c.getInt("laestrygonians.drops.flesh-max", 4));
         if (iron > 0) e.getDrops().add(new ItemStack(Material.IRON_BLOCK, iron));
         if (meat > 0) e.getDrops().add(flesh(meat));
-        if (r.nextDouble() < c.getDouble("laestrygonians.drops.helm-chance", 1.0)) e.getDrops().add(plugin.cute().create(Cute.Kind.LAESTRYGONIAN));
+        if (r.nextDouble() < c.getDouble("laestrygonians.drops.helm-chance", 0.3)) e.getDrops().add(plugin.cute().create(Cute.Kind.LAESTRYGONIAN));
         e.setDroppedExp(c.getInt("laestrygonians.drops.xp", 40));
         Location l = e.getEntity().getLocation();
         l.getWorld().playSound(l, Sound.ENTITY_RAVAGER_DEATH, 1.5f, 0.7f);
