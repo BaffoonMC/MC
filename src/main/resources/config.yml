@@ -1338,3 +1338,7 @@ deeper-still:
   bell-bite-hunger-seconds: 10
   bell-cooldown-seconds: 300
   haunt-days: 3
+
+# The Bestiary book: every player is given one once (new players on their first join, existing players on their next login).
+bestiary:
+  give-on-join: true

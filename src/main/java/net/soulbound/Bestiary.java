@@ -68,13 +68,14 @@ final class Bestiary implements Listener, CommandExecutor {
             "laestrygonian", "creaking", "bloodmoon", "sleeper", "homunculus");
 
     private final Soulbound plugin;
-    private final NamespacedKey itemKey, seenKey;
+    private final NamespacedKey itemKey, seenKey, givenKey;
     private BukkitTask task;
 
     Bestiary(Soulbound plugin) {
         this.plugin = plugin;
         itemKey = new NamespacedKey(plugin, "bestiary");
         seenKey = new NamespacedKey(plugin, "bestiary_seen");
+        givenKey = new NamespacedKey(plugin, "bestiary_given");
     }
 
     void start() { task = Bukkit.getScheduler().runTaskTimer(plugin, this::scan, 60L, 40L); }
@@ -94,6 +95,25 @@ final class Bestiary implements Listener, CommandExecutor {
     }
 
     boolean isBook(ItemStack it) { return it != null && it.hasItemMeta() && it.getItemMeta().getPersistentDataContainer().has(itemKey, PersistentDataType.BYTE); }
+
+    /** Everyone gets a Bestiary once: new players when they first join, everyone else the next time they log in. */
+    @EventHandler
+    public void onJoin(org.bukkit.event.player.PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        if (!plugin.getConfig().getBoolean("bestiary.give-on-join", true) || p.getPersistentDataContainer().has(givenKey, PersistentDataType.BYTE)) return;
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!p.isOnline() || p.getPersistentDataContainer().has(givenKey, PersistentDataType.BYTE)) return;
+            p.getPersistentDataContainer().set(givenKey, PersistentDataType.BYTE, (byte) 1);
+            boolean has = false;
+            for (ItemStack it : p.getInventory().getContents()) if (isBook(it)) { has = true; break; }
+            if (!has) for (ItemStack left : p.getInventory().addItem(item()).values()) p.getWorld().dropItemNaturally(p.getLocation(), left);
+            p.sendMessage(Component.text("\u2726 You've been given a ", TextColor.color(0xF5C351))
+                    .append(Component.text("Bestiary", TextColor.color(0xF5C351), TextDecoration.BOLD))
+                    .append(Component.text(". Everything you meet goes in it. Lost it? ", NamedTextColor.GRAY))
+                    .append(Component.text("/bestiary", NamedTextColor.AQUA).clickEvent(ClickEvent.runCommand("/bestiary"))));
+            p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
+        }, 60L);
+    }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onUse(PlayerInteractEvent e) {
