@@ -50,6 +50,7 @@ public final class Soulbound extends JavaPlugin {
     private Cute cute;
     private Laestrygonians laestrygonians;
     private ChatFix chatFix;
+    private NewPlayerPing newPlayerPing;
     private GodGear godGear;
     private QuantumGear quantum;
     private PotentialBlade potentialBlade;
@@ -477,6 +478,8 @@ public final class Soulbound extends JavaPlugin {
         cute = new Cute(this);
         laestrygonians = new Laestrygonians(this);
         chatFix = new ChatFix(this);
+        newPlayerPing = new NewPlayerPing(this);
+        pm.registerEvents(newPlayerPing, this);
         pm.registerEvents(chatFix, this);
         pm.registerEvents(laestrygonians, this);
         pm.registerEvents(cute, this);
@@ -671,6 +674,7 @@ public final class Soulbound extends JavaPlugin {
     Cute cute() { return cute; }
     Laestrygonians laestrygonians() { return laestrygonians; }
     ChatFix chatFix() { return chatFix; }
+    NewPlayerPing newPlayerPing() { return newPlayerPing; }
     KrakenBeard kraken() { return kraken; }
     Parasite parasite() { return parasite; }
     CurseManager curses() { return curses; }

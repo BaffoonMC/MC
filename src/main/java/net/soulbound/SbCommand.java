@@ -337,6 +337,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             s.sendMessage(line("/sb rankstars", "set the rank tags to medal stars (bronze, silver, gold) in LuckPerms"));
             s.sendMessage(line("/sb release", "let your captive go"));
             s.sendMessage(line("/sb summon laestrygonians [count] [player]", "giant man-eaters around you (6 by default)"));
+            s.sendMessage(line("/sb newping [on|off]", "a chime when someone joins for the first time"));
         }
     }
 
@@ -462,6 +463,13 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                 s.sendMessage(ok("Rank tags set: bronze star for Supporter, two silver for Patron, three gold for Chosen. Players need the resource pack to see them."));
             }
             case "size" -> size(s, a);
+            case "newping" -> {
+                if (!(s instanceof Player me)) { s.sendMessage("Players only."); break; }
+                boolean on = a.length > 1 ? !a[1].equalsIgnoreCase("off") : !plugin.newPlayerPing().on(me);
+                plugin.newPlayerPing().set(me, on);
+                s.sendMessage(ok(on ? "You'll hear a chime when someone joins for the first time." : "No more chimes for new players."));
+                if (on) me.playSound(me.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_BELL, 1f, 1.2f);
+            }
             case "summon" -> {
                 String what = a.length > 1 ? a[1].toLowerCase(Locale.ROOT) : "";
                 if (!what.startsWith("laestrygon")) { s.sendMessage(bad("/sb summon laestrygonians [count] [player]")); break; }
@@ -548,7 +556,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
     @Override
     public List<String> onTabComplete(CommandSender s, Command cmd, String label, String[] a) {
         if (!s.hasPermission("soulbound.admin")) return a.length == 1 ? filter(List.of("release"), a[0]) : List.of();
-        if (a.length == 1) return filter(List.of("give", "items", "player", "moloch", "god", "world", "size", "summon", "reload", "rankstars", "release", "help"), a[0]);
+        if (a.length == 1) return filter(List.of("give", "items", "player", "moloch", "god", "world", "size", "summon", "newping", "reload", "rankstars", "release", "help"), a[0]);
         String sub = a[0].toLowerCase(Locale.ROOT);
         switch (sub) {
             case "give" -> {
@@ -569,6 +577,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                 if (a.length == 3 && a[1].equalsIgnoreCase("hunger")) return filter(List.of("0", "50", "95", "100"), a[2]);
             }
             case "god" -> { if (a.length == 2) return filter(List.of("test", "heaven"), a[1]); }
+            case "newping" -> { if (a.length == 2) return filter(List.of("on", "off"), a[1]); }
             case "summon" -> {
                 if (a.length == 2) return filter(List.of("laestrygonians"), a[1]);
                 if (a.length == 3) return filter(List.of("6", "3", "12"), a[2]);
