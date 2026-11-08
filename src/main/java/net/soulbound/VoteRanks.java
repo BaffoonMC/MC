@@ -188,12 +188,45 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
         if (e.getRawSlot() == 23) { p.closeInventory(); Bukkit.getScheduler().runTask(plugin, () -> p.performCommand("voteshop")); return; }
         Site st = m.slots.get(e.getRawSlot());
         if (st == null) return;
-        p.closeInventory();
-        // a menu can't open a web page, so hand them the link in chat, one click away
-        p.sendMessage(Component.text("» ", NamedTextColor.GREEN).append(Component.text("Click here to vote on " + st.name(), NamedTextColor.GREEN, TextDecoration.UNDERLINED)
-                .clickEvent(ClickEvent.openUrl(st.url())).hoverEvent(HoverEvent.showText(Component.text(st.url(), NamedTextColor.GRAY))))
-                .append(Component.text("  then /vote for the next one", NamedTextColor.GRAY)));
         p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 0.6f, 1.2f);
+        Bukkit.getScheduler().runTask(plugin, () -> showSite(p, st));
+    }
+
+    /** Who's looking at a site's "open the vote page" box right now, so their menu can come back by itself when the vote lands. */
+    private final java.util.Map<java.util.UUID, Long> inDialog = new java.util.HashMap<>();
+
+    /**
+     * A chest can't open a web page, so a small box pops up over it with a button that does. It stays open after
+     * the button (and after the browser), Esc goes back, and the menu reopens refreshed as soon as the vote arrives.
+     */
+    private void showSite(Player p, Site st) {
+        long left = wait(p, st);
+        io.papermc.paper.registry.data.dialog.ActionButton open = io.papermc.paper.registry.data.dialog.ActionButton.create(
+                Component.text("Open the vote page  ↗", left > 0 ? TextColor.color(0xFF8A8A) : TextColor.color(0x5CE27A)),
+                Component.text(st.url(), NamedTextColor.GRAY), 220,
+                io.papermc.paper.registry.data.dialog.action.DialogAction.staticAction(ClickEvent.openUrl(st.url())));
+        io.papermc.paper.registry.data.dialog.ActionButton back = io.papermc.paper.registry.data.dialog.ActionButton.create(
+                Component.text("◀  Back to the vote menu"), null, 220,
+                io.papermc.paper.registry.data.dialog.action.DialogAction.staticAction(ClickEvent.runCommand("/vote")));
+        Component body = left > 0
+                ? Component.text("You've already voted here today. You can vote again in " + hm(left) + ".", NamedTextColor.GRAY)
+                : Component.text("Open the page, type your Minecraft name exactly, and vote.\nThen come back: the vote menu reopens by itself the moment your vote arrives.", NamedTextColor.GRAY);
+        io.papermc.paper.dialog.Dialog d = io.papermc.paper.dialog.Dialog.create(b -> b.empty()
+                .base(io.papermc.paper.registry.data.dialog.DialogBase.builder(Component.text("Vote on " + st.name(), GOLD))
+                        .canCloseWithEscape(true)
+                        .afterAction(io.papermc.paper.registry.data.dialog.DialogBase.DialogAfterAction.NONE)
+                        .body(List.of(io.papermc.paper.registry.data.dialog.body.DialogBody.plainMessage(body)))
+                        .build())
+                .type(io.papermc.paper.registry.data.dialog.type.DialogType.multiAction(List.of(open), back, 1)));
+        inDialog.put(p.getUniqueId(), System.currentTimeMillis());
+        p.showDialog(d);
+    }
+
+    /** A vote just landed: if they're in the vote menu or a site's box, show them the menu again with that site gone red. */
+    void refresh(Player p) {
+        Long since = inDialog.remove(p.getUniqueId());
+        boolean inMenu = p.getOpenInventory().getTopInventory().getHolder() instanceof Menu;
+        if (inMenu || (since != null && System.currentTimeMillis() - since < 15 * 60_000L)) open(p);
     }
 
     @Override

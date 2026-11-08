@@ -195,7 +195,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
                     .append(Component.text(" (you have " + now + " point" + (now == 1 ? "" : "s") + ").  ", NamedTextColor.GRAY)).append(Component.text("/voteshop", NamedTextColor.YELLOW)));
             online.playSound(online.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.2f);
         }
-        if (plugin.voteRanks() != null) plugin.voteRanks().check(online);
+        if (plugin.voteRanks() != null) { plugin.voteRanks().check(online); plugin.voteRanks().refresh(online); }
     }
 
     /** Tell everyone online that someone voted, and on which site, so others remember to as well. */
