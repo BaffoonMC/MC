@@ -521,6 +521,12 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                 if (on) plugin.deeperStill().mark(t); else plugin.deeperStill().clear(t);
                 s.sendMessage(ok(t.getName() + (on ? " is now Forsaken." : " is no longer Forsaken: homunculi will come out for them again, and the Angel Engine works.")));
             }
+            case "chatfix" -> {
+                boolean off = a.length > 3 && a[3].equalsIgnoreCase("off");
+                plugin.chatFix().set(t, !off);
+                s.sendMessage(ok(off ? t.getName() + " gets chat the normal way again."
+                        : t.getName() + " now gets everyone's chat as server messages, which their game shows even when it hides player chat."));
+            }
             case "info" -> {
                 s.sendMessage(Component.text("— " + t.getName() + " —", NamedTextColor.GOLD));
                 s.sendMessage(Component.text("Forsaken: " + (plugin.deeperStill() != null && plugin.deeperStill().is(t) ? "yes" : "no"), NamedTextColor.GRAY));
@@ -552,8 +558,8 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             }
             case "player" -> {
                 if (a.length == 2) return null;
-                if (a.length == 3) return filter(List.of("info", "curse", "uncurse", "inhuman", "grace", "forsaken", "resetlimits", "reset"), a[2]);
-                if (a.length == 4 && (a[2].equalsIgnoreCase("inhuman") || a[2].equalsIgnoreCase("grace"))) return filter(List.of("on", "off"), a[3]);
+                if (a.length == 3) return filter(List.of("info", "curse", "uncurse", "inhuman", "grace", "forsaken", "chatfix", "resetlimits", "reset"), a[2]);
+                if (a.length == 4 && (a[2].equalsIgnoreCase("inhuman") || a[2].equalsIgnoreCase("grace") || a[2].equalsIgnoreCase("chatfix"))) return filter(List.of("on", "off"), a[3]);
                 if (a.length == 4 && (a[2].equalsIgnoreCase("deeper") || a[2].equalsIgnoreCase("forsaken"))) return filter(List.of("off", "on"), a[3]);
                 if (a.length == 4 && a[2].equalsIgnoreCase("curse")) return filter(List.of("15", "45", "120"), a[3]);
             }
