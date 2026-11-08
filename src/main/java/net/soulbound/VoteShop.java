@@ -169,10 +169,14 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         votes.merge(who.getUniqueId(), 1, Integer::sum);
         int now = add > 0 ? points.merge(who.getUniqueId(), add, Integer::sum) : points(who.getUniqueId());
         save();
+        double cash = plugin.getConfig().getDouble("voteshop.money-per-vote", 100);
+        boolean paid = cash > 0 && Money.give(who.getUniqueId(), cash);
         if (online == null) return;
-        if (add > 0) {
-            online.sendMessage(Component.text("Thanks for voting! ", GOLD).append(Component.text("+" + add + " point" + (add == 1 ? "" : "s"), NamedTextColor.GREEN))
-                    .append(Component.text(" (you have " + now + ").  ", NamedTextColor.GRAY)).append(Component.text("/voteshop", NamedTextColor.YELLOW)));
+        if (add > 0 || paid) {
+            Component got = Component.text(add > 0 ? "+" + add + " point" + (add == 1 ? "" : "s") : "", NamedTextColor.GREEN);
+            if (paid) got = got.append(Component.text((add > 0 ? " and " : "") + "+" + Money.fmt(cash), NamedTextColor.GREEN));
+            online.sendMessage(Component.text("Thanks for voting! ", GOLD).append(got)
+                    .append(Component.text(" (you have " + now + " point" + (now == 1 ? "" : "s") + ").  ", NamedTextColor.GRAY)).append(Component.text("/voteshop", NamedTextColor.YELLOW)));
             online.playSound(online.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.2f);
         }
         if (plugin.voteRanks() != null) plugin.voteRanks().check(online);
@@ -208,7 +212,13 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         String key = e.getPlayer().getName().toLowerCase(java.util.Locale.ROOT);
         Integer owed = pendingByName.remove(key), cast = pendingVotes.remove(key);
         if (owed != null) points.merge(e.getPlayer().getUniqueId(), owed, Integer::sum);
-        if (cast != null) votes.merge(e.getPlayer().getUniqueId(), cast, Integer::sum);
+        if (cast != null) {
+            votes.merge(e.getPlayer().getUniqueId(), cast, Integer::sum);
+            double cash = plugin.getConfig().getDouble("voteshop.money-per-vote", 100) * cast;   // votes cast before we'd ever seen them
+            if (cash > 0 && Money.give(e.getPlayer().getUniqueId(), cash))
+                e.getPlayer().sendMessage(Component.text("Thanks for voting! ", GOLD).append(Component.text("+" + Money.fmt(cash), NamedTextColor.GREEN))
+                        .append(Component.text(" for " + cast + " vote" + (cast == 1 ? "" : "s") + " while you were away.", NamedTextColor.GRAY)));
+        }
         if (owed != null || cast != null) save();
         Player p = e.getPlayer();   // LuckPerms needs a moment to load them before we can tell their rank
         if (plugin.voteRanks() != null) Bukkit.getScheduler().runTaskLater(plugin, () -> { if (p.isOnline()) plugin.voteRanks().check(p); }, 60L);

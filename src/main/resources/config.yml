@@ -862,6 +862,7 @@ welcome:
 # Points come from votes through NuVotifier; the items and everyone's points are kept in voteshop.yml.
 voteshop:
   points-per-vote: 1
+  money-per-vote: 100            # Essentials money for each vote too (0 = none)
   confirm-at: 100                 # things costing this much or more need a second click to buy
   block-eggs-on-spawners: true    # spawn eggs can't change what a mob spawner spawns (admins still can)
   # Ready-made pages of everyday things. /voteshop stock adds them after the last page (only once). Change prices
