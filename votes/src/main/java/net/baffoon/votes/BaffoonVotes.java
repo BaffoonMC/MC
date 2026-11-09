@@ -17,7 +17,9 @@ public final class BaffoonVotes extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        boolean fresh = !new File(getDataFolder(), "config.yml").exists();
         saveDefaultConfig();
+        if (fresh) migrateConfig();
         migrate();
         voteShop = new VoteShop(this);
         getServer().getPluginManager().registerEvents(voteShop, this);
@@ -42,6 +44,23 @@ public final class BaffoonVotes extends JavaPlugin {
         } catch (IOException ex) {
             getLogger().warning("Couldn't copy Soulbound's voteshop.yml across: " + ex.getMessage());
         }
+    }
+
+    /** First start: carry over any vote settings changed in Soulbound's config (sites, ranks ladder, shop lists, locked commands). */
+    private void migrateConfig() {
+        File old = new File(getDataFolder().getParentFile(), "Soulbound/config.yml");
+        if (!old.exists()) return;
+        var y = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(old);
+        boolean any = false;
+        for (String sec : new String[]{"voteshop", "vote-ranks", "locked-commands"}) {
+            if (!y.isConfigurationSection(sec)) continue;
+            for (String key : y.getConfigurationSection(sec).getKeys(true)) {
+                if (y.isConfigurationSection(sec + "." + key)) continue;
+                getConfig().set(sec + "." + key, y.get(sec + "." + key));
+                any = true;
+            }
+        }
+        if (any) { saveConfig(); getLogger().info("Copied the vote settings over from Soulbound's config.yml."); }
     }
 
     VoteShop voteShop() { return voteShop; }
