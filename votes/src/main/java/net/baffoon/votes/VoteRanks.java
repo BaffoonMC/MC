@@ -39,6 +39,7 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
 
     VoteRanks(BaffoonVotes plugin) {
         this.plugin = plugin;
+        loadMuted();
         Bukkit.getScheduler().runTaskTimer(plugin, this::remind, 20L * 60, 20L * 60);
     }
 
@@ -91,6 +92,47 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
     public void onQuit(org.bukkit.event.player.PlayerQuitEvent e) { joinedAt.remove(e.getPlayer().getUniqueId()); remindedAt.remove(e.getPlayer().getUniqueId()); inDialog.remove(e.getPlayer().getUniqueId()); }
 
     /** Once a minute: anyone who's been on a while and hasn't voted in a day gets a friendly nudge (then again every so often). */
+    // ---------------------------------------------------------------- who doesn't want reminders (kept in reminders.yml)
+
+    private final java.util.Set<java.util.UUID> muted = new java.util.HashSet<>();
+    private java.io.File mutedFile() { return new java.io.File(plugin.getDataFolder(), "reminders.yml"); }
+    private void loadMuted() {
+        var y = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(mutedFile());
+        for (String id : y.getStringList("off")) try { muted.add(java.util.UUID.fromString(id)); } catch (IllegalArgumentException ignored) {}
+    }
+    private void saveMuted() {
+        var y = new org.bukkit.configuration.file.YamlConfiguration();
+        List<String> l = new ArrayList<>(); for (var id : muted) l.add(id.toString());
+        y.set("off", l);
+        try { plugin.getDataFolder().mkdirs(); y.save(mutedFile()); } catch (java.io.IOException ex) { plugin.getLogger().warning("Couldn't save reminders.yml: " + ex.getMessage()); }
+    }
+
+    /** /vote reminders [on|off]  or, for admins, /vote reminders <player> [on|off] */
+    private void reminders(CommandSender s, String[] a) {
+        boolean admin = s.hasPermission("baffoonvotes.admin") || s.hasPermission("soulbound.admin");
+        org.bukkit.OfflinePlayer t; String set = null;
+        if (a.length >= 2 && !a[1].equalsIgnoreCase("on") && !a[1].equalsIgnoreCase("off")) {
+            if (!admin) { s.sendMessage(Component.text("You can only change your own: /vote reminders on|off", NamedTextColor.RED)); return; }
+            t = Bukkit.getOfflinePlayerIfCached(a[1]);
+            if (t == null) { s.sendMessage(Component.text("Never seen " + a[1] + " here.", NamedTextColor.RED)); return; }
+            if (a.length >= 3) set = a[2];
+        } else {
+            if (!(s instanceof Player p)) { s.sendMessage("Usage: /vote reminders <player> [on|off]"); return; }
+            t = p;
+            if (a.length >= 2) set = a[1];
+        }
+        java.util.UUID id = t.getUniqueId();
+        boolean on;
+        if (set == null) on = muted.contains(id);                 // no on/off given: flip it
+        else if (set.equalsIgnoreCase("on")) on = true;
+        else if (set.equalsIgnoreCase("off")) on = false;
+        else { s.sendMessage(Component.text("Use on or off.", NamedTextColor.RED)); return; }
+        if (on) muted.remove(id); else muted.add(id);
+        saveMuted();
+        String who = t.equals(s) ? "Your" : t.getName() + "'s";
+        s.sendMessage(Component.text(who + " vote reminders are now ", NamedTextColor.GRAY).append(Component.text(on ? "on" : "off", on ? NamedTextColor.GREEN : NamedTextColor.RED)).append(Component.text(".", NamedTextColor.GRAY)));
+    }
+
     private void remind() {
         var c = plugin.getConfig();
         if (!c.getBoolean("vote-ranks.reminder.enabled", true)) return;
@@ -104,6 +146,7 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
             java.util.UUID id = p.getUniqueId();
             long joined = joinedAt.computeIfAbsent(id, k -> now);
             if (now - joined < first) continue;
+            if (muted.contains(id)) continue;                                  // reminders switched off for them
             Long last = remindedAt.get(id);
             if (last != null && now - last < every) continue;
             if (now - plugin.voteShop().lastAnyVote(id) < day) continue;   // voted somewhere in the last day: leave them be
@@ -115,7 +158,9 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
             Component msg = Component.text("✦ ", GOLD).append(Component.text("You haven't voted today! ", NamedTextColor.YELLOW))
                     .append(Component.text(open + " site" + (open == 1 ? " is" : "s are") + " waiting" + (cash > 0 ? ", " + Money.fmt(cash) + " each" : "") + ", and every vote climbs your rank. ", NamedTextColor.GRAY))
                     .append(Component.text("[Vote now]", NamedTextColor.GREEN, TextDecoration.BOLD).clickEvent(ClickEvent.runCommand("/vote"))
-                            .hoverEvent(HoverEvent.showText(Component.text("Open the vote menu", NamedTextColor.GRAY))));
+                            .hoverEvent(HoverEvent.showText(Component.text("Open the vote menu", NamedTextColor.GRAY))))
+                    .append(Component.text("  [Stop reminding me]", NamedTextColor.DARK_GRAY).clickEvent(ClickEvent.runCommand("/vote reminders off"))
+                            .hoverEvent(HoverEvent.showText(Component.text("Turn these reminders off (/vote reminders on to bring them back)", NamedTextColor.GRAY))));
             p.sendMessage(msg);
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.6f, 1.4f);
         }
@@ -326,6 +371,7 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
 
     @Override
     public boolean onCommand(@NotNull CommandSender s, @NotNull Command cmd, @NotNull String label, String @NotNull [] a) {
+        if (a.length >= 1 && (a[0].equalsIgnoreCase("reminders") || a[0].equalsIgnoreCase("remind"))) { reminders(s, a); return true; }
         if (s instanceof Player p) { open(p); return true; }
         s.sendMessage(Component.text("Vote for BaffoonMC:", GOLD));
         for (Site st : sites()) s.sendMessage(Component.text(" " + st.name() + ": " + st.url(), NamedTextColor.GRAY));

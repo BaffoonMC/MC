@@ -7,7 +7,7 @@ softdepend: [Votifier, NuVotifier, Essentials, LuckPerms, Soulbound]
 commands:
   vote:
     description: The voting links, how many times you've voted and how far it is to your next level.
-    usage: /vote
+    usage: /vote [reminders [player] on|off]
     aliases: [votes]
   voteshop:
     description: The Vote Shop. Spend the points you get for voting (admins - /voteshop help).
