@@ -169,14 +169,18 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
                     String site;
                     try { site = String.valueOf(vote.getClass().getMethod("getServiceName").invoke(vote)); } catch (ReflectiveOperationException ex) { site = ""; }
                     String from = site;
-                    Bukkit.getScheduler().runTask(plugin, () -> { voted(name, from); announce(name, from); });
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        String label = resolveSite(name, from);
+                        plugin.getLogger().info("Vote: " + name + " via \"" + from + "\" -> " + (label != null ? label : "a site not in vote-ranks.sites (add its name as an alias)"));
+                        voted(name, from, label); announce(name, from, label);
+                    });
                 } catch (ReflectiveOperationException ex) { plugin.getLogger().warning("Vote Shop: couldn't read a vote: " + ex.getMessage()); }
             }, plugin, true);
             plugin.getLogger().info("Vote Shop: listening for votes from NuVotifier.");
         } catch (ClassNotFoundException ex) { plugin.getLogger().warning("Vote Shop: NuVotifier is here but its vote event wasn't found."); }
     }
 
-    private void voted(String name, String service) {
+    private void voted(String name, String service, String label) {
         if (name == null || name.isBlank() || name.length() > 16) return;
         int add = Math.max(0, plugin.getConfig().getInt("voteshop.points-per-vote", 1));
         Player online = Bukkit.getPlayerExact(name);
@@ -188,7 +192,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
             save(); return;
         }
         votes.merge(who.getUniqueId(), 1, Integer::sum);
-        String site = siteKey(siteName(service));
+        String site = siteKey(label != null ? label : service);
         Map<String, Long> mine = siteVotes.computeIfAbsent(who.getUniqueId(), k -> new HashMap<>());
         mine.put("any", System.currentTimeMillis());   // voted somewhere, even if we can't tell which site
         if (!site.isEmpty()) mine.put(site, System.currentTimeMillis());
@@ -208,9 +212,9 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     }
 
     /** Tell everyone online that someone voted, and on which site, so others remember to as well. */
-    private void announce(String name, String service) {
+    private void announce(String name, String service, String label) {
         if (name == null || name.isBlank() || name.length() > 16 || !plugin.getConfig().getBoolean("vote-ranks.broadcast", true)) return;
-        String site = siteName(service);
+        String site = label != null ? label : (service == null || service.isBlank() || service.equalsIgnoreCase("null") ? "" : service.trim());
         Component msg = Component.text("✔ ", NamedTextColor.GREEN).append(Component.text(name, NamedTextColor.WHITE))
                 .append(Component.text(" voted for the server" + (site.isEmpty() ? "" : " on " + site) + "! ", NamedTextColor.GRAY))
                 .append(Component.text("/vote", NamedTextColor.YELLOW).clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/vote"))
@@ -218,18 +222,53 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         Bukkit.broadcast(msg);
     }
 
-    /** The list site's own name for itself (e.g. "Minecraft-MP.com"), matched to one of our /vote sites where possible. */
-    private String siteName(String service) {
-        if (service == null || service.isBlank() || service.equalsIgnoreCase("null")) return "";
-        String key = service.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]", "");
+    /** Which of our /vote sites a list's service name means, or null. Lines are "Label|url" or "Label|url|alias,alias". */
+    private String matchSite(String service) {
+        if (service == null || service.isBlank() || service.equalsIgnoreCase("null")) return null;
+        String key = siteKey(service);
+        if (key.isEmpty()) return null;
         for (String line : plugin.getConfig().getStringList("vote-ranks.sites")) {
-            String[] w = line.split("\\|", 2);
+            String[] w = line.split("\\|", 3);
             if (w.length < 2) continue;
-            String host = w[1].toLowerCase(java.util.Locale.ROOT).replaceAll("^https?://(www\\.)?", "").split("/")[0].replaceAll("[^a-z0-9]", "");
-            String label = w[0].toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]", "");
-            if ((!host.isEmpty() && (key.equals(host) || key.contains(host) || host.contains(key))) || (!label.isEmpty() && (key.contains(label) || label.equals(key)))) return w[0].trim();
+            String host = w[1].toLowerCase(java.util.Locale.ROOT).replaceAll("^https?://(www\\.)?", "").split("/")[0];
+            String hostKey = siteKey(host), hostBare = siteKey(host.replaceAll("\\.[a-z]+$", "")), label = siteKey(w[0]);
+            if (key.equals(hostKey) || key.equals(hostBare) || key.equals(label)) return w[0].trim();
+            if (w.length > 2) for (String al : w[2].split(",")) if (!siteKey(al).isEmpty() && key.equals(siteKey(al))) return w[0].trim();
         }
-        return service.trim();
+        // looser: one name inside the other (longest site name wins, so "minecraftservers" doesn't steal "minecraftserverlist")
+        String best = null; int bestLen = 0;
+        for (String line : plugin.getConfig().getStringList("vote-ranks.sites")) {
+            String[] w = line.split("\\|", 3);
+            if (w.length < 2) continue;
+            String host = w[1].toLowerCase(java.util.Locale.ROOT).replaceAll("^https?://(www\\.)?", "").split("/")[0];
+            for (String cand : List.of(siteKey(host.replaceAll("\\.[a-z]+$", "")), siteKey(w[0]))) {
+                if (cand.length() < 4) continue;
+                if ((key.contains(cand) || cand.contains(key)) && cand.length() > bestLen) { best = w[0].trim(); bestLen = cand.length(); }
+            }
+        }
+        return best;
+    }
+
+    /** Sites each player opened from /vote, and when: a vote whose service name we don't recognise goes to the latest one. */
+    private final Map<UUID, Map<String, Long>> clicks = new HashMap<>();
+    void clicked(UUID id, String label) { clicks.computeIfAbsent(id, k -> new HashMap<>()).put(label, System.currentTimeMillis()); }
+
+    String resolveSite(String name, String service) {
+        String m = matchSite(service);
+        if (m != null) return m;
+        Player p = Bukkit.getPlayerExact(name);
+        OfflinePlayer op = p != null ? p : Bukkit.getOfflinePlayerIfCached(name);
+        if (op == null) return null;
+        Map<String, Long> c = clicks.get(op.getUniqueId());
+        if (c == null) return null;
+        long now = System.currentTimeMillis(), cool = (long) (plugin.getConfig().getDouble("vote-ranks.cooldown-hours", 24) * 3_600_000L);
+        String best = null; long bestAt = 0;
+        for (var en : c.entrySet()) {
+            if (now - en.getValue() > 2 * 3_600_000L) continue;                       // opened over two hours ago
+            if (lastVote(op.getUniqueId(), en.getKey()) > now - cool) continue;        // already counted today
+            if (en.getValue() > bestAt) { best = en.getKey(); bestAt = en.getValue(); }
+        }
+        return best;
     }
 
     @EventHandler
@@ -492,6 +531,19 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
                 }
                 s.sendMessage(Component.text(t.getName() + " has voted " + votes(t.getUniqueId()) + " times (this is what ranks go by; points are separate).", GOLD));
             }
+            case "sites" -> {
+                if (a.length < 2) { s.sendMessage(Component.text("Usage: /voteshop sites <player>", NamedTextColor.RED)); return true; }
+                OfflinePlayer t = Bukkit.getOfflinePlayerIfCached(a[1]);
+                if (t == null) { s.sendMessage(Component.text("Never seen " + a[1] + " here.", NamedTextColor.RED)); return true; }
+                Map<String, Long> m = siteVotes.getOrDefault(t.getUniqueId(), Map.of());
+                s.sendMessage(Component.text(t.getName() + "'s votes on record (site: how long ago):", GOLD));
+                if (m.isEmpty()) s.sendMessage(Component.text(" none", NamedTextColor.GRAY));
+                long now = System.currentTimeMillis();
+                for (var en : m.entrySet()) {
+                    long mins = (now - en.getValue()) / 60000;
+                    s.sendMessage(Component.text(" " + en.getKey() + ": " + (mins < 120 ? mins + " min" : (mins / 60) + " h") + " ago", NamedTextColor.GRAY));
+                }
+            }
             case "reload" -> { load(); s.sendMessage(Component.text("Vote Shop reloaded.", NamedTextColor.GREEN)); }
             case "reprice" -> {
                 String set = a.length > 1 ? a[1].toLowerCase(java.util.Locale.ROOT) : "starter";
@@ -587,12 +639,12 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender s, @NotNull Command cmd, @NotNull String label, String @NotNull [] a) {
         if (!s.hasPermission("soulbound.admin")) return List.of();
-        if (a.length == 1) return filter(List.of("add", "edit", "stock", "reprice", "points", "votes", "reload", "help"), a[0]);
+        if (a.length == 1) return filter(List.of("add", "edit", "stock", "reprice", "points", "votes", "sites", "reload", "help"), a[0]);
         if (a.length == 2 && a[0].equalsIgnoreCase("add")) return filter(List.of("10", "25", "50", "100", "150"), a[1]);
         if (a.length == 3 && a[0].equalsIgnoreCase("add")) { List<String> l = new ArrayList<>(); for (int i = 1; i <= pages() + 1; i++) l.add(String.valueOf(i)); return filter(l, a[2]); }
         if (a.length == 2 && a[0].equalsIgnoreCase("stock")) return filter(List.of("extra", "blocks", "force"), a[1]);
         if (a.length == 2 && a[0].equalsIgnoreCase("reprice")) return filter(List.of("starter", "extra", "blocks"), a[1]);
-        if (a.length == 2 && a[0].equalsIgnoreCase("votes")) { List<String> l = new ArrayList<>(); for (Player p : Bukkit.getOnlinePlayers()) l.add(p.getName()); return filter(l, a[1]); }
+        if (a.length == 2 && (a[0].equalsIgnoreCase("votes") || a[0].equalsIgnoreCase("sites"))) { List<String> l = new ArrayList<>(); for (Player p : Bukkit.getOnlinePlayers()) l.add(p.getName()); return filter(l, a[1]); }
         if (a.length == 3 && a[0].equalsIgnoreCase("votes")) return filter(List.of("add", "take", "set"), a[2]);
         if (a.length == 2 && a[0].equalsIgnoreCase("points")) { List<String> l = new ArrayList<>(); for (Player p : Bukkit.getOnlinePlayers()) l.add(p.getName()); return filter(l, a[1]); }
         if (a.length == 3 && a[0].equalsIgnoreCase("points")) return filter(List.of("add", "take", "set"), a[2]);

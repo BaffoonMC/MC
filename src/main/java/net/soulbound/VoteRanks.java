@@ -169,7 +169,7 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
     private List<Site> sites() {
         List<Site> l = new ArrayList<>();
         for (String site : plugin.getConfig().getStringList("vote-ranks.sites")) {
-            String[] w = site.split("\\|", 2);
+            String[] w = site.split("\\|", 3);
             l.add(new Site(w[0].trim(), w.length > 1 ? w[1].trim() : w[0].trim()));
         }
         return l;
@@ -274,6 +274,7 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
         Site st = m.slots.get(e.getRawSlot());
         if (st == null) return;
         p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 0.6f, 1.2f);
+        plugin.voteShop().clicked(p.getUniqueId(), st.name());
         p.closeInventory();
         // always the link in chat too, in case the box can't show on this player's game
         p.sendMessage(Component.text("» ", NamedTextColor.GREEN).append(Component.text("Click here to vote on " + st.name(), NamedTextColor.GREEN, TextDecoration.UNDERLINED)

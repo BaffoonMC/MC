@@ -1165,6 +1165,9 @@ vote-ranks:
     first-after-minutes: 20
     every-minutes: 60
   # The voting sites /vote lists, as "Name|link". Each needs NuVotifier set up on its listing to count.
+  # "Name|vote link", or "Name|vote link|alias,alias" when a list sends its votes under a different name (the console
+  # logs each vote as: Vote: <player> via "<name the list sent>" -> <site>). A vote under a name we don't know goes to
+  # the site that player last opened from /vote.
   sites:
     - "Minecraft-MP|https://minecraft-mp.com/server/366545/vote/"
     - "MinecraftServers.org|https://minecraftservers.org/vote/695841"
