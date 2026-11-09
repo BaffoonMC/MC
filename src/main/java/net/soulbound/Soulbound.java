@@ -36,8 +36,6 @@ public final class Soulbound extends JavaPlugin {
     private RaptureCrossbow raptureCrossbow;
     private DeeperStill deeperStill;
     private WildDrop wildDrop;
-    private VoteShop voteShop;
-    private VoteRanks voteRanks;
     private AccountReset accountReset;
     private Sleeper sleeper;
     private GiantCreaking giantCreaking;
@@ -441,11 +439,6 @@ public final class Soulbound extends JavaPlugin {
         wildDrop = new WildDrop(this);
         wildDrop.start();
         pm.registerEvents(new Welcome(this), this);
-        voteShop = new VoteShop(this);
-        pm.registerEvents(voteShop, this);
-        voteShop.start();
-        voteRanks = new VoteRanks(this);
-        pm.registerEvents(voteRanks, this);
         accountReset = new AccountReset(this);
         pm.registerEvents(accountReset, this);
         Rtp rtp = new Rtp(this);
@@ -467,8 +460,6 @@ public final class Soulbound extends JavaPlugin {
         giantCreaking = new GiantCreaking(this);
         pm.registerEvents(giantCreaking, this);
         giantCreaking.start();
-        if (getCommand("voteshop") != null) { getCommand("voteshop").setExecutor(voteShop); getCommand("voteshop").setTabCompleter(voteShop); }
-        if (getCommand("vote") != null) getCommand("vote").setExecutor(voteRanks);
         festering = new FesteringFlesh(this);
         pm.registerEvents(festering, this);
         thiefKey = new ThiefKey(this);
@@ -652,8 +643,6 @@ public final class Soulbound extends JavaPlugin {
     InhumanPoison inhumanPoison() { return inhumanPoison; }
     QuantumStand quantumStand() { return quantumStand; }
     Homunculus homunculus() { return homunculus; }
-    VoteShop voteShop() { return voteShop; }
-    VoteRanks voteRanks() { return voteRanks; }
     AccountReset accountReset() { return accountReset; }
     Sleeper sleeper() { return sleeper; }
     GiantCreaking giantCreaking() { return giantCreaking; }

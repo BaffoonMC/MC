@@ -82,7 +82,8 @@ final class AccountReset implements Listener {
         // Soulbound's own memory first, so nothing writes it back afterwards
         if (plugin.curses() != null) plugin.curses().forget(id);
         if (plugin.inhumanHearts() != null) plugin.inhumanHearts().forget(id);
-        if (plugin.voteShop() != null) plugin.voteShop().forget(id);
+        if (Bukkit.getPluginManager().getPlugin("BaffoonVotes") != null)   // votes, points and vote history live in BaffoonVotes now
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "voteshop forget " + id);
         int strays = 0;
         if (plugin.homunculus() != null) for (var w : Bukkit.getWorlds()) for (Husk h : w.getEntitiesByClass(Husk.class))
             if (id.equals(plugin.homunculus().ownerOf(h))) { h.remove(); strays++; }

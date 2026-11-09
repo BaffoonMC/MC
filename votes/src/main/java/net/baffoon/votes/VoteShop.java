@@ -1,4 +1,4 @@
-package net.soulbound;
+package net.baffoon.votes;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -58,7 +58,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         @Override public @NotNull Inventory getInventory() { return inv; }
     }
 
-    private final Soulbound plugin;
+    private final BaffoonVotes plugin;
     private final File file;
     private final List<Entry> entries = new ArrayList<>();
     private final Map<UUID, Integer> points = new HashMap<>();
@@ -71,7 +71,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     private boolean stocked, stockedExtra;                               // the starter / extra pages have been added
     private final java.util.Set<String> stockedSets = new java.util.HashSet<>();   // any other ready-made sets added (blocks...)
 
-    VoteShop(Soulbound plugin) {
+    VoteShop(BaffoonVotes plugin) {
         this.plugin = plugin;
         this.file = new File(plugin.getDataFolder(), "voteshop.yml");
         load();
@@ -379,7 +379,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
         if (idx == null || idx >= entries.size()) return;
         Entry en = entries.get(idx);
         if (h.edit) {
-            if (!p.hasPermission("soulbound.admin")) return;
+            if (!(p.hasPermission("baffoonvotes.admin") || p.hasPermission("soulbound.admin"))) return;
             if (e.isShiftClick()) {
                 if (onPage(en.page() + 1).size() >= PER_PAGE) { p.sendActionBar(Component.text("Page " + (en.page() + 1) + " is full.", NamedTextColor.RED)); return; }
                 entries.set(idx, new Entry(en.item(), en.price(), en.page() + 1)); save();
@@ -451,7 +451,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
     public void onEggOnSpawner(PlayerInteractEvent e) {
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getClickedBlock() == null || e.getClickedBlock().getType() != Material.SPAWNER) return;
         if (e.getItem() == null || !e.getItem().getType().name().endsWith("_SPAWN_EGG")) return;
-        if (!plugin.getConfig().getBoolean("voteshop.block-eggs-on-spawners", true) || e.getPlayer().hasPermission("soulbound.admin")) return;
+        if (!plugin.getConfig().getBoolean("voteshop.block-eggs-on-spawners", true) || (e.getPlayer().hasPermission("baffoonvotes.admin") || e.getPlayer().hasPermission("soulbound.admin"))) return;
         e.setCancelled(true);
         e.getPlayer().sendActionBar(Component.text("Spawn eggs don't work on spawners here.", NamedTextColor.GRAY));
     }
@@ -460,7 +460,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender s, @NotNull Command cmd, @NotNull String label, String @NotNull [] a) {
-        boolean admin = s.hasPermission("soulbound.admin");
+        boolean admin = (s.hasPermission("baffoonvotes.admin") || s.hasPermission("soulbound.admin"));
         if (a.length == 0 || !admin && !a[0].equalsIgnoreCase("points")) {
             if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
             int page = 1;
@@ -544,6 +544,14 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
                     s.sendMessage(Component.text(" " + en.getKey() + ": " + (mins < 120 ? mins + " min" : (mins / 60) + " h") + " ago", NamedTextColor.GRAY));
                 }
             }
+            case "forget" -> {   // used by Soulbound's account reset: wipe someone's votes, points and vote history
+                if (a.length < 2) { s.sendMessage(Component.text("Usage: /voteshop forget <player|uuid>", NamedTextColor.RED)); return true; }
+                UUID id;
+                try { id = UUID.fromString(a[1]); }
+                catch (IllegalArgumentException ex) { OfflinePlayer t = Bukkit.getOfflinePlayerIfCached(a[1]); if (t == null) { s.sendMessage(Component.text("Never seen " + a[1] + " here.", NamedTextColor.RED)); return true; } id = t.getUniqueId(); }
+                forget(id);
+                s.sendMessage(Component.text("Forgot their votes, points and vote history.", NamedTextColor.GREEN));
+            }
             case "reload" -> { load(); s.sendMessage(Component.text("Vote Shop reloaded.", NamedTextColor.GREEN)); }
             case "reprice" -> {
                 String set = a.length > 1 ? a[1].toLowerCase(java.util.Locale.ROOT) : "starter";
@@ -608,12 +616,13 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
             try { amount = Math.max(1, Integer.parseInt(w[1])); price = Math.max(0, Integer.parseInt(w[2])); }
             catch (NumberFormatException ex) { s.sendMessage(Component.text("Skipped \"" + l + "\" (amount and price must be numbers).", NamedTextColor.GRAY)); continue; }
             ItemStack it;
-            if (w[0].equalsIgnoreCase("sb:hat_token") && plugin.wardrobe() != null) it = plugin.wardrobe().token(amount);   // Soulbound's own things
+            if (w[0].toLowerCase(java.util.Locale.ROOT).startsWith("sb:")) it = SoulboundItems.get(w[0].substring(3), amount);   // Soulbound's own things, if it's installed
             else {
                 Material m = Material.matchMaterial(w[0]);
                 if (m == null || !m.isItem()) { s.sendMessage(Component.text("Skipped \"" + l + "\" (unknown item).", NamedTextColor.GRAY)); continue; }
                 it = new ItemStack(m, Math.min(m.getMaxStackSize(), amount));
             }
+            if (it == null) { s.sendMessage(Component.text("Skipped \"" + l + "\" (that Soulbound item isn't available).", NamedTextColor.GRAY)); continue; }
             entries.add(new Entry(it, price, page));
             onThis++; added++;
         }
@@ -638,7 +647,7 @@ final class VoteShop implements Listener, CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender s, @NotNull Command cmd, @NotNull String label, String @NotNull [] a) {
-        if (!s.hasPermission("soulbound.admin")) return List.of();
+        if (!(s.hasPermission("baffoonvotes.admin") || s.hasPermission("soulbound.admin"))) return List.of();
         if (a.length == 1) return filter(List.of("add", "edit", "stock", "reprice", "points", "votes", "sites", "reload", "help"), a[0]);
         if (a.length == 2 && a[0].equalsIgnoreCase("add")) return filter(List.of("10", "25", "50", "100", "150"), a[1]);
         if (a.length == 3 && a[0].equalsIgnoreCase("add")) { List<String> l = new ArrayList<>(); for (int i = 1; i <= pages() + 1; i++) l.add(String.valueOf(i)); return filter(l, a[2]); }

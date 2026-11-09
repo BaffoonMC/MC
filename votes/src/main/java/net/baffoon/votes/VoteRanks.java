@@ -1,4 +1,4 @@
-package net.soulbound;
+package net.baffoon.votes;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -35,9 +35,9 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
     private static final TextColor GOLD = TextColor.color(0xF2C04A);
     private record Step(String group, int votes) {}
 
-    private final Soulbound plugin;
+    private final BaffoonVotes plugin;
 
-    VoteRanks(Soulbound plugin) {
+    VoteRanks(BaffoonVotes plugin) {
         this.plugin = plugin;
         Bukkit.getScheduler().runTaskTimer(plugin, this::remind, 20L * 60, 20L * 60);
     }

@@ -1,0 +1,19 @@
+name: BaffoonVotes
+version: '${version}'
+main: net.baffoon.votes.BaffoonVotes
+api-version: '26.3'
+description: BaffoonMC voting - /vote, vote ranks and the Vote Shop.
+softdepend: [Votifier, NuVotifier, Essentials, LuckPerms, Soulbound]
+commands:
+  vote:
+    description: The voting links, how many times you've voted and how far it is to your next level.
+    usage: /vote
+    aliases: [votes]
+  voteshop:
+    description: The Vote Shop. Spend the points you get for voting (admins - /voteshop help).
+    usage: /voteshop
+    aliases: [vshop]
+permissions:
+  baffoonvotes.admin:
+    description: Stock and edit the Vote Shop, change votes and points.
+    default: op
