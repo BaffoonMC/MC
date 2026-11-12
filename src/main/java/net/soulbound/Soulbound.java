@@ -49,6 +49,7 @@ public final class Soulbound extends JavaPlugin {
     private Laestrygonians laestrygonians;
     private ChatFix chatFix;
     private NewPlayerPing newPlayerPing;
+    private PingMask pingMask;
     private GodGear godGear;
     private QuantumGear quantum;
     private PotentialBlade potentialBlade;
@@ -472,6 +473,9 @@ public final class Soulbound extends JavaPlugin {
         chatFix = new ChatFix(this);
         newPlayerPing = new NewPlayerPing(this);
         pm.registerEvents(newPlayerPing, this);
+        pingMask = new PingMask(this);
+        pm.registerEvents(pingMask, this);
+        pingMask.start();
         pm.registerEvents(chatFix, this);
         pm.registerEvents(laestrygonians, this);
         pm.registerEvents(cute, this);
@@ -665,6 +669,7 @@ public final class Soulbound extends JavaPlugin {
     Laestrygonians laestrygonians() { return laestrygonians; }
     ChatFix chatFix() { return chatFix; }
     NewPlayerPing newPlayerPing() { return newPlayerPing; }
+    PingMask pingMask() { return pingMask; }
     KrakenBeard kraken() { return kraken; }
     Parasite parasite() { return parasite; }
     CurseManager curses() { return curses; }

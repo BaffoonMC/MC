@@ -464,6 +464,23 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
                 s.sendMessage(ok("Rank tags set: bronze star for Supporter, two silver for Patron, three gold for Chosen. Players need the resource pack to see them."));
             }
             case "size" -> size(s, a);
+            case "pingmask" -> {
+                if (!(s instanceof Player me)) { s.sendMessage("Players only."); break; }
+                if (!me.hasPermission("soulbound.pingmask")) { s.sendMessage(Component.text("Only the owner can use that.", NamedTextColor.RED)); break; }
+                PingMask pm = plugin.pingMask();
+                if (a.length < 2) {
+                    String cur = pm.setting(me);
+                    s.sendMessage(ok("Your real ping: " + pm.real(me) + " ms. Others see: " + me.getPing() + " ms"
+                            + (cur == null ? " (no mask)." : cur.startsWith("+") ? " (real " + cur + " ms)." : " (fixed).")));
+                    s.sendMessage(ok("/sb pingmask +50  adds 50 ms   |   /sb pingmask 80  always shows 80 ms   |   /sb pingmask off"));
+                    break;
+                }
+                String v = a[1].toLowerCase(java.util.Locale.ROOT);
+                if (v.equals("off")) { pm.set(me, null); s.sendMessage(ok("Ping mask off: everyone sees your real ping again.")); break; }
+                if (!v.matches("\\+?\\d{1,4}")) { s.sendMessage(Component.text("Use +50 to add 50 ms, 80 to always show 80 ms, or off.", NamedTextColor.RED)); break; }
+                pm.set(me, v);
+                s.sendMessage(ok(v.startsWith("+") ? "Others now see your ping " + v + " ms higher than it really is." : "Others now see your ping as " + v + " ms."));
+            }
             case "newping" -> {
                 if (!(s instanceof Player me)) { s.sendMessage("Players only."); break; }
                 boolean on = a.length > 1 ? !a[1].equalsIgnoreCase("off") : !plugin.newPlayerPing().on(me);
@@ -557,7 +574,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
     @Override
     public List<String> onTabComplete(CommandSender s, Command cmd, String label, String[] a) {
         if (!s.hasPermission("soulbound.admin")) return a.length == 1 ? filter(List.of("release"), a[0]) : List.of();
-        if (a.length == 1) return filter(List.of("give", "items", "player", "moloch", "god", "world", "size", "summon", "newping", "reload", "rankstars", "release", "help"), a[0]);
+        if (a.length == 1) return filter(List.of("give", "items", "player", "moloch", "god", "world", "size", "summon", "newping", "pingmask", "reload", "rankstars", "release", "help"), a[0]);
         String sub = a[0].toLowerCase(Locale.ROOT);
         switch (sub) {
             case "give" -> {
@@ -579,6 +596,7 @@ final class SbCommand implements CommandExecutor, TabCompleter, Listener {
             }
             case "god" -> { if (a.length == 2) return filter(List.of("test", "heaven"), a[1]); }
             case "newping" -> { if (a.length == 2) return filter(List.of("on", "off"), a[1]); }
+            case "pingmask" -> { if (a.length == 2) return filter(List.of("+50", "+100", "80", "off"), a[1]); }
             case "summon" -> {
                 if (a.length == 2) return filter(List.of("laestrygonians"), a[1]);
                 if (a.length == 3) return filter(List.of("6", "3", "12"), a[2]);

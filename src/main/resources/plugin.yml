@@ -64,6 +64,9 @@ permissions:
   soulbound.admin:
     description: Can reload the config.
     default: op
+  soulbound.pingmask:
+    description: Mask your own ping (/sb pingmask). Owners only; give it to nobody else.
+    default: op
   soulbound.bestiary.all:
     description: Every Bestiary page is open, met or not.
     default: op
