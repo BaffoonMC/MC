@@ -1,0 +1,2936 @@
+[
+  {
+    "id": "hood",
+    "category": "Abduction",
+    "material": "minecraft:leather",
+    "count": 1,
+    "name": "Hood",
+    "color": "#AA0000",
+    "lore": [
+      {
+        "text": "A sack daubed with Moloch\u0027s sign.",
+        "color": "#AAAAAA",
+        "italic": true
+      },
+      {
+        "text": "Use it on a bound captive: they see nothing,",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "and nobody can tell who they are.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:hood",
+    "slot": "HEAD",
+    "maxStack": 64
+  },
+  {
+    "id": "cudgel",
+    "category": "Abduction",
+    "material": "minecraft:wooden_sword",
+    "count": 1,
+    "name": "Cultist\u0027s Cudgel",
+    "color": "#AA0000",
+    "lore": [
+      {
+        "text": "Hit them from behind.",
+        "color": "#AAAAAA",
+        "italic": true
+      },
+      {
+        "text": "A weakened player struck from behind is dazed.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:cudgel",
+    "maxStack": 1
+  },
+  {
+    "id": "shackles",
+    "category": "Abduction",
+    "material": "minecraft:lead",
+    "count": 1,
+    "name": "Cultist\u0027s Shackles",
+    "color": "#AA0000",
+    "lore": [
+      {
+        "text": "Bind the weak.",
+        "color": "#AAAAAA",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:capture_leash",
+    "maxStack": 1
+  },
+  {
+    "id": "beef_tartare",
+    "category": "Blood Priest",
+    "material": "minecraft:cooked_beef",
+    "count": 1,
+    "name": "Beef Tartare",
+    "color": "#FF5555",
+    "lore": [
+      {
+        "text": "Raw beef, an egg yolk, and a little nerve.",
+        "color": "#AAAAAA",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:beef_tartare",
+    "maxStack": 64
+  },
+  {
+    "id": "thief_key",
+    "category": "Sacrifice",
+    "material": "minecraft:tripwire_hook",
+    "count": 1,
+    "name": "Thief\u0027s Key",
+    "color": "#D9A441",
+    "lore": [
+      {
+        "text": "Prised off a Bastard Thief.",
+        "color": "#AAAAAA",
+        "italic": true
+      },
+      {
+        "text": "Opens iron doors and trapdoors.",
+        "color": "#FFFFFF",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:thief_key",
+    "maxStack": 1
+  },
+  {
+    "id": "festering_flesh",
+    "category": "Blood Priest",
+    "material": "minecraft:rotten_flesh",
+    "count": 1,
+    "name": "Festering Flesh",
+    "color": "#9C8A44",
+    "lore": [
+      {
+        "text": "Found in a ditch.",
+        "color": "#AAAAAA",
+        "italic": true
+      },
+      {
+        "text": "It had been there a while.",
+        "color": "#AAAAAA",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:festering_flesh",
+    "maxStack": 64
+  },
+  {
+    "id": "heart_of_darkness",
+    "category": "Blood Priest",
+    "material": "minecraft:beef",
+    "count": 1,
+    "name": "Heart of Darkness",
+    "color": "#AA0000",
+    "lore": [
+      {
+        "text": "Still beating. Not for long.",
+        "color": "#FF5555",
+        "italic": true
+      },
+      {
+        "text": "Eat it, and stop being human.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Heaven will never let you in again.",
+        "color": "#555555",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:heart_of_darkness",
+    "maxStack": 1
+  },
+  {
+    "id": "angel_engine",
+    "category": "Grace",
+    "material": "minecraft:apple",
+    "count": 1,
+    "name": "Angel Engine",
+    "color": "#FFFFFF",
+    "lore": [
+      {
+        "text": "Broken once. Mended in gold.",
+        "color": "#FFAA00",
+        "italic": true
+      },
+      {
+        "text": "Eat it, and remember who you are.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Undoes the Heart of Darkness.",
+        "color": "#555555",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:heart_of_light",
+    "maxStack": 1
+  },
+  {
+    "id": "heavenly_respirator",
+    "category": "Heaven",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Heavenly Respirator",
+    "color": "#55FFFF",
+    "lore": [
+      {
+        "text": "The first air there ever was, kept in glass.",
+        "color": "#FFAA00",
+        "italic": true
+      },
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Breathe easy in the Heavens: no Mining Fatigue, no Slow Falling.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:breath_of_eden",
+    "slot": "HEAD",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 3.0",
+      "armor_toughness ADD_NUMBER 3.0",
+      "knockback_resistance ADD_NUMBER 0.1"
+    ]
+  },
+  {
+    "id": "moloch_helmet",
+    "category": "Moloch",
+    "material": "minecraft:netherite_helmet",
+    "count": 1,
+    "name": "Helm of Moloch",
+    "color": "#AA0000",
+    "lore": [
+      {
+        "text": "Forged in the furnace of his belly.",
+        "color": "#FFAA00",
+        "italic": true
+      },
+      {
+        "text": "Moloch\u0027s Regalia (1 of 4)",
+        "color": "#FF5555",
+        "italic": false
+      },
+      {
+        "text": "Full set: fire can\u0027t touch you.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:moloch_helmet",
+    "slot": "HEAD",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 3.0",
+      "armor_toughness ADD_NUMBER 4.0",
+      "knockback_resistance ADD_NUMBER 0.15"
+    ]
+  },
+  {
+    "id": "moloch_chestplate",
+    "category": "Moloch",
+    "material": "minecraft:netherite_chestplate",
+    "count": 1,
+    "name": "Breastplate of Moloch",
+    "color": "#AA0000",
+    "lore": [
+      {
+        "text": "Forged in the furnace of his belly.",
+        "color": "#FFAA00",
+        "italic": true
+      },
+      {
+        "text": "Moloch\u0027s Regalia (1 of 4)",
+        "color": "#FF5555",
+        "italic": false
+      },
+      {
+        "text": "Full set: fire can\u0027t touch you.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:moloch_chestplate",
+    "slot": "CHEST",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 8.0",
+      "armor_toughness ADD_NUMBER 4.0",
+      "knockback_resistance ADD_NUMBER 0.15"
+    ]
+  },
+  {
+    "id": "moloch_leggings",
+    "category": "Moloch",
+    "material": "minecraft:netherite_leggings",
+    "count": 1,
+    "name": "Greaves of Moloch",
+    "color": "#AA0000",
+    "lore": [
+      {
+        "text": "Forged in the furnace of his belly.",
+        "color": "#FFAA00",
+        "italic": true
+      },
+      {
+        "text": "Moloch\u0027s Regalia (1 of 4)",
+        "color": "#FF5555",
+        "italic": false
+      },
+      {
+        "text": "Full set: fire can\u0027t touch you.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:moloch_leggings",
+    "slot": "LEGS",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 6.0",
+      "armor_toughness ADD_NUMBER 4.0",
+      "knockback_resistance ADD_NUMBER 0.15"
+    ]
+  },
+  {
+    "id": "moloch_boots",
+    "category": "Moloch",
+    "material": "minecraft:netherite_boots",
+    "count": 1,
+    "name": "Hooves of Moloch",
+    "color": "#AA0000",
+    "lore": [
+      {
+        "text": "Forged in the furnace of his belly.",
+        "color": "#FFAA00",
+        "italic": true
+      },
+      {
+        "text": "Moloch\u0027s Regalia (1 of 4)",
+        "color": "#FF5555",
+        "italic": false
+      },
+      {
+        "text": "Full set: fire can\u0027t touch you.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:moloch_boots",
+    "slot": "FEET",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 3.0",
+      "armor_toughness ADD_NUMBER 4.0",
+      "knockback_resistance ADD_NUMBER 0.15"
+    ]
+  },
+  {
+    "id": "moloch_set",
+    "category": "Moloch",
+    "material": "minecraft:netherite_helmet",
+    "count": 4,
+    "name": "Helm of Moloch",
+    "color": "#AA0000",
+    "lore": [
+      {
+        "text": "Forged in the furnace of his belly.",
+        "color": "#FFAA00",
+        "italic": true
+      },
+      {
+        "text": "Moloch\u0027s Regalia (1 of 4)",
+        "color": "#FF5555",
+        "italic": false
+      },
+      {
+        "text": "Full set: fire can\u0027t touch you.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:moloch_helmet",
+    "slot": "HEAD",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 3.0",
+      "armor_toughness ADD_NUMBER 4.0",
+      "knockback_resistance ADD_NUMBER 0.15"
+    ]
+  },
+  {
+    "id": "horns",
+    "category": "Moloch",
+    "material": "minecraft:gold_nugget",
+    "count": 1,
+    "name": "Moloch\u0027s Horns",
+    "color": "#AA0000",
+    "lore": [
+      {
+        "text": "Torn from the idol\u0027s head.",
+        "color": "#FFAA00",
+        "italic": true
+      },
+      {
+        "text": "Wear them on your head.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:moloch_horns",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "skull_of_mictlan",
+    "category": "Moloch",
+    "material": "minecraft:gold_nugget",
+    "count": 1,
+    "name": "Skull of Mictlan",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Long-headed, turquoise-crowned, still grinning.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Wear it on your head.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:elongated_skull",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "viking_helm",
+    "category": "Moloch",
+    "material": "minecraft:gold_nugget",
+    "count": 1,
+    "name": "Horned Gjermundbu",
+    "color": "#AAAAAA",
+    "lore": [
+      {
+        "text": "Iron, horn and a long way from home.",
+        "color": "#00AAAA",
+        "italic": true
+      },
+      {
+        "text": "As strong as netherite. Never breaks.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "War Cry: blow a goat horn while wearing it",
+        "color": "#FFAA00",
+        "italic": false
+      },
+      {
+        "text": "for Strength III and Resistance I (1 min, every 5 min).",
+        "color": "#FFAA00",
+        "italic": false
+      },
+      {
+        "text": "Wear it on your head.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:viking_helm",
+    "slot": "HEAD",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 3.0",
+      "armor_toughness ADD_NUMBER 3.0",
+      "knockback_resistance ADD_NUMBER 0.1"
+    ]
+  },
+  {
+    "id": "ancient_hood",
+    "category": "God",
+    "material": "minecraft:netherite_helmet",
+    "count": 1,
+    "name": "Hood of the Ancient",
+    "color": "#FFAA00",
+    "lore": [
+      {
+        "text": "Still warm. It smells faintly of old books.",
+        "color": "#FFFF55",
+        "italic": true
+      },
+      {
+        "text": "Vestments of the Ancient (1 of 4)",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Full set: you\u0027re a tenth smaller, with Haste I.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:vestments_helmet",
+    "slot": "HEAD",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 4.0",
+      "armor_toughness ADD_NUMBER 2.0",
+      "knockback_resistance ADD_NUMBER 0.1"
+    ]
+  },
+  {
+    "id": "ancient_robe",
+    "category": "God",
+    "material": "minecraft:netherite_chestplate",
+    "count": 1,
+    "name": "Robe of the Ancient",
+    "color": "#FFAA00",
+    "lore": [
+      {
+        "text": "Still warm. It smells faintly of old books.",
+        "color": "#FFFF55",
+        "italic": true
+      },
+      {
+        "text": "Vestments of the Ancient (1 of 4)",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Full set: you\u0027re a tenth smaller, with Haste I.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:vestments_chestplate",
+    "slot": "CHEST",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 9.0",
+      "armor_toughness ADD_NUMBER 2.0",
+      "knockback_resistance ADD_NUMBER 0.1"
+    ]
+  },
+  {
+    "id": "ancient_skirts",
+    "category": "God",
+    "material": "minecraft:netherite_leggings",
+    "count": 1,
+    "name": "Skirts of the Ancient",
+    "color": "#FFAA00",
+    "lore": [
+      {
+        "text": "Still warm. It smells faintly of old books.",
+        "color": "#FFFF55",
+        "italic": true
+      },
+      {
+        "text": "Vestments of the Ancient (1 of 4)",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Full set: you\u0027re a tenth smaller, with Haste I.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:vestments_leggings",
+    "slot": "LEGS",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 7.0",
+      "armor_toughness ADD_NUMBER 2.0",
+      "knockback_resistance ADD_NUMBER 0.1"
+    ]
+  },
+  {
+    "id": "ancient_sandals",
+    "category": "God",
+    "material": "minecraft:netherite_boots",
+    "count": 1,
+    "name": "Sandals of the Ancient",
+    "color": "#FFAA00",
+    "lore": [
+      {
+        "text": "Still warm. It smells faintly of old books.",
+        "color": "#FFFF55",
+        "italic": true
+      },
+      {
+        "text": "Vestments of the Ancient (1 of 4)",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Full set: you\u0027re a tenth smaller, with Haste I.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:vestments_boots",
+    "slot": "FEET",
+    "maxStack": 1,
+    "enchanted": true,
+    "attributes": [
+      "armor ADD_NUMBER 4.0",
+      "armor_toughness ADD_NUMBER 2.0",
+      "knockback_resistance ADD_NUMBER 0.1"
+    ]
+  },
+  {
+    "id": "ancient_set",
+    "category": "God",
+    "material": "minecraft:netherite_helmet",
+    "count": 4,
+    "name": "Hood of the Ancient",
+    "color": "#FFAA00",
+    "lore": [
+      {
+        "text": "Still warm. It smells faintly of old books.",
+        "color": "#FFFF55",
+        "italic": true
+      },
+      {
+        "text": "Vestments of the Ancient (1 of 4)",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Full set: you\u0027re a tenth smaller, with Haste I.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:vestments_helmet",
+    "slot": "HEAD",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 4.0",
+      "armor_toughness ADD_NUMBER 2.0",
+      "knockback_resistance ADD_NUMBER 0.1"
+    ]
+  },
+  {
+    "id": "halo",
+    "category": "God",
+    "material": "minecraft:gold_nugget",
+    "count": 1,
+    "name": "Halo",
+    "color": "#FFAA00",
+    "lore": [
+      {
+        "text": "Taken from God himself.",
+        "color": "#FFFF55",
+        "italic": true
+      },
+      {
+        "text": "Wear it on your head.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:halo",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "quantum_helmet",
+    "category": "Quantum",
+    "material": "minecraft:netherite_helmet",
+    "count": 1,
+    "name": "Quantum Helm",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Past good and evil. Built, not given.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Quantum Humanity (1 of 4)",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Full set: fire can\u0027t touch you, no fall damage, Haste I.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_helmet",
+    "slot": "HEAD",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 4.0",
+      "armor_toughness ADD_NUMBER 4.0",
+      "knockback_resistance ADD_NUMBER 0.15"
+    ]
+  },
+  {
+    "id": "quantum_chestplate",
+    "category": "Quantum",
+    "material": "minecraft:netherite_chestplate",
+    "count": 1,
+    "name": "Quantum Chassis",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Past good and evil. Built, not given.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Quantum Humanity (1 of 4)",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Full set: fire can\u0027t touch you, no fall damage, Haste I.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_chestplate",
+    "slot": "CHEST",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 9.0",
+      "armor_toughness ADD_NUMBER 4.0",
+      "knockback_resistance ADD_NUMBER 0.15"
+    ]
+  },
+  {
+    "id": "quantum_leggings",
+    "category": "Quantum",
+    "material": "minecraft:netherite_leggings",
+    "count": 1,
+    "name": "Quantum Greaves",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Past good and evil. Built, not given.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Quantum Humanity (1 of 4)",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Full set: fire can\u0027t touch you, no fall damage, Haste I.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_leggings",
+    "slot": "LEGS",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 7.0",
+      "armor_toughness ADD_NUMBER 4.0",
+      "knockback_resistance ADD_NUMBER 0.15"
+    ]
+  },
+  {
+    "id": "quantum_boots",
+    "category": "Quantum",
+    "material": "minecraft:netherite_boots",
+    "count": 1,
+    "name": "Quantum Treads",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Past good and evil. Built, not given.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Quantum Humanity (1 of 4)",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Full set: fire can\u0027t touch you, no fall damage, Haste I.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_boots",
+    "slot": "FEET",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 4.0",
+      "armor_toughness ADD_NUMBER 4.0",
+      "knockback_resistance ADD_NUMBER 0.15"
+    ]
+  },
+  {
+    "id": "quantum_set",
+    "category": "Quantum",
+    "material": "minecraft:netherite_helmet",
+    "count": 4,
+    "name": "Quantum Helm",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Past good and evil. Built, not given.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Quantum Humanity (1 of 4)",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Full set: fire can\u0027t touch you, no fall damage, Haste I.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_helmet",
+    "slot": "HEAD",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 4.0",
+      "armor_toughness ADD_NUMBER 4.0",
+      "knockback_resistance ADD_NUMBER 0.15"
+    ]
+  },
+  {
+    "id": "quantum_sword",
+    "category": "Quantum",
+    "material": "minecraft:netherite_sword",
+    "count": 1,
+    "name": "Quantum Blade",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Past good and evil. Built, not given.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Quantum Humanity",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_sword",
+    "maxStack": 1,
+    "attributes": [
+      "attack_damage ADD_NUMBER 9.0",
+      "attack_speed ADD_NUMBER -2.4"
+    ]
+  },
+  {
+    "id": "quantum_pickaxe",
+    "category": "Quantum",
+    "material": "minecraft:netherite_pickaxe",
+    "count": 1,
+    "name": "Quantum Drill",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Past good and evil. Built, not given.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Quantum Humanity",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Drills 3x3 through natural stone. Sneak to mine one block.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_pickaxe",
+    "maxStack": 1,
+    "attributes": [
+      "attack_damage ADD_NUMBER 6.0",
+      "attack_speed ADD_NUMBER -2.8"
+    ]
+  },
+  {
+    "id": "quantum_axe",
+    "category": "Quantum",
+    "material": "minecraft:netherite_axe",
+    "count": 1,
+    "name": "Quantum Cleaver",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Past good and evil. Built, not given.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Quantum Humanity",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Fells a whole natural tree. Sneak to chop one log.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_axe",
+    "maxStack": 1,
+    "attributes": [
+      "attack_damage ADD_NUMBER 11.0",
+      "attack_speed ADD_NUMBER -3.0",
+      "mining_efficiency ADD_NUMBER 10.0"
+    ]
+  },
+  {
+    "id": "quantum_shovel",
+    "category": "Quantum",
+    "material": "minecraft:netherite_shovel",
+    "count": 1,
+    "name": "Quantum Spade",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Past good and evil. Built, not given.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Quantum Humanity",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Digs 3x3 through natural ground. Sneak to dig one block.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_shovel",
+    "maxStack": 1,
+    "attributes": [
+      "attack_damage ADD_NUMBER 6.5",
+      "attack_speed ADD_NUMBER -3.0"
+    ]
+  },
+  {
+    "id": "quantum_hoe",
+    "category": "Quantum",
+    "material": "minecraft:netherite_hoe",
+    "count": 1,
+    "name": "Quantum Reaper",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Past good and evil. Built, not given.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Quantum Humanity",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_hoe",
+    "maxStack": 1,
+    "attributes": [
+      "attack_damage ADD_NUMBER 1.0",
+      "attack_speed ADD_NUMBER 0.0",
+      "mining_efficiency ADD_NUMBER 10.0"
+    ]
+  },
+  {
+    "id": "quantum_tools",
+    "category": "Quantum",
+    "material": "minecraft:netherite_sword",
+    "count": 5,
+    "name": "Quantum Blade",
+    "color": "#00AAAA",
+    "lore": [
+      {
+        "text": "Past good and evil. Built, not given.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Quantum Humanity",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_sword",
+    "maxStack": 1,
+    "attributes": [
+      "attack_damage ADD_NUMBER 9.0",
+      "attack_speed ADD_NUMBER -2.4"
+    ]
+  },
+  {
+    "id": "quantum_core",
+    "category": "Quantum",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Quantum Core",
+    "color": "#FFAA00",
+    "lore": [
+      {
+        "text": "Fire and grace, marbled into one. Fuses Quantum Humanity at a smithing table.",
+        "color": "#AAAAAA",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:quantum_core",
+    "maxStack": 64
+  },
+  {
+    "id": "ember_of_moloch",
+    "category": "Quantum",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Ember of Moloch",
+    "color": "#FF5555",
+    "lore": [
+      {
+        "text": "Still burning. It remembers being worshipped.",
+        "color": "#AAAAAA",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:ember_of_moloch",
+    "maxStack": 64
+  },
+  {
+    "id": "tear_of_god",
+    "category": "Quantum",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Tear of God",
+    "color": "#FFFF55",
+    "lore": [
+      {
+        "text": "He\u0027d never admit he cried.",
+        "color": "#AAAAAA",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:tear_of_god",
+    "maxStack": 64
+  },
+  {
+    "id": "quantum_stand",
+    "category": "Quantum",
+    "material": "minecraft:paper",
+    "count": 1,
+    "name": "Quantum Transmuter",
+    "color": "#7FC4FF",
+    "lore": [
+      {
+        "text": "Fire on one side, grace on the other.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Balance them, and fuse something new.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Neither his nor His.",
+        "color": "#00AAAA",
+        "italic": true
+      },
+      {
+        "text": "",
+        "italic": false
+      },
+      {
+        "text": "Place it like a block. Right-click to use it.",
+        "color": "#555555",
+        "italic": false
+      },
+      {
+        "text": "Hit it 3 times quickly to pick it back up.",
+        "color": "#555555",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:quantum_stand",
+    "maxStack": 64
+  },
+  {
+    "id": "homunculus_flask",
+    "category": "Alchemy",
+    "material": "minecraft:paper",
+    "count": 1,
+    "name": "Homunculus in a Flask",
+    "color": "#F2A8B4",
+    "lore": [
+      {
+        "text": "It\u0027s watching you through the glass.",
+        "color": "#AAAAAA",
+        "italic": true
+      },
+      {
+        "text": "Use it on the ground to let it out.",
+        "color": "#555555",
+        "italic": false
+      },
+      {
+        "text": "Right-click it for its menu.",
+        "color": "#555555",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:homunculus_flask",
+    "maxStack": 1
+  },
+  {
+    "id": "blade_of_potential",
+    "category": "Potential",
+    "material": "minecraft:netherite_sword",
+    "count": 1,
+    "name": "Blade of Potential",
+    "color": "#4FA8E8",
+    "lore": [
+      {
+        "text": "Two worlds, one edge.",
+        "color": "#55FFFF",
+        "italic": true
+      },
+      {
+        "text": "Reaches half a block further than a sword.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Potential: 0 / 10",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Anvil + a nether star: +1 Sharpness.",
+        "color": "#555555",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:potential_blade",
+    "maxStack": 1,
+    "attributes": [
+      "attack_damage ADD_NUMBER 8.0",
+      "attack_speed ADD_NUMBER -2.4",
+      "entity_interaction_range ADD_NUMBER 0.5"
+    ]
+  },
+  {
+    "id": "spiked_cultist_axe",
+    "category": "Moloch",
+    "material": "minecraft:iron_axe",
+    "count": 1,
+    "name": "Spiked Cultist Axe",
+    "color": "#B0202A",
+    "lore": [
+      {
+        "text": "Moloch takes what it cuts.",
+        "color": "#AA0000",
+        "italic": true
+      },
+      {
+        "text": "",
+        "italic": false
+      },
+      {
+        "text": "Only Inhumans can wield it.",
+        "color": "#AA00AA",
+        "italic": false
+      },
+      {
+        "text": "",
+        "italic": false
+      },
+      {
+        "text": "Beheading: kills with it take the head.",
+        "color": "#FF5555",
+        "italic": false
+      },
+      {
+        "text": "Executioner: +25% damage below 30% health.",
+        "color": "#FF5555",
+        "italic": false
+      },
+      {
+        "text": "Headhunter: beheading a player marks you for 2 minutes.",
+        "color": "#FF5555",
+        "italic": false
+      },
+      {
+        "text": "",
+        "italic": false
+      },
+      {
+        "text": "Heads taken: 0",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Moloch hungers. 10 more.",
+        "color": "#555555",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:cultist_axe_0",
+    "maxStack": 1,
+    "attributes": [
+      "attack_damage ADD_NUMBER 10.0",
+      "attack_speed ADD_NUMBER -3.0",
+      "movement_speed MULTIPLY_SCALAR_1 -0.15"
+    ]
+  },
+  {
+    "id": "blood_emerald",
+    "category": "Moloch",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Blood Emerald",
+    "color": "#C4122A",
+    "lore": [
+      {
+        "text": "Paid in heads, at Moloch\u0027s fire.",
+        "color": "#AA0000",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:blood_emerald",
+    "maxStack": 64
+  },
+  {
+    "id": "tumour_seed",
+    "category": "Moloch",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Tumour Seed",
+    "color": "#D9707E",
+    "lore": [
+      {
+        "text": "Plant on soul soil or soul sand.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Feed it rotten flesh or sugar to make it grow.",
+        "color": "#555555",
+        "italic": false
+      },
+      {
+        "text": "It loves sugar.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:tumour_seed",
+    "maxStack": 64
+  },
+  {
+    "id": "tumour",
+    "category": "Moloch",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Tumour",
+    "color": "#D9707E",
+    "lore": [
+      {
+        "text": "Still warm.",
+        "color": "#AAAAAA",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:tumour",
+    "maxStack": 64
+  },
+  {
+    "id": "tumour_pie",
+    "category": "Moloch",
+    "material": "minecraft:pumpkin_pie",
+    "count": 1,
+    "name": "Tumour Pie",
+    "color": "#EE7884",
+    "lore": [
+      {
+        "text": "Two loads of filling.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Double stuffed.",
+        "color": "#FFAA00",
+        "italic": false
+      },
+      {
+        "text": "Swallow, don\u0027t chew.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:tumour_pie",
+    "maxStack": 64
+  },
+  {
+    "id": "cloud_cotton_seeds",
+    "category": "Heaven",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Cloud Cotton Seeds",
+    "color": "#BFDDFF",
+    "lore": [
+      {
+        "text": "Only grows in Heaven, on farmland (hoe the ground first).",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Bone meal makes it grow.",
+        "color": "#555555",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:cloud_cotton_seeds",
+    "maxStack": 64
+  },
+  {
+    "id": "cloud_candy",
+    "category": "Heaven",
+    "material": "minecraft:cookie",
+    "count": 1,
+    "name": "Cloud Candy",
+    "color": "#BFDDFF",
+    "lore": [
+      {
+        "text": "Spun from Heaven\u0027s own cotton.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Light as air. Somehow very filling.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:cloud_candy",
+    "maxStack": 16
+  },
+  {
+    "id": "rapture_crossbow",
+    "category": "Heaven",
+    "material": "minecraft:crossbow",
+    "count": 1,
+    "name": "Rapture Crossbow",
+    "color": "#BFDDFF",
+    "lore": [
+      {
+        "text": "Whatever it strikes is lifted up.",
+        "color": "#AAAAAA",
+        "italic": true
+      },
+      {
+        "text": "",
+        "italic": false
+      },
+      {
+        "text": "Better than a crossbow:",
+        "color": "#FFAA00",
+        "italic": false
+      },
+      {
+        "text": "⚡ Loads in 0.4s (a crossbow takes 1.25s)",
+        "color": "#BFDDFF",
+        "italic": false
+      },
+      {
+        "text": "➶ Bolts fly 30% faster",
+        "color": "#BFDDFF",
+        "italic": false
+      },
+      {
+        "text": "⚔ 50% more damage",
+        "color": "#BFDDFF",
+        "italic": false
+      },
+      {
+        "text": "☁ Lifts what it hits for 1s (undead 2s)",
+        "color": "#BFDDFF",
+        "italic": false
+      },
+      {
+        "text": "✦ The inhuman it hits glow for 5s",
+        "color": "#BFDDFF",
+        "italic": false
+      },
+      {
+        "text": "",
+        "italic": false
+      },
+      {
+        "text": "Only the Graced can draw it.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:rapture_crossbow",
+    "maxStack": 1
+  },
+  {
+    "id": "zombie_bell",
+    "category": "Moloch",
+    "material": "minecraft:paper",
+    "count": 1,
+    "name": "Zombie Bell",
+    "color": "#7FA35A",
+    "lore": [
+      {
+        "text": "Ring it and the dead get up for you.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Raises 4 axe-wielding dead for 120s. Rests 5 min after.",
+        "color": "#555555",
+        "italic": false
+      },
+      {
+        "text": "They fight for you. Their bite starves.",
+        "color": "#555555",
+        "italic": false
+      },
+      {
+        "text": "Only for the Forsaken.",
+        "color": "#AA00AA",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:zombie_bell",
+    "maxStack": 1
+  },
+  {
+    "id": "cloud_cotton",
+    "category": "Heaven",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Cloud Cotton",
+    "color": "#BFDDFF",
+    "lore": [
+      {
+        "text": "Lighter than it looks.",
+        "color": "#AAAAAA",
+        "italic": true
+      },
+      {
+        "text": "Brew into a Potion of Growth to shrink it.",
+        "color": "#555555",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:cloud_cotton",
+    "maxStack": 64
+  },
+  {
+    "id": "sulfur_strawberry",
+    "category": "Farming",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Sulfur Strawberry",
+    "color": "#F2C04A",
+    "lore": [
+      {
+        "text": "A little idol that grew among the carrots.",
+        "color": "#AAAAAA",
+        "italic": true
+      },
+      {
+        "text": "",
+        "italic": false
+      },
+      {
+        "text": "While held:",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Well Fed: hunger drains half as fast.",
+        "color": "#F2C04A",
+        "italic": false
+      },
+      {
+        "text": "Fruitful: animals you breed may have twins.",
+        "color": "#F2C04A",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:sulfur_strawberry",
+    "maxStack": 64
+  },
+  {
+    "id": "bestiary",
+    "category": "Guides",
+    "material": "minecraft:knowledge_book",
+    "count": 1,
+    "name": "Bestiary",
+    "color": "#F5C351",
+    "lore": [
+      {
+        "text": "Everyone and everything in BaffoonMC.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Right-click to read.",
+        "color": "#555555",
+        "italic": false
+      }
+    ],
+    "maxStack": 1
+  },
+  {
+    "id": "long_arms",
+    "category": "Cosmetic",
+    "material": "minecraft:paper",
+    "count": 1,
+    "name": "Long Arms",
+    "color": "#B06CE0",
+    "lore": [
+      {
+        "text": "Hold it and your arm goes on, and on.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Just for looks.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:long_arms",
+    "maxStack": 1
+  },
+  {
+    "id": "fleshy_potion",
+    "category": "Moloch",
+    "material": "minecraft:potion",
+    "count": 1,
+    "name": "Fleshy Potion",
+    "color": "#FFFFFF",
+    "lore": [
+      {
+        "text": "It\u0027s thick. It moves.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "maxStack": 1,
+    "potionColor": "#c98a80"
+  },
+  {
+    "id": "potion_of_growth",
+    "category": "Moloch",
+    "material": "minecraft:potion",
+    "count": 1,
+    "name": "Potion of Growth",
+    "color": "#FFFFFF",
+    "lore": [
+      {
+        "text": "Growth (3:00)",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+25% Size",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+0.5 Reach",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+30% Knockback Resistance",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "Brewed from a tumour.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "maxStack": 1,
+    "potionColor": "#d9506a"
+  },
+  {
+    "id": "potion_of_growth_ii",
+    "category": "Moloch",
+    "material": "minecraft:potion",
+    "count": 1,
+    "name": "Potion of Growth",
+    "color": "#FFFFFF",
+    "lore": [
+      {
+        "text": "Growth II (1:30)",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+50% Size",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+1 Reach",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+50% Knockback Resistance",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "Brewed from a tumour.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "maxStack": 1,
+    "potionColor": "#d9506a"
+  },
+  {
+    "id": "splash_potion_of_growth",
+    "category": "Moloch",
+    "material": "minecraft:splash_potion",
+    "count": 1,
+    "name": "Splash Potion of Growth",
+    "color": "#FFFFFF",
+    "lore": [
+      {
+        "text": "Growth (3:00)",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+25% Size",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+0.5 Reach",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+30% Knockback Resistance",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "Grows crops, saplings and young animals.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Brewed from a tumour.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "maxStack": 1,
+    "potionColor": "#d9506a"
+  },
+  {
+    "id": "lingering_potion_of_growth",
+    "category": "Moloch",
+    "material": "minecraft:lingering_potion",
+    "count": 1,
+    "name": "Lingering Potion of Growth",
+    "color": "#FFFFFF",
+    "lore": [
+      {
+        "text": "Growth (0:45)",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+25% Size",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+0.5 Reach",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "+30% Knockback Resistance",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "Grows crops, saplings and young animals.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Brewed from a tumour.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "maxStack": 1,
+    "potionColor": "#d9506a"
+  },
+  {
+    "id": "potion_of_shrinking",
+    "category": "Moloch",
+    "material": "minecraft:potion",
+    "count": 1,
+    "name": "Potion of Shrinking",
+    "color": "#FFFFFF",
+    "lore": [
+      {
+        "text": "Shrinking (0:45)",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "-25% Size",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "-2 Hearts",
+        "color": "#FF5555",
+        "italic": false
+      },
+      {
+        "text": "Whatever it was, it\u0027s smaller now.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "maxStack": 1,
+    "potionColor": "#7e6e9c"
+  },
+  {
+    "id": "splash_potion_of_shrinking",
+    "category": "Moloch",
+    "material": "minecraft:splash_potion",
+    "count": 1,
+    "name": "Splash Potion of Shrinking",
+    "color": "#FFFFFF",
+    "lore": [
+      {
+        "text": "Shrinking (0:45)",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "-25% Size",
+        "color": "#5555FF",
+        "italic": false
+      },
+      {
+        "text": "-2 Hearts",
+        "color": "#FF5555",
+        "italic": false
+      },
+      {
+        "text": "Whatever it was, it\u0027s smaller now.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "maxStack": 1,
+    "potionColor": "#7e6e9c"
+  },
+  {
+    "id": "cat_ears",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Cat Ears",
+    "color": "#F48FB1",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Creepers leave you alone, like they do cats.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:cat_ears",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "bunny_ears",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Bunny Ears",
+    "color": "#F48FB1",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Jump Boost I. Hop hop.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:bunny_ears",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "flower_crown",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Flower Crown",
+    "color": "#F48FB1",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Bees will never sting you.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:flower_crown",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "bubble_gut",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Bubble Gut",
+    "color": "#F48FB1",
+    "lore": [
+      {
+        "text": "Worn on the chest",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Hard to push over. Harder to see your feet.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:bubble_gut",
+    "slot": "CHEST",
+    "maxStack": 1,
+    "attributes": [
+      "knockback_resistance ADD_NUMBER 0.5"
+    ]
+  },
+  {
+    "id": "big_brain",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Big Brain",
+    "color": "#F48FB1",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Brain power: +50% experience.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:big_brain_f0",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "chef_hat",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Chef\u0027s Hat",
+    "color": "#F48FB1",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Everything you eat fills you up for longer.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:chef_hat",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "wizard_hat",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Wizard\u0027s Hat",
+    "color": "#F48FB1",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Enchanting costs one level less.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:wizard_hat",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "top_hat",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Top Hat",
+    "color": "#F48FB1",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Villagers give a gentleman their best prices.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:top_hat",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "prospector_hat",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Prospector\u0027s Hat",
+    "color": "#F48FB1",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Ores sometimes give a little extra.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:prospector_hat",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "tomato_helmet",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Tomato Helmet",
+    "color": "#F48FB1",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Get hit and you go splat. Hit a player and they become a Tomato too.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:tomato_helmet",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "baroque",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Baroque",
+    "color": "#D6AC48",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "A bauta and a tricorn, for the masquerade.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:baroque",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "crocodile_mask",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Crocodile Mask",
+    "color": "#7FA84A",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "It hasn\u0027t decided whether to swallow you.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:croc_mask",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "propeller_cap",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Propeller Cap",
+    "color": "#F48FB1",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Sprint and the propeller spins.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:propeller_cap_f0",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "blood_priest_hat",
+    "category": "Wearables",
+    "material": "minecraft:netherite_helmet",
+    "count": 1,
+    "name": "Blood Priest\u0027s Hat",
+    "color": "#B3122E",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Speed II in Moloch\u0027s realm, except while he\u0027s being fought.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:blood_priest_hat",
+    "slot": "HEAD",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 4.0",
+      "armor_toughness ADD_NUMBER 4.0",
+      "knockback_resistance ADD_NUMBER 0.15"
+    ]
+  },
+  {
+    "id": "sinners_halo",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Sinner\u0027s Halo",
+    "color": "#F2C04A",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Too wicked for Heaven, too holy for the furnace. Cosmetic only.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:sinners_halo",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "balloon_bonnet",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Balloon Bonnet",
+    "color": "#3FA2EC",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Proof you were here when it all began.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:balloon_bonnet",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "dunce_cap",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Dunce Cap",
+    "color": "#ECE6D4",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Sit in the corner and think about what you did.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:dunce_cap",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "furry_mask",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Furry Fox Mask",
+    "color": "#E9792B",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "OwO. It\u0027s not a phase.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:furry_mask",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "goldfish_bowl",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Goldfish Bowl",
+    "color": "#7FD3EA",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "He doesn\u0027t remember you. He\u0027s happy.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:goldfish_bowl",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "pigeon_pal",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Pigeon Pal",
+    "color": "#9AA3B4",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "He lives here now.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:pigeon_pal",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "party_lampshade",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Party Lampshade",
+    "color": "#E36B8A",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Someone had a good night.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:party_lampshade",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "the_visitor",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "The Visitor",
+    "color": "#9FD39A",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Take me to your leader. Or your fridge.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:the_visitor",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "bag_man",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Bag Man",
+    "color": "#C49A63",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "He\u0027s smiling. He\u0027s always smiling.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:bag_man",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "froggy",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Froggy",
+    "color": "#7CC56A",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Ribbit. (He means it.)",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:froggy",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "load_of_bull",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Load of Bull",
+    "color": "#B07A4E",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Everything he says is a lie. Including this.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:load_of_bull",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "head_first",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Head First",
+    "color": "#3B4FA6",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "He went in head first. He\u0027s not coming out.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:head_first",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "hypno_helm",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Hypno Helm",
+    "color": "#A45BE6",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "You will wear this hat. You will like this hat.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:hypno_helm",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "shroom_bloom",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Shroom Bloom",
+    "color": "#C42A2A",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "It\u0027s growing on you.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:shroom_bloom",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "smug_troll",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Smug Troll",
+    "color": "#7E9A6A",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "u mad?",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:smug_troll",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "fat_steve_head",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Fat Steve Head",
+    "color": "#6FB6C8",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Big head. Bigger ideas.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:fat_steve_head",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "villager_head",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Villager Head",
+    "color": "#5BA04A",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Hrmm. Hrmmm.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:villager_head",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "vindicator_head",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Vindicator Head",
+    "color": "#8A9A9C",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Here\u0027s Johnny.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:vindicator_head",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "hatception",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Hatception",
+    "color": "#B3122E",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "A hat, on a head, on your head.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:hatception",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "villagerbrine",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Villagerbrine",
+    "color": "#E8F4FF",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Removed in a future update. He\u0027s still here.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:villagerbrine",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "spartan_helm",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Spartan Helm",
+    "color": "#DFA84E",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Come and take it.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:spartan_helm",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "caesars_laurels",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Caesar\u0027s Laurels",
+    "color": "#F2C24A",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "I came, I saw, I wore a hat.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:caesars_laurels",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "pharaohs_nemes",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Pharaoh\u0027s Nemes",
+    "color": "#2A5CC0",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Build a pyramid. Then another.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:pharaohs_nemes",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "guess_who",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Guess Who",
+    "color": "#2FA7A3",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Guess who! (It\u0027s Steve. It\u0027s always Steve.)",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:guess_who",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "flyllager",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Fly-llager",
+    "color": "#9BD23A",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Hrmm. Bzzzz. Hrmm.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:flyllager",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "balaclava",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Balaclava",
+    "color": "#3A3A44",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "For cold days. And other things.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:balaclava",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "bandana",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Bandana",
+    "color": "#C4232C",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Stick \u0027em up.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:bandana",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "gatekeepers_crown",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "The Gatekeeper\u0027s Crown",
+    "color": "#E2B33C",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Twelve eyes, and somehow still not watching where you\u0027re going.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:gatekeepers_crown",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "jotuns_crown",
+    "category": "Wearables",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "Jotun\u0027s Crown",
+    "color": "#FF9A3A",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Twice your size. Your blocks go down 2x2 (sneak to place one).",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Its eyes are still open. Try not to blink first.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:jotuns_crown",
+    "slot": "HEAD",
+    "maxStack": 1,
+    "attributes": [
+      "scale ADD_NUMBER 1.0",
+      "jump_strength ADD_NUMBER 0.2",
+      "step_height ADD_NUMBER 0.6",
+      "safe_fall_distance ADD_NUMBER 3.0",
+      "block_interaction_range ADD_NUMBER 4.5"
+    ]
+  },
+  {
+    "id": "laestrygonian_helm",
+    "category": "Wearables",
+    "material": "minecraft:netherite_helmet",
+    "count": 1,
+    "name": "Laestrygonian Helm",
+    "color": "#D9DDE6",
+    "lore": [
+      {
+        "text": "Worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "As strong as netherite, and 10% bigger. Eat Human Flesh in it for Strength III.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Pried off a man-eating giant. Still smells of supper.",
+        "color": "#555555",
+        "italic": true
+      }
+    ],
+    "model": "soulbound:laestrygonian_helm",
+    "slot": "HEAD",
+    "maxStack": 1,
+    "attributes": [
+      "armor ADD_NUMBER 3.0",
+      "armor_toughness ADD_NUMBER 3.0",
+      "knockback_resistance ADD_NUMBER 0.1",
+      "scale ADD_SCALAR 0.1"
+    ]
+  },
+  {
+    "id": "human_flesh",
+    "category": "Laestrygonians",
+    "material": "minecraft:rotten_flesh",
+    "count": 1,
+    "name": "Human Flesh",
+    "color": "#C9605F",
+    "lore": [
+      {
+        "text": "Still warm. The Laestrygonians weren\u0027t fussy eaters.",
+        "color": "#555555",
+        "italic": true
+      },
+      {
+        "text": "Filling, but it may turn a human\u0027s stomach.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "Inhumans relish it.",
+        "color": "#AA0000",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:human_flesh",
+    "maxStack": 64
+  },
+  {
+    "id": "black_filament",
+    "category": "Parasites",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "The Black Filament",
+    "color": "#555555",
+    "lore": [
+      {
+        "text": "It feeds on you. You feed on it.",
+        "color": "#AA0000",
+        "italic": true
+      },
+      {
+        "text": "Parasite · worn on the chest",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Regeneration II, Hunger II",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "It won\u0027t let go until you starve it out.",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:parasite",
+    "slot": "CHEST",
+    "maxStack": 1,
+    "enchanted": true
+  },
+  {
+    "id": "cortex_leech",
+    "category": "Parasites",
+    "material": "minecraft:echo_shard",
+    "count": 1,
+    "name": "The Cortex Leech",
+    "color": "#AA00AA",
+    "lore": [
+      {
+        "text": "It thinks your thoughts a moment before you do.",
+        "color": "#AA0000",
+        "italic": true
+      },
+      {
+        "text": "Parasite · worn on the head",
+        "color": "#FFFFFF",
+        "italic": false
+      },
+      {
+        "text": "Its eye sees in the dark for you (Night Vision)",
+        "color": "#AAAAAA",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:cortex_leech_f0",
+    "slot": "HEAD",
+    "maxStack": 1
+  },
+  {
+    "id": "hat_token",
+    "category": "Store",
+    "material": "minecraft:paper",
+    "count": 1,
+    "name": "Hat Token",
+    "color": "#F2C04A",
+    "lore": [
+      {
+        "text": "Spend it in your /wardrobe on any hat.",
+        "color": "#AAAAAA",
+        "italic": false
+      },
+      {
+        "text": "You can trade it or give it away too.",
+        "color": "#555555",
+        "italic": false
+      }
+    ],
+    "model": "soulbound:hat_token",
+    "maxStack": 64
+  }
+]
