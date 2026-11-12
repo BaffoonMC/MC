@@ -3,7 +3,7 @@ version: '${version}'
 main: net.baffoon.votes.BaffoonVotes
 api-version: '26.3'
 description: BaffoonMC voting - /vote, vote ranks and the Vote Shop.
-softdepend: [Votifier, NuVotifier, Essentials, LuckPerms, Soulbound]
+softdepend: [Votifier, NuVotifier, Essentials, LuckPerms, Soulbound, PlaceholderAPI]
 commands:
   vote:
     description: The voting links, how many times you've voted and how far it is to your next level.

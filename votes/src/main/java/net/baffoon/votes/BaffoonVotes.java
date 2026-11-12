@@ -30,6 +30,10 @@ public final class BaffoonVotes extends JavaPlugin {
         if (vs != null) { vs.setExecutor(voteShop); vs.setTabCompleter(voteShop); }
         var v = getCommand("vote");
         if (v != null) v.setExecutor(voteRanks);
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            try { new VotePlaceholders(this).register(); getLogger().info("PlaceholderAPI found: %baffoonvotes_...% placeholders registered."); }
+            catch (Throwable t) { getLogger().warning("Couldn't register placeholders: " + t); }
+        }
     }
 
     /** Bring Soulbound's vote data across the first time (votes, points, which sites, the shop's stock). */

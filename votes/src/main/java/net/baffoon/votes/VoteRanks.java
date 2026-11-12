@@ -209,6 +209,23 @@ final class VoteRanks implements CommandExecutor, org.bukkit.event.Listener {
                         .append(Component.text("/vote", NamedTextColor.YELLOW).clickEvent(ClickEvent.runCommand("/vote"))));
     }
 
+    // ---------------------------------------------------------------- for placeholders
+
+    /** How many of the sites they've voted on in the last day, and how many sites there are. */
+    int votedToday(java.util.UUID id) {
+        long cool = (long) (plugin.getConfig().getDouble("vote-ranks.cooldown-hours", 24) * 3_600_000L), now = System.currentTimeMillis();
+        int n = 0;
+        for (Site st : sites()) { long last = plugin.voteShop().lastVote(id, st.name()); if (last > 0 && now - last < cool) n++; }
+        return n;
+    }
+    int siteCount() { return sites().size(); }
+    /** The next level up and the votes it takes, or null at the top. */
+    String[] next(java.util.UUID id) {
+        int v = plugin.voteShop().votes(id);
+        for (Step st : ladder()) if (v < st.votes()) return new String[]{nice(st.group()), String.valueOf(st.votes()), String.valueOf(st.votes() - v)};
+        return null;
+    }
+
     private record Site(String name, String url) {}
 
     private List<Site> sites() {
