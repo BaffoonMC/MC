@@ -33,14 +33,14 @@ import java.util.Map;
  *
  *   top row      chart panel (0-2) · the Director's eye (4) · treasury panel (6-8)
  *   left 3x3     buy 1/8/64 · sell 1/8/all · vault: deposit all, withdraw 8, withdraw all
- *   middle       the ledger (13, 22, 31)
+ *   middle       the ledger (12-14, 21-23, 30-32)
  *   right 3x3    the lizard shop (from config)
  *   bottom row   leave (45) · notices (49) · your money (53)
  */
 final class Capital implements Listener {
     private static final TextColor GOLD = TextColor.color(0xF0C85A), ICE = Cash.ICE;
     private static final NamespacedKey INVISIBLE = new NamespacedKey("bureau", "invisible");
-    private static final int[] SHOP = {14, 15, 16, 23, 24, 25, 32, 33, 34};
+    private static final int[] SHOP = {15, 16, 17, 24, 25, 26, 33, 34, 35};
     private final Bureau plugin;
 
     Capital(Bureau plugin) { this.plugin = plugin; }
@@ -138,7 +138,7 @@ final class Capital implements Listener {
         for (int s : new int[]{6, 7, 8}) m.inv.setItem(s, hover(plain("The Treasury", GOLD), treasury));
 
         // buy
-        int[][] buys = {{10, 1}, {11, 8}, {12, 64}};
+        int[][] buys = {{9, 1}, {10, 8}, {11, 64}};
         for (int[] b : buys) {
             int n = b[1];
             m.inv.setItem(b[0], cashButton(n, plain("Buy " + n + " Cold Hard Cash", NamedTextColor.GREEN), List.of(
@@ -148,7 +148,7 @@ final class Capital implements Listener {
             m.actions.put(b[0], () -> buy(p, n));
         }
         // sell
-        int[][] sells = {{19, 1}, {20, 8}, {21, -1}};
+        int[][] sells = {{18, 1}, {19, 8}, {20, -1}};
         for (int[] s : sells) {
             int n = s[1] < 0 ? pockets : s[1];
             String label = s[1] < 0 ? "Sell all (" + pockets + ")" : "Sell " + n;
@@ -160,12 +160,12 @@ final class Capital implements Listener {
         }
         // vault
         double fee = plugin.getConfig().getDouble("vault.withdraw-fee", 0.02);
-        m.inv.setItem(28, button(Material.CHEST, 1, plain("Deposit all", ICE), List.of(
+        m.inv.setItem(27, button(Material.CHEST, 1, plain("Deposit all", ICE), List.of(
                 plain("Lock your Cash in the Bureau's freezer.", NamedTextColor.GRAY),
                 plain("Nobody can steal it from there.", NamedTextColor.DARK_GRAY),
                 Component.empty(), plain("In the vault: " + held, ICE), plain("» Click to deposit " + pockets, NamedTextColor.AQUA))));
-        m.actions.put(28, () -> deposit(p));
-        int[][] outs = {{29, 8}, {30, -1}};
+        m.actions.put(27, () -> deposit(p));
+        int[][] outs = {{28, 8}, {29, -1}};
         for (int[] o : outs) {
             int n = o[1] < 0 ? Vaults.maxWithdraw(held, fee) : o[1];
             m.inv.setItem(o[0], button(Material.HOPPER, Math.max(1, Math.min(64, n)), plain(o[1] < 0 ? "Withdraw all" : "Withdraw " + n, ICE), List.of(
@@ -180,7 +180,7 @@ final class Capital implements Listener {
         List<String> led = plugin.ledger(id);
         if (led.isEmpty()) lines.add(plain(" nothing yet", NamedTextColor.DARK_GRAY));
         for (String l : led) lines.add(plain(" " + l, NamedTextColor.WHITE));
-        for (int s : new int[]{13, 22, 31}) m.inv.setItem(s, hover(plain("The Ledger", GOLD), lines));
+        for (int s : new int[]{12, 13, 14, 21, 22, 23, 30, 31, 32}) m.inv.setItem(s, hover(plain("The Ledger", GOLD), lines));
 
         // the shop
         List<String> shop = plugin.getConfig().getStringList("shop");
