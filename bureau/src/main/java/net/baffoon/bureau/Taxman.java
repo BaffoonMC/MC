@@ -194,6 +194,14 @@ final class Taxman implements Listener {
     }
 
     private void caught(Player p, Hunt h, Taxes.Case c) {
+        if (plugin.items().takeOne(p, "tax_receipt")) {
+            say(p, "...A receipt. Hm. In order. Good day.");
+            p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1f, 0.8f);
+            c.lastHunt = System.currentTimeMillis();
+            plugin.dirty();
+            endHunt(h.target, "The Taxman leaves for the day. (You still owe " + Money.fmt(c.owed) + ".)");
+            return;
+        }
         double before = c.owed;
         plugin.taxes().collect(p, c, true);
         double took = before - c.owed;

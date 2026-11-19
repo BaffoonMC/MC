@@ -23,6 +23,7 @@ vault:
 # Tax on Exchange profits. Sell Cash for more than you paid for it and the Bureau wants a cut of the profit.
 tax:
   profit-rate: 0.10       # 10% of the profit
+  ledger-rate: 0.07       # ...or 7% while carrying an Accountant's Ledger
   notice-hours: 72        # time to pay before interest is added (the Final Notice)
   final-hours: 48         # time after the Final Notice before the Taxman is assigned
   interest: 0.25          # added at the Final Notice
@@ -54,8 +55,38 @@ security:
   fired-hours: 24         # /bureau fire: can't ride the lift down for this long
   peace-radius: 16        # no player-on-player fighting this close to a Security lizard (0 = off)
 
-# The lizard shop, the right-hand side of the Exchange: "MATERIAL amount price-in-Cold-Hard-Cash", up to 9 lines.
+# Bureau items (see /bureau item). Their prices are in the shop list below.
+items:
+  settle-minutes: 60          # Settlement Papers take this much off Moloch's Curse...
+  settle-cooldown-hours: 20   # ...once a day
+  audit-chance: 0.25          # three settlements in a week: this chance of an audit...
+  audit-fine: 50              # ...for this much (in money, added to their tax bill)
+  life-insurance-days: 3      # one Life Insurance policy per this many days
+  lift-pass-hours: 20         # how often a Lift Pass works
+  report-accuracy: 0.7        # how often a Market Report is right
+  expense-spread: 0.03        # the Exchange cut with an Expense Account
+  party-minutes: 5
+  party-cooldown-minutes: 60
+  party-xp: 150               # XP points (not levels) for everyone at the party when it ends
+
+# The lizard shop, the right-hand side of the Exchange, nine to a page (the book at the bottom turns pages).
+# "MATERIAL amount price" or "bureau:<item> amount price"; prices are in Cold Hard Cash.
 shop:
+  - "bureau:settlement_papers 1 20"
+  - "bureau:life_insurance 1 40"
+  - "bureau:pet_insurance 1 15"
+  - "bureau:strongbox 1 25"
+  - "bureau:tax_receipt 1 12"
+  - "bureau:briefcase 1 30"
+  - "bureau:lift_pass 1 20"
+  - "bureau:market_report 1 5"
+  - "bureau:expense_card 1 35"
+  - "bureau:accountants_ledger 1 20"
+  - "bureau:sunglasses 1 10"
+  - "bureau:pink_slip 1 4"
+  - "bureau:desk_lizard 1 60"
+  - "bureau:fun_ticket 1 30"
+  - "bureau:golden_stapler 1 100"
   - "NAME_TAG 1 6"
   - "SADDLE 1 10"
   - "SPYGLASS 1 8"

@@ -48,6 +48,7 @@ final class Capital implements Listener {
     static final class Menu implements InventoryHolder {
         Inventory inv;
         final Map<Integer, Runnable> actions = new HashMap<>();
+        int page;   // which page of the shop is showing
         @Override public @NotNull Inventory getInventory() { return inv; }
     }
 
@@ -113,7 +114,8 @@ final class Capital implements Listener {
         Vaults vaults = plugin.vaults();
         var id = p.getUniqueId();
         int pockets = Cash.count(p), held = vaults.held(id);
-        double buy = ex.buyPrice(), sell = ex.sellPrice();
+        double spread = plugin.items().spread(p);
+        double buy = ex.buyPrice(spread), sell = ex.sellPrice(spread);
         int left = plugin.buyLeft(id);
 
         // top row: the chart, the eye, the treasury
@@ -182,34 +184,49 @@ final class Capital implements Listener {
         for (String l : led) lines.add(plain(" " + l, NamedTextColor.WHITE));
         for (int s : new int[]{12, 13, 14, 21, 22, 23, 30, 31, 32}) m.inv.setItem(s, hover(plain("The Ledger", GOLD), lines));
 
-        // the shop
+        // the shop, nine to a page: "MATERIAL amount price" or "bureau:<item> amount price"
         List<String> shop = plugin.getConfig().getStringList("shop");
-        for (int i = 0; i < Math.min(SHOP.length, shop.size()); i++) {
-            String[] w = shop.get(i).trim().split("\\s+");
+        int pages = Math.max(1, (shop.size() + SHOP.length - 1) / SHOP.length);
+        if (m.page >= pages) m.page = 0;
+        for (int i = 0; i < SHOP.length; i++) {
+            int idx = m.page * SHOP.length + i;
+            if (idx >= shop.size()) break;
+            String[] w = shop.get(idx).trim().split("\\s+");
             if (w.length < 3) continue;
-            Material mat = Material.matchMaterial(w[0]);
-            if (mat == null || !mat.isItem()) continue;
             int amount, price;
             try { amount = Integer.parseInt(w[1]); price = Integer.parseInt(w[2]); } catch (NumberFormatException e) { continue; }
-            ItemStack show = new ItemStack(mat, Math.max(1, Math.min(mat.getMaxStackSize(), amount)));
+            ItemStack goods;
+            String bureauId = null;
+            if (w[0].toLowerCase(Locale.ROOT).startsWith("bureau:")) {
+                bureauId = w[0].substring(7).toLowerCase(Locale.ROOT);
+                goods = plugin.items().make(bureauId, amount);
+            } else {
+                Material mat = Material.matchMaterial(w[0]);
+                goods = mat == null || !mat.isItem() ? null : new ItemStack(mat, Math.max(1, Math.min(mat.getMaxStackSize(), amount)));
+            }
+            if (goods == null) continue;
+            ItemStack show = goods.clone();
             ItemMeta im = show.getItemMeta();
-            im.lore(List.of(
-                    plain("Price: ", NamedTextColor.GRAY).append(plain(price + " Cold Hard Cash", ICE)),
-                    plain("Paid from your pockets, then your vault.", NamedTextColor.DARK_GRAY),
-                    Component.empty(), plain("» Click to buy", NamedTextColor.GREEN)));
+            List<Component> lore = new ArrayList<>(im.hasLore() && im.lore() != null ? im.lore() : List.of());
+            lore.add(Component.empty());
+            lore.add(plain("Price: ", NamedTextColor.GRAY).append(plain(price + " Cold Hard Cash", ICE)));
+            lore.add(plain("Paid from your pockets, then your vault.", NamedTextColor.DARK_GRAY));
+            lore.add(plain("\u00bb Click to buy", NamedTextColor.GREEN));
+            im.lore(lore);
             show.setItemMeta(im);
             m.inv.setItem(SHOP[i], show);
-            int amt = amount, pr = price;
-            m.actions.put(SHOP[i], () -> shopBuy(p, mat, amt, pr));
+            int pr = price;
+            String bid = bureauId;
+            m.actions.put(SHOP[i], () -> shopBuy(p, goods, pr, bid));
         }
 
         // bottom row
         m.inv.setItem(45, button(Material.BARRIER, 1, plain("Leave", NamedTextColor.RED), List.of(plain("Mind the door.", NamedTextColor.DARK_GRAY))));
         m.actions.put(45, p::closeInventory);
-        m.inv.setItem(49, button(Material.PAPER, 1, plain("Bureau Notices", GOLD), List.of(
-                plain("Contracts, companies and the Taxman", NamedTextColor.GRAY),
-                plain("are coming to the Bureau soon.", NamedTextColor.GRAY),
-                Component.empty(), plain("\"Prepare your paperwork.\"", NamedTextColor.DARK_GRAY))));
+        m.inv.setItem(49, button(Material.BOOK, m.page + 1, plain("The Shop: page " + (m.page + 1) + " of " + pages, GOLD), List.of(
+                plain("The lizards' goods, on the right.", NamedTextColor.GRAY),
+                Component.empty(), plain(pages > 1 ? "\u00bb Click for the next page" : "That's everything.", NamedTextColor.GREEN))));
+        if (pages > 1) m.actions.put(49, () -> { m.page = (m.page + 1) % pages; refresh(p); p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 0.6f, 1.2f); });
         double bal = Money.balance(id);
         m.inv.setItem(53, cashButton(Math.max(1, Math.min(64, pockets)), plain("Your Money", GOLD), List.of(
                 plain("Pockets: ", NamedTextColor.GRAY).append(plain(pockets + " Cold Hard Cash", ICE)),
@@ -236,7 +253,7 @@ final class Capital implements Listener {
         int left = plugin.buyLeft(p.getUniqueId());
         if (left <= 0) { no(p, "That's all the Cash you can buy today. The lizards have limits. Come back tomorrow."); return; }
         n = Math.min(n, left);
-        double cost = Exchange.round(plugin.exchange().buyPrice() * n);
+        double cost = Exchange.round(plugin.exchange().buyPrice(plugin.items().spread(p)) * n);
         if (!Money.take(p.getUniqueId(), cost)) { no(p, "You need " + Money.fmt(cost) + " for that."); return; }
         Cash.give(p, n);
         plugin.bought(p.getUniqueId(), n);
@@ -250,7 +267,7 @@ final class Capital implements Listener {
     private void sell(Player p, int n) {
         if (!Money.available()) { no(p, "The Exchange is closed (no money plugin)."); return; }
         if (n <= 0 || Cash.count(p) < n) { no(p, "You're not carrying that much Cold Hard Cash."); return; }
-        double got = Exchange.round(plugin.exchange().sellPrice() * n);
+        double got = Exchange.round(plugin.exchange().sellPrice(plugin.items().spread(p)) * n);
         if (!Cash.take(p, n)) return;
         if (!Money.give(p.getUniqueId(), got)) { Cash.give(p, n); no(p, "The teller couldn't pay you. Try again later."); return; }
         plugin.exchange().pressure(n, false);
@@ -283,15 +300,20 @@ final class Capital implements Listener {
         refresh(p);
     }
 
-    private void shopBuy(Player p, Material mat, int amount, int price) {
+    private void shopBuy(Player p, ItemStack goods, int price, String bureauId) {
+        if (bureauId != null) { String why = plugin.items().canBuy(p, bureauId); if (why != null) { no(p, why); return; } }
         int pockets = Cash.count(p), held = plugin.vaults().held(p.getUniqueId());
         if (pockets + held < price) { no(p, "That costs " + price + " Cold Hard Cash. You have " + (pockets + held) + "."); return; }
         int fromPockets = Math.min(pockets, price);
         Cash.take(p, fromPockets);
         if (price - fromPockets > 0) plugin.vaults().add(p.getUniqueId(), -(price - fromPockets));
-        for (ItemStack l : p.getInventory().addItem(new ItemStack(mat, amount)).values()) p.getWorld().dropItemNaturally(p.getLocation(), l);
-        plugin.log(p.getUniqueId(), "Bought " + amount + " " + mat.getKey().getKey().replace('_', ' ') + " for " + price);
-        ok(p, "Bought " + amount + " " + mat.getKey().getKey().replace('_', ' ') + " for " + price + " Cold Hard Cash.");
+        for (ItemStack l : p.getInventory().addItem(goods.clone()).values()) p.getWorld().dropItemNaturally(p.getLocation(), l);
+        String name = goods.getItemMeta() != null && goods.getItemMeta().hasDisplayName()
+                ? net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(goods.getItemMeta().displayName())
+                : goods.getType().getKey().getKey().replace('_', ' ');
+        plugin.log(p.getUniqueId(), "Bought " + (goods.getAmount() > 1 ? goods.getAmount() + " " : "") + name + " for " + price);
+        ok(p, "Bought " + (goods.getAmount() > 1 ? goods.getAmount() + " " : "") + name + " for " + price + " Cold Hard Cash.");
+        if (bureauId != null) plugin.items().bought(p, bureauId);
         refresh(p);
     }
 

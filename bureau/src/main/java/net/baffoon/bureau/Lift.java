@@ -58,6 +58,11 @@ final class Lift implements Listener {
             p.sendActionBar(Component.text("Security won't let you down. You were fired. Come back in about " + h + "h.", TextColor.color(0xE05050)));
             return;
         }
+        ride(p, to, down);
+    }
+
+    /** The ride itself: a ding, a moment of darkness, and they step out at dest. */
+    void ride(Player p, Location to, boolean down) {
         long now = System.currentTimeMillis();
         if (now - riding.getOrDefault(p.getUniqueId(), 0L) < 4000) return;
         riding.put(p.getUniqueId(), now);

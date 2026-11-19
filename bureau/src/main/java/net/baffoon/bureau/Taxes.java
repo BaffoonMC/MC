@@ -80,7 +80,8 @@ final class Taxes implements Listener {
         c.basisCost = Math.max(0, c.basisCost - avg * from);
         plugin.dirty();
         if (profit <= 0) return;
-        double tax = Exchange.round(profit * cfg("profit-rate", 0.10));
+        double rate = plugin.items().carrying(p, "accountants_ledger") ? cfg("ledger-rate", 0.07) : cfg("profit-rate", 0.10);
+        double tax = Exchange.round(profit * rate);
         if (tax < 0.01) return;
         add(p.getUniqueId(), tax);
         p.sendMessage(Component.text("✎ ", GOLD).append(Component.text("Profit of " + Money.fmt(profit) + ". The Bureau will be wanting "

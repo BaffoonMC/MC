@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "net.soulbound"
-version = "0.243.0"
+version = "0.244.0"
 
 repositories {
     mavenCentral()

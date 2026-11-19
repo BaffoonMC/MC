@@ -99,6 +99,15 @@ final class CurseManager implements Listener {
 
     int secondsLeft(Player p) { return left.getOrDefault(p.getUniqueId(), 0); }
 
+    /** Take seconds off a curse (the Bureau's Settlement Papers); lifts it if that's all of it. */
+    void reduce(Player p, int seconds) {
+        int l = left.getOrDefault(p.getUniqueId(), 0);
+        if (l <= 0 || seconds <= 0) return;
+        if (seconds >= l) { lift(p); return; }
+        left.put(p.getUniqueId(), l - seconds);
+        persist();
+    }
+
     private void tickSecond() {
         boolean changed = false;
         for (Player p : Bukkit.getOnlinePlayers()) {

@@ -58,8 +58,18 @@ final class Exchange {
         return LocalDate.now(z).toEpochDay();
     }
 
-    double buyPrice() { return round(price * (1 + cfg("spread", 0.05))); }
-    double sellPrice() { return round(price * (1 - cfg("spread", 0.05))); }
+    double buyPrice() { return buyPrice(cfg("spread", 0.05)); }
+    double sellPrice() { return sellPrice(cfg("spread", 0.05)); }
+    double buyPrice(double spread) { return round(price * (1 + spread)); }
+    double sellPrice(double spread) { return round(price * (1 - spread)); }
+
+    private Double queued;   // the next half hour's wobble, rolled early so a Market Report can know it
+
+    /** Roughly how much the next half-hour tick will move the price (sign is what matters). */
+    double nextMove() {
+        if (queued == null) queued = ThreadLocalRandom.current().nextGaussian() * cfg("drift", 0.02);
+        return price * queued + (cfg("base-price", 25) - price) * cfg("pull", 0.10);
+    }
     static double round(double v) { return Math.round(v * 100) / 100.0; }
 
     /** Change since the day opened, as a fraction. */
@@ -91,7 +101,8 @@ final class Exchange {
         newDay();
         if (event.isEmpty()) {
             double base = cfg("base-price", 25);
-            double wobble = ThreadLocalRandom.current().nextGaussian() * cfg("drift", 0.02);
+            double wobble = queued != null ? queued : ThreadLocalRandom.current().nextGaussian() * cfg("drift", 0.02);
+            queued = null;
             price = price * (1 + wobble) + (base - price) * cfg("pull", 0.10);
             clamp();
         }
