@@ -44,6 +44,8 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
     private Taxman taxman;
     private Security security;
     private BureauItems items;
+    private Contracts contracts;
+    private Companies companies;
     boolean spawning;   // the Bureau is placing its own walkers (spawn protection shouldn't stop them)
     private final Map<UUID, Integer> boughtToday = new HashMap<>();
     private final Map<UUID, Deque<String>> ledger = new HashMap<>();
@@ -62,6 +64,8 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         taxman = new Taxman(this);
         security = new Security(this);
         items = new BureauItems(this);
+        contracts = new Contracts(this);
+        companies = new Companies(this);
         Walker.key = new org.bukkit.NamespacedKey(this, "walker");
         load();
         var pm = getServer().getPluginManager();
@@ -72,7 +76,8 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         pm.registerEvents(taxman, this);
         pm.registerEvents(security, this);
         pm.registerEvents(items, this);
-        for (String c : List.of("bureau", "cash", "tax")) {
+        pm.registerEvents(contracts, this);
+        for (String c : List.of("bureau", "cash", "tax", "contracts", "company")) {
             var cmd = getCommand(c);
             if (cmd != null) { cmd.setExecutor(this); cmd.setTabCompleter(this); }
         }
@@ -84,6 +89,7 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         Bukkit.getScheduler().runTaskTimer(this, taxman::tick, 100L, 1L);
         Bukkit.getScheduler().runTaskTimer(this, security::tick, 100L, 1L);
         Bukkit.getScheduler().runTaskTimer(this, items::tick, 100L, 1L);
+        Bukkit.getScheduler().runTaskTimer(this, () -> { contracts.minute(); companies.minute(); }, 20L * 30, 20L * 60);
         // walkers aren't saved, but a crash could leave some behind: clear any strays
         for (var w : Bukkit.getWorlds()) for (var e : w.getEntities()) if (Walker.isPart(e)) e.remove();
         Bukkit.getScheduler().runTaskTimer(this, () -> { if (dirty) save(); }, 20L * 30, 20L * 30);
@@ -111,6 +117,8 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
     Taxman taxman() { return taxman; }
     Security security() { return security; }
     BureauItems items() { return items; }
+    Contracts contracts() { return contracts; }
+    Companies companies() { return companies; }
 
     void dirty() { dirty = true; }
 
@@ -141,6 +149,8 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         taxes.load(y.getConfigurationSection("taxes"));
         security.load(y.getConfigurationSection("fired"));
         items.load(y.getConfigurationSection("items"));
+        contracts.load(y.getConfigurationSection("contracts"));
+        companies.load(y.getConfigurationSection("companies"));
         boughtToday.clear();
         if (y.getLong("bought-day", -1) == exchange.today()) {
             ConfigurationSection b = y.getConfigurationSection("bought");
@@ -164,6 +174,8 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         taxes.save(y.createSection("taxes"));
         security.save(y.createSection("fired"));
         items.save(y.createSection("items"));
+        contracts.save(y.createSection("contracts"));
+        companies.save(y.createSection("companies"));
         y.set("bought-day", exchange.today());
         ConfigurationSection b = y.createSection("bought");
         for (var e : boughtToday.entrySet()) b.set(e.getKey().toString(), e.getValue());
@@ -183,6 +195,14 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender s, @NotNull Command cmd, @NotNull String label, String @NotNull [] a) {
         if (cmd.getName().equalsIgnoreCase("cash")) { cash(s); return true; }
+        if (cmd.getName().equalsIgnoreCase("contracts")) {
+            if (s instanceof Player p) contracts.open(p); else s.sendMessage("Players only.");
+            return true;
+        }
+        if (cmd.getName().equalsIgnoreCase("company")) {
+            if (s instanceof Player p) companies.command(p, a); else s.sendMessage("Players only.");
+            return true;
+        }
         if (cmd.getName().equalsIgnoreCase("tax")) {
             if (!(s instanceof Player p)) { s.sendMessage("Players only."); return true; }
             if (a.length > 0 && a[0].equalsIgnoreCase("pay")) taxes.pay(p); else taxes.status(p);
@@ -250,11 +270,11 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
             }
             case "npc" -> {
                 if (!(s instanceof Player p)) { s.sendMessage("Players only."); break; }
-                if (a.length < 2) { s.sendMessage(bad("Usage: /bureau npc <teller|receptionist|director|security|clerk|taxman> [name] | remove | reskin")); break; }
+                if (a.length < 2) { s.sendMessage(bad("Usage: /bureau npc <teller|receptionist|director|security|clerk|taxman|votes> [name] | remove | reskin")); break; }
                 if (a[1].equalsIgnoreCase("remove")) { s.sendMessage(ok(lizards.removeNear(p))); break; }
                 if (a[1].equalsIgnoreCase("reskin")) { s.sendMessage(ok(lizards.reskinAll())); break; }
                 Lizards.Role r = Lizards.Role.of(a[1]);
-                if (r == null) { s.sendMessage(bad("Roles: teller, receptionist, director, security, clerk, taxman.")); break; }
+                if (r == null) { s.sendMessage(bad("Roles: teller, receptionist, director, security, clerk, taxman, votes.")); break; }
                 String name = a.length > 2 ? String.join(" ", java.util.Arrays.copyOfRange(a, 2, a.length)) : null;
                 s.sendMessage(ok(lizards.spawn(p, r, name)));
             }
@@ -350,13 +370,21 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender s, @NotNull Command cmd, @NotNull String label, String @NotNull [] a) {
         if (cmd.getName().equalsIgnoreCase("tax")) return a.length == 1 ? List.of("pay") : List.of();
+        if (cmd.getName().equalsIgnoreCase("contracts")) return List.of();
+        if (cmd.getName().equalsIgnoreCase("company")) {
+            List<String> o = a.length == 1 ? List.of("create", "invite", "join", "leave", "kick", "boss", "deposit", "withdraw", "info", "top", "disband")
+                    : a.length == 2 && List.of("invite", "kick", "boss").contains(a[0].toLowerCase(Locale.ROOT)) ? Bukkit.getOnlinePlayers().stream().map(Player::getName).toList()
+                    : a.length == 2 && List.of("join", "info").contains(a[0].toLowerCase(Locale.ROOT)) ? companies.names() : List.of();
+            String last = a[a.length - 1].toLowerCase(Locale.ROOT);
+            return o.stream().filter(x -> x.toLowerCase(Locale.ROOT).startsWith(last)).toList();
+        }
         if (cmd.getName().equalsIgnoreCase("cash")) return List.of();
         if (!admin(s)) return a.length == 1 ? List.of("hire", "party") : List.of();
         List<String> opts = switch (a.length) {
             case 1 -> List.of("exchange", "give", "item", "vault", "price", "event", "npc", "lift", "tax", "fire", "unfire", "hire", "party", "reload", "help");
             case 2 -> switch (a[0].toLowerCase(Locale.ROOT)) {
                 case "event" -> List.of("boom", "crash", "calm");
-                case "npc" -> List.of("teller", "receptionist", "director", "security", "clerk", "taxman", "remove", "reskin");
+                case "npc" -> List.of("teller", "receptionist", "director", "security", "clerk", "taxman", "votes", "remove", "reskin");
                 case "lift" -> List.of("set");
                 case "price" -> List.of("set");
                 case "give", "item", "vault", "exchange", "tax", "fire", "unfire" -> Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();

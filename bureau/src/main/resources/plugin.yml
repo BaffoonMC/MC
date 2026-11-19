@@ -15,6 +15,14 @@ commands:
   tax:
     description: What you owe the Bureau. /tax pay to settle up.
     usage: /tax [pay]
+  contracts:
+    description: Today's Bureau contracts, your rank and strikes.
+    usage: /contracts
+    aliases: [jobs]
+  company:
+    description: Companies - a team with a shared vault (/company for help).
+    usage: /company [create|invite|join|leave|deposit|withdraw|info|top]
+    aliases: [co]
 permissions:
   bureau.admin:
     description: Place lizards, set the lift, move the market, hand out Cold Hard Cash.

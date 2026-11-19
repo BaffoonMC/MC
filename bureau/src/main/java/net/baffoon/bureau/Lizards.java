@@ -36,7 +36,8 @@ final class Lizards implements Listener {
         DIRECTOR("director", "Director Sssterling", "The Director"),
         SECURITY("security", "Security", "Bureau Security"),
         CLERK("clerk", "Clerk", "Contracts Department"),
-        TAXMAN("taxman", "The Taxman", "Collections");
+        TAXMAN("taxman", "The Taxman", "Collections"),
+        VOTES("clerk", "Mr. Ballot", "Votes & Rewards");
         final String skin, name, title;
         Role(String skin, String name, String title) { this.skin = skin; this.name = name; this.title = title; }
         static Role of(String s) { try { return valueOf(s.toUpperCase(Locale.ROOT)); } catch (Exception e) { return null; } }
@@ -131,6 +132,15 @@ final class Lizards implements Listener {
         if (now - cooldown.getOrDefault(p.getUniqueId(), 0L) < 600) return;
         cooldown.put(p.getUniqueId(), now);
         if (r == Role.TELLER) { say(p, e.getRightClicked(), r, "teller"); plugin.capital().open(p); return; }
+        if (r == Role.RECEPTIONIST) { say(p, e.getRightClicked(), r, "receptionist"); plugin.contracts().open(p); return; }
+        if (r == Role.VOTES) {
+            say(p, e.getRightClicked(), r, "votes");
+            p.sendMessage(Component.text("[Vote Shop]", GOLD, net.kyori.adventure.text.format.TextDecoration.BOLD).clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/voteshop"))
+                    .append(Component.text("   ", NamedTextColor.GRAY))
+                    .append(Component.text("[Vote links]", GREEN, net.kyori.adventure.text.format.TextDecoration.BOLD).clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/vote"))));
+            if (!p.performCommand("voteshop")) p.performCommand("vote");
+            return;
+        }
         say(p, e.getRightClicked(), r, r.name().toLowerCase(Locale.ROOT));
         if (r == Role.SECURITY) p.sendMessage(plugin.security().offer());
         if (r == Role.TAXMAN) plugin.taxes().status(p);

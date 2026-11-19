@@ -97,6 +97,53 @@ shop:
   - "TURTLE_SCUTE 2 18"
   - "CLOCK 1 5"
 
+# Contracts: daily jobs from Mrs. Sssmith (the receptionist) or /contracts.
+contracts:
+  per-day: 3
+  manager-per-day: 4          # from the third rank up
+  strikes-to-fire: 3          # signed contracts left unfinished at the end of the day, in a week
+  pay-bonus-per-rank: 0.10    # +10% pay for each rank above Intern
+  company-bonus: 0.10         # +10% when the pay goes to your company's vault
+  ranks: ["Intern 0", "Clerk 15", "Manager 60", "Regional Lizard 150", "Director 400"]
+  # "kind target amount reward": kind is deliver, kill, mine or fish; reward is Cold Hard Cash.
+  # mine targets also count their deepslate versions (IRON_ORE covers DEEPSLATE_IRON_ORE); fish takes ANY.
+  jobs:
+    - "deliver WHEAT 64 3"
+    - "deliver CARROT 64 3"
+    - "deliver POTATO 64 3"
+    - "deliver OAK_LOG 32 3"
+    - "deliver SPRUCE_LOG 32 3"
+    - "deliver COBBLESTONE 128 2"
+    - "deliver IRON_INGOT 16 5"
+    - "deliver COAL 32 3"
+    - "deliver PAPER 32 3"
+    - "deliver LEATHER 16 4"
+    - "deliver GLASS 32 3"
+    - "deliver SUGAR_CANE 32 2"
+    - "deliver BONE 24 3"
+    - "deliver STRING 16 3"
+    - "deliver PUMPKIN 16 3"
+    - "kill ZOMBIE 15 3"
+    - "kill SKELETON 12 3"
+    - "kill SPIDER 10 3"
+    - "kill CREEPER 6 4"
+    - "kill DROWNED 8 4"
+    - "kill ENDERMAN 4 5"
+    - "kill WITCH 2 5"
+    - "mine STONE 256 2"
+    - "mine DEEPSLATE 128 3"
+    - "mine COAL_ORE 16 3"
+    - "mine IRON_ORE 12 4"
+    - "mine COPPER_ORE 20 2"
+    - "mine REDSTONE_ORE 10 3"
+    - "fish ANY 10 3"
+
+# Companies: a team with a shared vault.
+companies:
+  create-price: 100           # Cold Hard Cash to found one
+  max-members: 5
+  weekly-bonus: 10            # Cold Hard Cash for the Company of the Week
+
 # What the lizards say when clicked.
 lines:
   teller:
@@ -119,6 +166,10 @@ lines:
     - "Form 27-B/6? That's two floors down. There are no floors down."
     - "I'm on my coffee break. It's a long one."
     - "Don't tell the Director, but the photocopier is warm. I sit on it."
+  votes:
+    - "Vote early. Vote often. The lizards are counting."
+    - "Every vote is a point. Every point is a purchase. Every purchase is... paperwork."
+    - "The Vote Shop is open. Mind the queue. There is no queue."
   taxman:
     - "I have all day. And all night."
     - "Sssettle up."
