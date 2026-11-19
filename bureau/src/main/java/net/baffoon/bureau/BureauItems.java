@@ -110,6 +110,9 @@ final class BureauItems implements Listener {
         def("desk_lizard", Material.PAPER, "Desk Lizard", GREEN, 1, "Right-click: he rides on your shoulder.", "Right-click again: he goes back in your pocket.", "Wears a tiny tie.");
         def("golden_stapler", Material.PAPER, "Golden Stapler", GOLD, 1, "It does nothing.", "Everyone knows you have one.");
         def("fun_ticket", Material.PAPER, "Mandatory Fun Ticket", TextColor.color(0xFFD54F), 16, "Right-click: a five-minute party at the Bureau.", "Everyone who turns up gets a little XP.", "Attendance will be noted.");
+        def("suit_jacket", Material.LEATHER_CHESTPLATE, "Suit Jacket", NamedTextColor.WHITE, 1, "Part of a Bureau suit. Shirt and tie included.", "Full suit: +10% contract pay and", "1% off the Exchange's cut.");
+        def("suit_trousers", Material.LEATHER_LEGGINGS, "Suit Trousers", NamedTextColor.WHITE, 1, "Part of a Bureau suit. Pressed, with a belt.", "Full suit: +10% contract pay and", "1% off the Exchange's cut.");
+        def("suit_shoes", Material.LEATHER_BOOTS, "Suit Shoes", NamedTextColor.WHITE, 1, "Part of a Bureau suit. Polished.", "Full suit: +10% contract pay and", "1% off the Exchange's cut.");
     }
 
     private final Bureau plugin;
@@ -152,6 +155,12 @@ final class BureauItems implements Listener {
             eq.setModel(null);
             m.setEquippable(eq);
         }
+        if (id.startsWith("suit_")) {
+            EquippableComponent eq = m.getEquippable();
+            eq.setSlot(switch (id) { case "suit_jacket" -> EquipmentSlot.CHEST; case "suit_trousers" -> EquipmentSlot.LEGS; default -> EquipmentSlot.FEET; });
+            eq.setModel(new NamespacedKey("bureau", "suit"));
+            m.setEquippable(eq);
+        }
         it.setItemMeta(m);
         return it;
     }
@@ -185,9 +194,16 @@ final class BureauItems implements Listener {
         else p.getInventory().setItemInMainHand(null);
     }
 
+    /** Wearing all three pieces of the Bureau suit. */
+    boolean suited(Player p) {
+        var inv = p.getInventory();
+        return "suit_jacket".equals(id(inv.getChestplate())) && "suit_trousers".equals(id(inv.getLeggings())) && "suit_shoes".equals(id(inv.getBoots()));
+    }
+
     /** The Exchange cut for this player right now. */
     double spread(Player p) {
         double base = plugin.getConfig().getDouble("exchange.spread", 0.05);
+        if (suited(p)) base = Math.max(0, base - plugin.getConfig().getDouble("items.suit-spread-off", 0.01));
         return expenseUntil.getOrDefault(p.getUniqueId(), 0L) > System.currentTimeMillis() ? Math.min(base, plugin.getConfig().getDouble("items.expense-spread", 0.03)) : base;
     }
 
@@ -227,7 +243,7 @@ final class BureauItems implements Listener {
         String id = id(it);
         if (id == null) return;
         switch (id) {
-            case "strongbox", "briefcase", "sunglasses" -> { return; }   // placing, bundle use and wearing work as normal
+            case "strongbox", "briefcase", "sunglasses", "suit_jacket", "suit_trousers", "suit_shoes" -> { return; }   // placing, bundle use and wearing work as normal
             default -> e.setCancelled(true);
         }
         switch (id) {

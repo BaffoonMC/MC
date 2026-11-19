@@ -57,6 +57,8 @@ security:
 
 # Bureau items (see /bureau item). Their prices are in the shop list below.
 items:
+  suit-pay-bonus: 0.10        # wearing the full Bureau suit: +10% contract pay...
+  suit-spread-off: 0.01       # ...and the Exchange takes 1% less
   settle-minutes: 60          # Settlement Papers take this much off Moloch's Curse...
   settle-cooldown-hours: 20   # ...once a day
   audit-chance: 0.25          # three settlements in a week: this chance of an audit...
@@ -87,6 +89,9 @@ shop:
   - "bureau:desk_lizard 1 60"
   - "bureau:fun_ticket 1 30"
   - "bureau:golden_stapler 1 100"
+  - "bureau:suit_jacket 1 20"
+  - "bureau:suit_trousers 1 15"
+  - "bureau:suit_shoes 1 10"
   - "NAME_TAG 1 6"
   - "SADDLE 1 10"
   - "SPYGLASS 1 8"

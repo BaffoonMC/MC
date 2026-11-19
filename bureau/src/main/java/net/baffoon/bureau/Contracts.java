@@ -216,13 +216,15 @@ final class Contracts implements Listener {
         String co = plugin.companies().of(p.getUniqueId());
         boolean toCo = d.payCompany && co != null;
         if (toCo) bonus += cfg("company-bonus", 0.10);
+        boolean suited = plugin.items().suited(p);
+        if (suited) bonus += plugin.getConfig().getDouble("items.suit-pay-bonus", 0.10);
         int pay = (int) Math.round(j.reward * bonus);
         if (toCo) plugin.companies().addVault(co, pay);
         else Cash.give(p, pay);
         plugin.log(p.getUniqueId(), "Contract: " + describe(j) + " +" + pay);
         plugin.dirty();
         p.sendMessage(Component.text("✔ Contract complete: ", GREEN).append(Component.text(describe(j), NamedTextColor.WHITE))
-                .append(Component.text("  +" + pay + " Cold Hard Cash" + (toCo ? " to " + co : ""), ICE)));
+                .append(Component.text("  +" + pay + " Cold Hard Cash" + (toCo ? " to " + co : "") + (suited ? " (sharp suit)" : ""), ICE)));
         p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.4f);
         if (after > before) {
             String name = ranks().get(after).name;
