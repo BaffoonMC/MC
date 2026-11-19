@@ -1,0 +1,60 @@
+# The Bureau of Cold-Blooded Affairs. Prices are in server money (Essentials); Cold Hard Cash is the lizards' banknote.
+
+exchange:
+  start-price: 25.0       # the very first price
+  base-price: 25.0        # where the price drifts back to
+  min-price: 10.0
+  max-price: 60.0
+  spread: 0.05            # players buy 5% above the price and sell 5% below it (the lizards' cut)
+  daily-limit: 0.20       # the price never moves more than 20% from where the day opened
+  drift: 0.02             # the random wobble every half hour
+  pull: 0.10              # how hard it's pulled back towards base-price each half hour
+  pressure: 0.0005        # each note bought nudges the price up this much (selling nudges it down)
+  rally: 0.30             # an event rally pushes the price up 30% over ten minutes...
+  crash: 0.20             # ...and a crash down 20%
+  buy-limit-per-day: 64   # most Cash one player can buy in a day
+  moloch-events: true     # Moloch waking starts a rally; Moloch going quiet starts a crash (needs PlaceholderAPI + Soulbound)
+  anywhere: false         # true lets players open the Exchange with /bureau exchange anywhere, not just at the teller
+  timezone: Europe/London # when a new trading day starts
+
+vault:
+  withdraw-fee: 0.02      # taking Cash out of the vault costs 2% (at least 1)
+
+# The lizard shop, the right-hand side of the Exchange: "MATERIAL amount price-in-Cold-Hard-Cash", up to 9 lines.
+shop:
+  - "NAME_TAG 1 6"
+  - "SADDLE 1 10"
+  - "SPYGLASS 1 8"
+  - "EXPERIENCE_BOTTLE 8 12"
+  - "GOLDEN_CARROT 16 4"
+  - "LEAD 2 3"
+  - "BUNDLE 1 10"
+  - "TURTLE_SCUTE 2 18"
+  - "CLOCK 1 5"
+
+# What the lizards say when clicked.
+lines:
+  teller:
+    - "Welcome to the Exchange. Prices are final. Feelings are not our department."
+    - "Buy low. Sell high. Do not cry at the counter."
+    - "Cold Hard Cash. The only currency that never warms up to you."
+  receptionist:
+    - "Take a number. We have no numbers. Take one anyway."
+    - "Contracts are not open yet. Please wait in the waiting area. Indefinitely."
+    - "The Director is in a meeting. He is always in a meeting."
+  director:
+    - "Cold-blooded. Nothing personal."
+    - "Time is money. You are wasting both."
+    - "Sssettle down. The market will decide your fate."
+  security:
+    - "Keep moving."
+    - "No basking in the corridors."
+    - "I've been told to escort someone out today. Might be you."
+  clerk:
+    - "Form 27-B/6? That's two floors down. There are no floors down."
+    - "I'm on my coffee break. It's a long one."
+    - "Don't tell the Director, but the photocopier is warm. I sit on it."
+  taxman:
+    - "I have all day. And all night."
+    - "Sssettle up."
+    - "Everyone pays. Eventually."

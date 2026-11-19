@@ -1,0 +1,18 @@
+name: Bureau
+version: '${version}'
+main: net.baffoon.bureau.Bureau
+api-version: '26.3'
+description: The Bureau of Cold-Blooded Affairs - lizards in suits, Cold Hard Cash and the Exchange.
+softdepend: [Essentials, PlaceholderAPI, Soulbound]
+commands:
+  bureau:
+    description: The Bureau of Cold-Blooded Affairs (admins - /bureau help).
+    usage: /bureau
+    aliases: [lizards]
+  cash:
+    description: How much Cold Hard Cash you have, and today's price.
+    usage: /cash
+permissions:
+  bureau.admin:
+    description: Place lizards, set the lift, move the market, hand out Cold Hard Cash.
+    default: op
