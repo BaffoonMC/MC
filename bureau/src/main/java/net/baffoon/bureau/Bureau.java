@@ -47,6 +47,7 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
     private Contracts contracts;
     private Companies companies;
     private Ticker ticker;
+    private Chart chart;
     boolean spawning;   // the Bureau is placing its own walkers (spawn protection shouldn't stop them)
     private final Map<UUID, Integer> boughtToday = new HashMap<>();
     private final Map<UUID, Deque<String>> ledger = new HashMap<>();
@@ -68,6 +69,7 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         contracts = new Contracts(this);
         companies = new Companies(this);
         ticker = new Ticker(this);
+        chart = new Chart(this);
         Walker.key = new org.bukkit.NamespacedKey(this, "walker");
         load();
         var pm = getServer().getPluginManager();
@@ -92,6 +94,7 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         Bukkit.getScheduler().runTaskTimer(this, security::tick, 100L, 1L);
         Bukkit.getScheduler().runTaskTimer(this, items::tick, 100L, 1L);
         Bukkit.getScheduler().runTaskTimer(this, ticker::tick, 100L, 1L);
+        Bukkit.getScheduler().runTaskTimer(this, chart::second, 100L, 20L);
         Bukkit.getScheduler().runTaskTimer(this, () -> { contracts.minute(); companies.minute(); }, 20L * 30, 20L * 60);
         // walkers aren't saved, but a crash could leave some behind: clear any strays
         for (var w : Bukkit.getWorlds()) for (var e : w.getEntities()) if (Walker.isPart(e)) e.remove();
@@ -109,6 +112,7 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         if (security != null) security.endAll();
         if (items != null) items.endAll();
         if (ticker != null) ticker.endAll();
+        if (chart != null) chart.endAll();
         save();
     }
 
@@ -156,6 +160,7 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         contracts.load(y.getConfigurationSection("contracts"));
         companies.load(y.getConfigurationSection("companies"));
         ticker.load(y.getStringList("tickers"));
+        chart.load(y.getConfigurationSection("chart"));
         boughtToday.clear();
         if (y.getLong("bought-day", -1) == exchange.today()) {
             ConfigurationSection b = y.getConfigurationSection("bought");
@@ -182,6 +187,7 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         contracts.save(y.createSection("contracts"));
         companies.save(y.createSection("companies"));
         y.set("tickers", ticker.save());
+        chart.save(y.createSection("chart"));
         y.set("bought-day", exchange.today());
         ConfigurationSection b = y.createSection("bought");
         for (var e : boughtToday.entrySet()) b.set(e.getKey().toString(), e.getValue());
@@ -292,6 +298,15 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
                 if (a.length > 2) try { width = Integer.parseInt(a[2]); } catch (NumberFormatException ignored) {}
                 s.sendMessage(ok(ticker.place(p, width)));
             }
+            case "chart" -> {
+                if (!(s instanceof Player p)) { s.sendMessage("Players only."); break; }
+                if (a.length < 2) { s.sendMessage(bad("Usage: /bureau chart place [width] [height] (look at the wall) | remove   (" + chart.count() + " placed)")); break; }
+                if (a[1].equalsIgnoreCase("remove")) { s.sendMessage(ok(chart.removeNear(p))); break; }
+                int width = 11, height = 5;
+                if (a.length > 2) try { width = Integer.parseInt(a[2]); } catch (NumberFormatException ignored) {}
+                if (a.length > 3) try { height = Integer.parseInt(a[3]); } catch (NumberFormatException ignored) {}
+                s.sendMessage(ok(chart.place(p, width, height)));
+            }
             case "lift" -> {
                 if (!(s instanceof Player p)) { s.sendMessage("Players only."); break; }
                 if (a.length < 3 || !a[1].equalsIgnoreCase("set") || !(a[2].equalsIgnoreCase("top") || a[2].equalsIgnoreCase("bottom"))) {
@@ -395,12 +410,12 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         if (cmd.getName().equalsIgnoreCase("cash")) return List.of();
         if (!admin(s)) return a.length == 1 ? List.of("hire", "party") : List.of();
         List<String> opts = switch (a.length) {
-            case 1 -> List.of("exchange", "give", "item", "vault", "price", "event", "npc", "lift", "ticker", "tax", "fire", "unfire", "hire", "party", "reload", "help");
+            case 1 -> List.of("exchange", "give", "item", "vault", "price", "event", "npc", "lift", "ticker", "chart", "tax", "fire", "unfire", "hire", "party", "reload", "help");
             case 2 -> switch (a[0].toLowerCase(Locale.ROOT)) {
                 case "event" -> List.of("boom", "crash", "calm");
                 case "npc" -> List.of("teller", "receptionist", "director", "security", "clerk", "taxman", "votes", "remove", "reskin");
                 case "lift" -> List.of("set");
-                case "ticker" -> List.of("place", "remove");
+                case "ticker", "chart" -> List.of("place", "remove");
                 case "price" -> List.of("set");
                 case "give", "item", "vault", "exchange", "tax", "fire", "unfire" -> Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
                 default -> List.of();

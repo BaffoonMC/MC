@@ -169,6 +169,11 @@ ticker:
     - VENOM
     - GECK
 
+# Candlestick charts of the Cold Hard Cash price: /bureau chart place [width] [height], /bureau chart remove.
+chart:
+  candle-minutes: 30   # how long each candle covers
+  candle-width: 0.5    # blocks per candle
+
 # What the lizards say. A line starting with ! is SHOUTED (bold red, with a hiss).
 # Context: "owes" when you owe tax, "director-crash"/"director-rally" during market events,
 # "rage" when you keep pestering one lizard, "fired" for the Director losing it.
