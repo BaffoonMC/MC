@@ -45,6 +45,14 @@ final class Companies {
     }
 
     private final Bureau plugin;
+
+    /** The n companies with the fullest vaults (for the ticker). */
+    List<Company> richest(int n) {
+        List<Company> all = new ArrayList<>(byName.values());
+        all.removeIf(c -> c.vault <= 0);
+        all.sort((x, y) -> Integer.compare(y.vault, x.vault));
+        return all.size() > n ? all.subList(0, n) : all;
+    }
     private final Map<String, Company> byName = new HashMap<>();   // lower-case name -> company
     private long week = -1;
 

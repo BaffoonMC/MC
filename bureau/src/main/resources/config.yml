@@ -150,6 +150,25 @@ companies:
   weekly-bonus: 10            # Cold Hard Cash for the Company of the Week
 
 # What the lizards say when clicked.
+# Stock tickers: /bureau ticker place [width] while looking at a wall, /bureau ticker remove.
+ticker:
+  scale: 2.0        # text size: 2.0 is half a block tall
+  speed: 1.6        # blocks a second, right to left
+  gap: 1.2          # blocks between one quote and the next
+  stocks:           # made-up lizard stocks; their prices wander on their own and follow rallies and crashes
+    - SSTR
+    - WARMROCK
+    - COLDWELL
+    - BASK
+    - SCALE
+    - MOLT
+    - TAILCO
+    - SWAMP
+    - FLYCORP
+    - HISS
+    - VENOM
+    - GECK
+
 # What the lizards say. A line starting with ! is SHOUTED (bold red, with a hiss).
 # Context: "owes" when you owe tax, "director-crash"/"director-rally" during market events,
 # "rage" when you keep pestering one lizard, "fired" for the Director losing it.
