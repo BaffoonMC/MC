@@ -47,6 +47,8 @@ final class Lizards implements Listener {
     private final Bureau plugin;
     private final NamespacedKey roleKey;
     private final Map<UUID, Long> cooldown = new HashMap<>();
+    private final Map<UUID, java.util.ArrayDeque<Long>> pestering = new HashMap<>();
+    private static final TextColor SHOUT = TextColor.color(0xFF4D4D);
 
     Lizards(Bureau plugin) {
         this.plugin = plugin;
@@ -131,19 +133,58 @@ final class Lizards implements Listener {
         long now = System.currentTimeMillis();
         if (now - cooldown.getOrDefault(p.getUniqueId(), 0L) < 600) return;
         cooldown.put(p.getUniqueId(), now);
-        if (r == Role.TELLER) { say(p, e.getRightClicked(), r, "teller"); plugin.capital().open(p); return; }
-        if (r == Role.RECEPTIONIST) { say(p, e.getRightClicked(), r, "receptionist"); plugin.contracts().open(p); return; }
+        Entity liz = e.getRightClicked();
+
+        // Pester one lizard five times in 15 seconds and they lose it.
+        var clicks = pestering.computeIfAbsent(p.getUniqueId(), k -> new java.util.ArrayDeque<>());
+        clicks.addLast(now);
+        while (!clicks.isEmpty() && now - clicks.peekFirst() > 15_000) clicks.pollFirst();
+        if (clicks.size() >= 5) {
+            clicks.clear();
+            if (r == Role.DIRECTOR) { say(p, liz, r, "fired"); fakeFire(p, liz); }
+            else say(p, liz, r, "rage");
+            return;
+        }
+
+        if (r == Role.TELLER) { say(p, liz, r, owesLine(p) ? "owes" : "teller"); plugin.capital().open(p); return; }
+        if (r == Role.RECEPTIONIST) { say(p, liz, r, "receptionist"); plugin.contracts().open(p); return; }
         if (r == Role.VOTES) {
-            say(p, e.getRightClicked(), r, "votes");
+            say(p, liz, r, "votes");
             p.sendMessage(Component.text("[Vote Shop]", GOLD, net.kyori.adventure.text.format.TextDecoration.BOLD).clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/voteshop"))
                     .append(Component.text("   ", NamedTextColor.GRAY))
                     .append(Component.text("[Vote links]", GREEN, net.kyori.adventure.text.format.TextDecoration.BOLD).clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/vote"))));
             if (!p.performCommand("voteshop")) p.performCommand("vote");
             return;
         }
-        say(p, e.getRightClicked(), r, r.name().toLowerCase(Locale.ROOT));
+        String key = r.name().toLowerCase(Locale.ROOT);
+        if (r == Role.DIRECTOR) {
+            String ev = plugin.exchange().event;
+            if ("CRASH".equals(ev)) key = "director-crash";
+            else if ("RALLY".equals(ev)) key = "director-rally";
+            else if (owesLine(p)) key = "owes";
+        }
+        if (r == Role.TAXMAN && owesLine(p)) key = "owes";
+        say(p, liz, r, key);
         if (r == Role.SECURITY) p.sendMessage(plugin.security().offer());
         if (r == Role.TAXMAN) plugin.taxes().status(p);
+    }
+
+    /** They owe tax: about half the time the lizard brings it up. */
+    private boolean owesLine(Player p) {
+        var c = plugin.taxes().peek(p.getUniqueId());
+        return c != null && c.owed > 0.01 && ThreadLocalRandom.current().nextBoolean();
+    }
+
+    /** The Director loses it. Not a real firing: a title, a hiss and a shove out of his office. */
+    private void fakeFire(Player p, Entity lizard) {
+        p.showTitle(net.kyori.adventure.title.Title.title(
+                Component.text("YOU'RE FIRED!", SHOUT, net.kyori.adventure.text.format.TextDecoration.BOLD),
+                Component.text("...not really. Stop pestering the Director.", NamedTextColor.GRAY),
+                net.kyori.adventure.title.Title.Times.times(java.time.Duration.ofMillis(100), java.time.Duration.ofMillis(2200), java.time.Duration.ofMillis(600))));
+        p.playSound(lizard.getLocation(), Sound.ENTITY_CAT_HISS, 1f, 0.5f);
+        p.playSound(lizard.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.4f, 1.6f);
+        Vector push = p.getLocation().toVector().subtract(lizard.getLocation().toVector()).setY(0);
+        if (push.lengthSquared() > 1e-4) p.setVelocity(push.normalize().multiply(0.9).setY(0.35));
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -152,13 +193,22 @@ final class Lizards implements Listener {
     }
 
     private void say(Player p, Entity lizard, Role r, String key) {
-        List<String> lines = plugin.getConfig().getStringList("lines." + key);
+        List<String> lines = plugin.getConfig().getStringList("dialogue." + key);
+        if (lines.isEmpty()) lines = plugin.getConfig().getStringList("lines." + key);
         if (lines.isEmpty()) return;
         String line = lines.get(ThreadLocalRandom.current().nextInt(lines.size()));
+        boolean shout = line.startsWith("!");
+        if (shout) line = line.substring(1).trim();
         Component name = lizard.customName() != null ? lizard.customName() : Component.text(r.name, GREEN);
-        p.sendMessage(Component.text("<", NamedTextColor.DARK_GRAY).append(name).append(Component.text("> ", NamedTextColor.DARK_GRAY))
-                .append(Component.text(line, r == Role.DIRECTOR ? GOLD : NamedTextColor.WHITE)));
-        p.playSound(lizard.getLocation(), Sound.ENTITY_LLAMA_SPIT, 0.3f, 0.6f);
-        p.playSound(lizard.getLocation(), Sound.BLOCK_SAND_STEP, 0.5f, 1.6f);
+        Component text = shout ? Component.text(line, SHOUT, net.kyori.adventure.text.format.TextDecoration.BOLD)
+                : Component.text(line, r == Role.DIRECTOR ? GOLD : NamedTextColor.WHITE);
+        p.sendMessage(Component.text("<", NamedTextColor.DARK_GRAY).append(name).append(Component.text("> ", NamedTextColor.DARK_GRAY)).append(text));
+        if (shout) {
+            p.playSound(lizard.getLocation(), Sound.ENTITY_CAT_HISS, 0.8f, 0.6f);
+            p.playSound(lizard.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.6f, 0.5f);
+        } else {
+            p.playSound(lizard.getLocation(), Sound.ENTITY_LLAMA_SPIT, 0.3f, 0.6f);
+            p.playSound(lizard.getLocation(), Sound.BLOCK_SAND_STEP, 0.5f, 1.6f);
+        }
     }
 }

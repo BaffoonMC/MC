@@ -150,32 +150,57 @@ companies:
   weekly-bonus: 10            # Cold Hard Cash for the Company of the Week
 
 # What the lizards say when clicked.
-lines:
+# What the lizards say. A line starting with ! is SHOUTED (bold red, with a hiss).
+# Context: "owes" when you owe tax, "director-crash"/"director-rally" during market events,
+# "rage" when you keep pestering one lizard, "fired" for the Director losing it.
+dialogue:
   teller:
-    - "Welcome to the Exchange. Prices are final. Feelings are not our department."
-    - "Buy low. Sell high. Do not cry at the counter."
-    - "Cold Hard Cash. The only currency that never warms up to you."
+    - "Next! NEXT! Are you buying or are you breathing on my glass?"
+    - "Prices are final. Your feelings are NOT my department."
+    - "Buy low. Sell high. Do NOT cry at my counter."
+    - "!COUNT IT TWICE. WE DON'T DO REFUNDS. WE DON'T DO SMILES."
   receptionist:
-    - "Take a number. We have no numbers. Take one anyway."
-    - "Contracts are not open yet. Please wait in the waiting area. Indefinitely."
-    - "The Director is in a meeting. He is always in a meeting."
+    - "Take a number. We have no numbers. TAKE ONE ANYWAY."
+    - "Do you have an appointment? No? Then SIT. DOWN."
+    - "The Director is in a meeting. He is ALWAYS in a meeting. Stop asking."
+    - "!SIGN THE FORM. INITIAL THE FORM. DO NOT LICK THE FORM."
   director:
     - "Cold-blooded. Nothing personal."
-    - "Time is money. You are wasting both."
-    - "Sssettle down. The market will decide your fate."
+    - "Time is money. You are wasting BOTH."
+    - "You're standing in my office like you OWN it. You own NOTHING."
+    - "!PROFITS! I WANT TO SEE PROFITS! WHY AM I LOOKING AT YOU?"
+  director-crash:
+    - "!WHO SOLD?! WHO PANICKED?! SOMEBODY IN THIS BUILDING IS GETTING FIRED!"
+    - "!THE MARKET IS ON FIRE AND YOU WANT TO CHAT?!"
+  director-rally:
+    - "Business is BOOMING. Don't touch anything."
+    - "Sssplendid quarter. Get back to work before I change my mind."
   security:
-    - "Keep moving."
-    - "No basking in the corridors."
-    - "I've been told to escort someone out today. Might be you."
+    - "Keep. Moving."
+    - "No basking in the corridors. I WILL escort you."
+    - "I've been told to throw someone out today. Might be you."
+    - "!HANDS WHERE I CAN SEE THEM. ALL FOUR OF THEM."
   clerk:
-    - "Form 27-B/6? That's two floors down. There are no floors down."
-    - "I'm on my coffee break. It's a long one."
-    - "Don't tell the Director, but the photocopier is warm. I sit on it."
+    - "Form 27-B/6? Two floors down. There ARE no floors down. Figure it out."
+    - "I'm on my coffee break. Come back when I care. So, never."
+    - "Don't tell the Director the photocopier is warm. I sit on it. WHAT ARE YOU LOOKING AT?"
   votes:
-    - "Vote early. Vote often. The lizards are counting."
-    - "Every vote is a point. Every point is a purchase. Every purchase is... paperwork."
-    - "The Vote Shop is open. Mind the queue. There is no queue."
+    - "Vote early. Vote often. The lizards are COUNTING."
+    - "You haven't voted today? Then what ARE you doing with your life?"
+    - "!EVERY VOTE IS A POINT. EVERY POINT IS PAPERWORK. GO. VOTE."
   taxman:
-    - "I have all day. And all night."
-    - "Sssettle up."
-    - "Everyone pays. Eventually."
+    - "I have all day. And ALL night."
+    - "Sssettle up. Or I come to YOU."
+    - "!EVERYONE PAYS. EVENTUALLY. YOU'RE NO DIFFERENT."
+  owes:
+    - "You OWE us. Did you think we forgot? We NEVER forget."
+    - "!PAY YOUR TAXES, YOU WARM-BLOODED FREELOADER!"
+    - "Your file is on my desk. It's THICK. Type /tax pay."
+  rage:
+    - "!WHAT. DO. YOU. WANT."
+    - "!STOP CLICKING ME. I AM A PROFESSIONAL."
+    - "!ONE MORE TIME AND I'M CALLING SECURITY."
+  fired:
+    - "!YOU'RE FIRED! GET OUT OF MY OFFICE!"
+    - "!YOU'RE FIRED! TAKE YOUR STAPLER AND GO!"
+    - "!YOU'RE FIRED! AND DON'T LET THE LIFT DOORS HIT YOU!"
