@@ -28,14 +28,14 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * The Sulfur Strawberry: a little carrot idol with a gold shimmer, very rarely dug up when harvesting ripe carrots.
+ * The Carrot of Plenty (once the "Sulfur Strawberry"): a little carrot idol with a gold shimmer, very rarely dug up when harvesting ripe carrots.
  * Held in either hand:
  * - Well Fed: hunger drains half as fast.
  * - Fruitful: animals you breed sometimes have twins (an identical second baby).
  * No recipe; it only comes out of the ground.
  */
 final class SulfurStrawberry implements Listener {
-    static final String NAME = "Sulfur Strawberry";
+    static final String NAME = "Carrot of Plenty";
     private static final TextColor GOLD = TextColor.color(0xF2C04A);
     private final Soulbound plugin;
     private final NamespacedKey key;
@@ -62,6 +62,17 @@ final class SulfurStrawberry implements Listener {
         return it != null && it.hasItemMeta() && it.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.BYTE);
     }
 
+    /** Old "Sulfur Strawberry" items take the new name and lore. */
+    private void rename(ItemStack it) {
+        if (!is(it)) return;
+        ItemMeta m = it.getItemMeta();
+        if (m.displayName() != null && net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(m.displayName()).equals(NAME)) return;
+        ItemMeta fresh = create(1).getItemMeta();
+        m.displayName(fresh.displayName());
+        m.lore(fresh.lore());
+        it.setItemMeta(m);
+    }
+
     boolean holding(Player p) { return is(p.getInventory().getItemInMainHand()) || is(p.getInventory().getItemInOffHand()); }
 
     // ---------------------------------------------------------------- Well Fed
@@ -69,6 +80,7 @@ final class SulfurStrawberry implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onExhaust(EntityExhaustionEvent e) {
         if (!(e.getEntity() instanceof Player p) || !holding(p)) return;
+        rename(p.getInventory().getItemInMainHand()); rename(p.getInventory().getItemInOffHand());
         e.setExhaustion(e.getExhaustion() * (float) plugin.getConfig().getDouble("sulfur-strawberry.hunger-multiplier", 0.5));
     }
 
@@ -100,7 +112,7 @@ final class SulfurStrawberry implements Listener {
         if (b.getType() != Material.CARROTS || !(b.getBlockData() instanceof Ageable a) || a.getAge() < a.getMaximumAge()) return;
         Player p = e.getPlayer();
         if (p.getGameMode() != GameMode.SURVIVAL && p.getGameMode() != GameMode.ADVENTURE) return;
-        if (ThreadLocalRandom.current().nextDouble() >= plugin.getConfig().getDouble("sulfur-strawberry.drop-chance", 0.004)) return;
+        if (ThreadLocalRandom.current().nextDouble() >= plugin.getConfig().getDouble("sulfur-strawberry.drop-chance", 1.0 / 3000)) return;
         b.getWorld().dropItemNaturally(b.getLocation().add(.5, .3, .5), create(1));
         b.getWorld().playSound(b.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1f, 1.3f);
         b.getWorld().spawnParticle(Particle.WAX_OFF, b.getLocation().add(.5, .5, .5), 12, .3, .3, .3, 0.5);
