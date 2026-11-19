@@ -22,7 +22,7 @@ commands:
   company:
     description: Companies - a team with a shared vault (/company for help).
     usage: /company [create|invite|join|leave|deposit|withdraw|info|top]
-    aliases: [co]
+
 permissions:
   bureau.admin:
     description: Place lizards, set the lift, move the market, hand out Cold Hard Cash.
