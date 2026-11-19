@@ -3,6 +3,8 @@ on:
   push:
     paths: ['bureau/**', '.github/workflows/build-bureau.yml']
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,3 +23,10 @@ jobs:
         with:
           name: Bureau-jar
           path: bureau/build/libs/*.jar
+      - name: Publish to the bureau-latest release (a plain download link, no GitHub login needed)
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view bureau-latest >/dev/null 2>&1 || gh release create bureau-latest --title "Bureau (latest)" --notes "Latest Bureau plugin jar." --latest=false
+          gh release upload bureau-latest build/libs/*.jar --clobber
