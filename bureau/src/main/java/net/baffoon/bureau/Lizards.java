@@ -58,7 +58,7 @@ final class Lizards implements Listener {
         return r == null ? null : Role.of(r);
     }
 
-    private static ResolvableProfile skin(Role r) {
+    static ResolvableProfile skin(Role r) {
         return ResolvableProfile.resolvableProfile()
                 .skinPatch(s -> s.body(new NamespacedKey("bureau", "entity/lizard_" + r.skin)).model(org.bukkit.profile.PlayerTextures.SkinModel.CLASSIC))
                 .build();
@@ -132,6 +132,8 @@ final class Lizards implements Listener {
         cooldown.put(p.getUniqueId(), now);
         if (r == Role.TELLER) { say(p, e.getRightClicked(), r, "teller"); plugin.capital().open(p); return; }
         say(p, e.getRightClicked(), r, r.name().toLowerCase(Locale.ROOT));
+        if (r == Role.SECURITY) p.sendMessage(plugin.security().offer());
+        if (r == Role.TAXMAN) plugin.taxes().status(p);
     }
 
     @EventHandler(ignoreCancelled = true)

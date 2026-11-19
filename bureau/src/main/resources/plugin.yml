@@ -12,6 +12,9 @@ commands:
   cash:
     description: How much Cold Hard Cash you have, and today's price.
     usage: /cash
+  tax:
+    description: What you owe the Bureau. /tax pay to settle up.
+    usage: /tax [pay]
 permissions:
   bureau.admin:
     description: Place lizards, set the lift, move the market, hand out Cold Hard Cash.

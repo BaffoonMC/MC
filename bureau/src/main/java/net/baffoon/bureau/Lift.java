@@ -53,6 +53,11 @@ final class Lift implements Listener {
         else if (near(p.getLocation(), bottom)) { to = top; down = false; }
         else return;
         if (to == null) return;
+        if (down && plugin.security().fired(p.getUniqueId())) {
+            long h = plugin.security().firedLeft(p.getUniqueId()) / 3_600_000L + 1;
+            p.sendActionBar(Component.text("Security won't let you down. You were fired. Come back in about " + h + "h.", TextColor.color(0xE05050)));
+            return;
+        }
         long now = System.currentTimeMillis();
         if (now - riding.getOrDefault(p.getUniqueId(), 0L) < 4000) return;
         riding.put(p.getUniqueId(), now);

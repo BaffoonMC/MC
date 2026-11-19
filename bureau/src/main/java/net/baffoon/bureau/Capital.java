@@ -240,6 +240,7 @@ final class Capital implements Listener {
         if (!Money.take(p.getUniqueId(), cost)) { no(p, "You need " + Money.fmt(cost) + " for that."); return; }
         Cash.give(p, n);
         plugin.bought(p.getUniqueId(), n);
+        plugin.taxes().bought(p.getUniqueId(), n, cost);
         plugin.exchange().pressure(n, true);
         plugin.log(p.getUniqueId(), "Bought " + n + " for " + Money.fmt(cost));
         ok(p, "Bought " + n + " Cold Hard Cash for " + Money.fmt(cost) + ".");
@@ -253,6 +254,7 @@ final class Capital implements Listener {
         if (!Cash.take(p, n)) return;
         if (!Money.give(p.getUniqueId(), got)) { Cash.give(p, n); no(p, "The teller couldn't pay you. Try again later."); return; }
         plugin.exchange().pressure(n, false);
+        plugin.taxes().sold(p, n, got);
         plugin.log(p.getUniqueId(), "Sold " + n + " for " + Money.fmt(got));
         ok(p, "Sold " + n + " Cold Hard Cash for " + Money.fmt(got) + ".");
         refresh(p);

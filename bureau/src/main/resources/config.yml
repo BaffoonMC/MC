@@ -20,6 +20,40 @@ exchange:
 vault:
   withdraw-fee: 0.02      # taking Cash out of the vault costs 2% (at least 1)
 
+# Tax on Exchange profits. Sell Cash for more than you paid for it and the Bureau wants a cut of the profit.
+tax:
+  profit-rate: 0.10       # 10% of the profit
+  notice-hours: 72        # time to pay before interest is added (the Final Notice)
+  final-hours: 48         # time after the Final Notice before the Taxman is assigned
+  interest: 0.25          # added at the Final Notice
+  min-debt: 25            # the Taxman doesn't bother with less than this
+  min-hours-played: 5     # ...or with players newer than this
+
+# The Taxman: hunts players whose case is "assigned", when they're out in the wild.
+taxman:
+  speed: 0.23             # walking pace (a player walks a little faster; sprinting gets away)
+  hunt-minutes: 20        # he gives up after this long...
+  cooldown-hours: 20      # ...and comes back after this long
+  spawn-radius: 96        # never within this far of a world's spawn
+  bureau-radius: 48       # never within this far of the Bureau's lift
+  wait-minutes: 5         # if you stand somewhere safe, he waits this long, then leaves
+  cold-speed: 0.35        # in cold biomes or on snow and ice he slows to this fraction...
+  cold-seconds: 60        # ...and gives up after this much cold
+  stagger-seconds: 3      # hitting him only stops him for this long
+  resist-fee: 0.05        # ...and adds 5% to the bill
+  impound-stacks: 3       # if money and Cash don't cover it, up to this many backpack stacks are impounded (returned on paying)
+
+# Bureau Security.
+security:
+  bodyguard-price: 8      # Cold Hard Cash, hired from a Security lizard (right-click)
+  bodyguard-minutes: 60
+  speed: 0.3
+  hold-seconds: 10        # a bodyguard holds the Taxman back this long...
+  hold-cooldown-seconds: 25   # ...this often
+  swat-damage: 4          # a bodyguard's punch on mobs coming for you
+  fired-hours: 24         # /bureau fire: can't ride the lift down for this long
+  peace-radius: 16        # no player-on-player fighting this close to a Security lizard (0 = off)
+
 # The lizard shop, the right-hand side of the Exchange: "MATERIAL amount price-in-Cold-Hard-Cash", up to 9 lines.
 shop:
   - "NAME_TAG 1 6"
