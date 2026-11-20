@@ -48,6 +48,10 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
     private Companies companies;
     private Ticker ticker;
     private Chart chart;
+    /** Citizens is installed and switched on: walking lizards are Citizens NPCs. */
+    boolean citizens() {
+        return getConfig().getBoolean("walkers.use-citizens", true) && getServer().getPluginManager().isPluginEnabled("Citizens");
+    }
     boolean spawning;   // the Bureau is placing its own walkers (spawn protection shouldn't stop them)
     private final Map<UUID, Integer> boughtToday = new HashMap<>();
     private final Map<UUID, Deque<String>> ledger = new HashMap<>();

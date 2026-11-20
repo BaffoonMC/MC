@@ -3,7 +3,7 @@ version: '${version}'
 main: net.baffoon.bureau.Bureau
 api-version: '26.3'
 description: The Bureau of Cold-Blooded Affairs - lizards in suits, Cold Hard Cash and the Exchange.
-softdepend: [Essentials, PlaceholderAPI, Soulbound]
+softdepend: [Essentials, PlaceholderAPI, Soulbound, Citizens, Sentinel]
 commands:
   bureau:
     description: The Bureau of Cold-Blooded Affairs (admins - /bureau help).

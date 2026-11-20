@@ -85,6 +85,7 @@ final class Security implements Listener {
         Location at = p.getLocation().clone().add(p.getLocation().getDirection().setY(0).normalize().multiply(-1.5));
         Walker w = Walker.spawn(plugin, at, Lizards.Role.SECURITY, Component.text(p.getName() + "'s Bodyguard", GREEN), cfg("speed", 0.3));
         if (w == null) { Cash.give(p, price); return "Your bodyguard couldn't get here. You've been refunded."; }
+        w.guard(p, cfg("swat-damage", 4));   // with Citizens and Sentinel: a proper fighting guard
         guards.put(p.getUniqueId(), new Guard(p.getUniqueId(), w, System.currentTimeMillis() + (long) (cfg("bodyguard-minutes", 60) * 60_000L)));
         plugin.log(p.getUniqueId(), "Hired a bodyguard for " + price);
         p.playSound(p.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, 1f, 0.8f);
@@ -102,7 +103,7 @@ final class Security implements Listener {
             }
             g.ticks++;
             g.w.tick(p.getLocation());
-            if (g.ticks % 10 == 0) {
+            if (g.ticks % 10 == 0 && !g.w.sentinel()) {
                 if (g.w.at().distanceSquared(p.getLocation()) > 3.5 * 3.5) g.w.walkTo(p, 1.2); else g.w.stop();
             }
             if (g.ticks % 20 == 0) protect(p, g);
@@ -129,6 +130,7 @@ final class Security implements Listener {
                     .append(Component.text("Back off, pal. Go, boss, I've got him.", NamedTextColor.WHITE)));
             p.playSound(tax.at(), Sound.ENTITY_PLAYER_ATTACK_KNOCKBACK, 1f, 0.8f);
         }
+        if (g.w.sentinel()) return;          // Sentinel does the fighting
         double dmg = cfg("swat-damage", 4);
         for (Entity e : p.getNearbyEntities(5, 3, 5)) {
             if (!(e instanceof Mob m) || !(e instanceof Enemy) || Walker.isPart(e)) continue;

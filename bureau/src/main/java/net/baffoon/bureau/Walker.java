@@ -19,13 +19,23 @@ final class Walker {
     static NamespacedKey key;   // set by Bureau: marks both halves
     final Husk driver;
     final Mannequin body;
+    final NpcBody npc;      // set instead of driver and body when Citizens runs the walker
     private int frozenUntil;
     private int age;
 
-    private Walker(Husk driver, Mannequin body) { this.driver = driver; this.body = body; }
+    private Walker(Husk driver, Mannequin body) { this.driver = driver; this.body = body; this.npc = null; }
+    private Walker(NpcBody npc) { this.driver = null; this.body = null; this.npc = npc; }
 
     /** Null if something (spawn protection, another plugin) refused to let it appear. */
     static Walker spawn(Bureau plugin, Location at, Lizards.Role role, Component name, double speed) {
+        if (plugin.citizens()) {
+            try {
+                NpcBody n = NpcBody.spawn(plugin, at, role, name, speed);
+                if (n != null) return new Walker(n);
+            } catch (Throwable t) {
+                plugin.getLogger().warning("Citizens couldn't make a walking lizard (" + t + "); using the built-in walker.");
+            }
+        }
         plugin.spawning = true;
         Husk h;
         Mannequin m;
@@ -67,27 +77,32 @@ final class Walker {
 
     static boolean isPart(Entity e) { return e != null && e.getPersistentDataContainer().has(key, PersistentDataType.BYTE); }
 
-    boolean valid() { return driver.isValid() && body.isValid(); }
-    boolean owns(Entity e) { return e != null && (e.equals(driver) || e.equals(body)); }
-    Location at() { return driver.getLocation(); }
+    boolean valid() { return npc != null ? npc.valid() : driver.isValid() && body.isValid(); }
+    boolean owns(Entity e) { return e != null && (npc != null ? e.equals(npc.entity()) : e.equals(driver) || e.equals(body)); }
+    Location at() { return npc != null ? npc.at() : driver.getLocation(); }
+    /** True when Sentinel is doing this walker's following and fighting. */
+    boolean sentinel() { return npc != null && npc.sentinel; }
+    boolean guard(org.bukkit.entity.Player client, double damage) { return npc != null && npc.guard(client, damage); }
 
     void walkTo(LivingEntity target, double speedMul) {
         if (age < frozenUntil) return;
+        if (npc != null) { npc.walkTo(target, speedMul); return; }
         driver.getPathfinder().moveTo(target, speedMul);
     }
 
-    void stop() { driver.getPathfinder().stopPathfinding(); }
+    void stop() { if (npc != null) npc.stop(); else driver.getPathfinder().stopPathfinding(); }
 
     /** Stagger: stand still for ticks. */
     void freeze(int ticks) { frozenUntil = age + ticks; stop(); }
     boolean frozen() { return age < frozenUntil; }
 
-    void teleport(Location l) { driver.teleport(l); body.teleport(l); }
+    void teleport(Location l) { if (npc != null) npc.teleport(l); else { driver.teleport(l); body.teleport(l); } }
 
     /** Every tick: the lizard stands where the husk is, facing what it's after. */
     void tick(Location lookAt) {
         age++;
         if (age < frozenUntil) stop();
+        if (npc != null) { if (lookAt != null && age % 5 == 0 && lookAt.getWorld() == npc.at().getWorld()) npc.face(lookAt); return; }
         Location l = driver.getLocation();
         if (lookAt != null && lookAt.getWorld() == l.getWorld()) {
             double dx = lookAt.getX() - l.getX(), dz = lookAt.getZ() - l.getZ();
@@ -97,5 +112,5 @@ final class Walker {
         body.teleport(l);
     }
 
-    void remove() { driver.remove(); body.remove(); }
+    void remove() { if (npc != null) npc.remove(); else { driver.remove(); body.remove(); } }
 }

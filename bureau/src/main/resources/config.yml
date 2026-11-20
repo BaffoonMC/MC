@@ -150,6 +150,12 @@ companies:
   weekly-bonus: 10            # Cold Hard Cash for the Company of the Week
 
 # What the lizards say when clicked.
+# Walking lizards (bodyguards, the Taxman, the guards who throw people out). With the Citizens plugin installed they
+# are Citizens NPCs that really walk; with Sentinel too, bodyguards fight like Sentinel guards. Set false to go back
+# to the built-in walker.
+walkers:
+  use-citizens: true
+
 # Stock tickers: /bureau ticker place [width] while looking at a wall, /bureau ticker remove.
 ticker:
   scale: 2.0        # text size: 2.0 is half a block tall
