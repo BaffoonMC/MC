@@ -70,12 +70,16 @@ final class Lizards implements Listener {
     String spawn(Player p, Role r, String name) {
         Location l = p.getLocation();
         l.setPitch(0);
-        Mannequin m = l.getWorld().spawn(l, Mannequin.class, x -> {
-            x.setProfile(skin(r));
-            x.setPersistent(true);
-            x.setRemoveWhenFarAway(false);
-            x.getPersistentDataContainer().set(roleKey, PersistentDataType.STRING, r.name());
-        });
+        Mannequin m;
+        plugin.spawning = true;      // spawn protection (WorldGuard and the like) shouldn't stop the Bureau's own staff
+        try {
+            m = l.getWorld().spawn(l, Mannequin.class, x -> {
+                x.setProfile(skin(r));
+                x.setPersistent(true);
+                x.setRemoveWhenFarAway(false);
+                x.getPersistentDataContainer().set(roleKey, PersistentDataType.STRING, r.name());
+            });
+        } finally { plugin.spawning = false; }
         if (!m.isValid()) return "Something stopped the lizard appearing (another plugin cancelled it).";
         m.setInvulnerable(true);
         m.setImmovable(true);
