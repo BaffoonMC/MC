@@ -82,7 +82,14 @@ final class Walker {
     Location at() { return npc != null ? npc.at() : driver.getLocation(); }
     /** True when Sentinel is doing this walker's following and fighting. */
     boolean sentinel() { return npc != null && npc.sentinel; }
-    boolean guard(org.bukkit.entity.Player client, double damage) { return npc != null && npc.guard(client, damage); }
+    boolean guard(org.bukkit.entity.Player client, double damage, double health, boolean players) { return npc != null && npc.guard(client, damage, health, players); }
+    void target(java.util.UUID who) { if (npc != null) npc.target(who); }
+    /** A Sentinel bodyguard: he deals and takes real damage, unlike every other walker. */
+    static boolean fighter(Entity e) {
+        if (e == null) return false;
+        Byte b = e.getPersistentDataContainer().get(key, PersistentDataType.BYTE);
+        return b != null && b == 2;
+    }
 
     void walkTo(LivingEntity target, double speedMul) {
         if (age < frozenUntil) return;

@@ -51,7 +51,9 @@ security:
   speed: 0.3
   hold-seconds: 10        # a bodyguard holds the Taxman back this long...
   hold-cooldown-seconds: 25   # ...this often
-  swat-damage: 4          # a bodyguard's punch on mobs coming for you
+  swat-damage: 4          # a bodyguard's hit
+  bodyguard-health: 40    # with Citizens and Sentinel he can be killed (40 = 20 hearts); without them he can't be hurt
+  bodyguard-fights-players: true   # he goes for players his client hits, and anyone who hits his client or him
   fired-hours: 24         # /bureau fire: can't ride the lift down for this long
   peace-radius: 16        # no player-on-player fighting this close to a Security lizard (0 = off)
 

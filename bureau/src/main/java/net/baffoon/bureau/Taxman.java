@@ -237,7 +237,8 @@ final class Taxman implements Listener {
     public void onHit(EntityDamageByEntityEvent e) {
         Entity victim = e.getEntity(), by = e.getDamager();
         if (by instanceof Projectile pr && pr.getShooter() instanceof Entity s) by = s;
-        if (Walker.isPart(by)) { e.setCancelled(true); return; }          // walkers never hurt anyone
+        if (Walker.fighter(by) || Walker.fighter(victim)) return;         // Sentinel bodyguards fight for real
+        if (Walker.isPart(by)) { e.setCancelled(true); return; }          // other walkers never hurt anyone
         if (!Walker.isPart(victim)) return;
         e.setCancelled(true);
         for (Hunt h : hunts.values()) {
@@ -256,10 +257,10 @@ final class Taxman implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onHurt(EntityDamageEvent e) { if (Walker.isPart(e.getEntity()) && !(e instanceof EntityDamageByEntityEvent)) e.setCancelled(true); }
+    public void onHurt(EntityDamageEvent e) { if (Walker.isPart(e.getEntity()) && !Walker.fighter(e.getEntity()) && !(e instanceof EntityDamageByEntityEvent)) e.setCancelled(true); }
 
-    @EventHandler public void onTarget(EntityTargetEvent e) { if (Walker.isPart(e.getEntity())) e.setCancelled(true); }
-    @EventHandler public void onBurn(EntityCombustEvent e) { if (Walker.isPart(e.getEntity())) e.setCancelled(true); }
+    @EventHandler public void onTarget(EntityTargetEvent e) { if (Walker.isPart(e.getEntity()) && !Walker.fighter(e.getEntity())) e.setCancelled(true); }
+    @EventHandler public void onBurn(EntityCombustEvent e) { if (Walker.isPart(e.getEntity()) && !Walker.fighter(e.getEntity())) e.setCancelled(true); }
 
     /** Spawn protection doesn't apply to the Bureau's own walkers. */
     @EventHandler(priority = EventPriority.MONITOR)

@@ -60,11 +60,14 @@ final class NpcBody {
     void face(Location l) { if (!npc.getNavigator().isNavigating()) npc.faceLocation(l); }
     void remove() { npc.destroy(); }
 
+    void target(java.util.UUID who) { if (sentinel) try { SentinelHook.target(npc, who); } catch (Throwable ignored) {} }
+
     /** With Sentinel installed: guard this player and fight monsters. False if Sentinel isn't there or refused. */
-    boolean guard(Player client, double damage) {
+    boolean guard(Player client, double damage, double health, boolean players) {
         try {
-            SentinelHook.guard(npc, client, damage);
+            SentinelHook.guard(npc, client, damage, health, players);
             sentinel = true;
+            if (npc.getEntity() != null) npc.getEntity().getPersistentDataContainer().set(Walker.key, PersistentDataType.BYTE, (byte) 2);
         } catch (Throwable t) { sentinel = false; }
         return sentinel;
     }

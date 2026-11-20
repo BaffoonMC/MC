@@ -85,7 +85,7 @@ final class Security implements Listener {
         Location at = p.getLocation().clone().add(p.getLocation().getDirection().setY(0).normalize().multiply(-1.5));
         Walker w = Walker.spawn(plugin, at, Lizards.Role.SECURITY, Component.text(p.getName() + "'s Bodyguard", GREEN), cfg("speed", 0.3));
         if (w == null) { Cash.give(p, price); return "Your bodyguard couldn't get here. You've been refunded."; }
-        w.guard(p, cfg("swat-damage", 4));   // with Citizens and Sentinel: a proper fighting guard
+        w.guard(p, cfg("swat-damage", 4), cfg("bodyguard-health", 40), plugin.getConfig().getBoolean("security.bodyguard-fights-players", true));   // with Citizens and Sentinel: a proper fighting guard
         guards.put(p.getUniqueId(), new Guard(p.getUniqueId(), w, System.currentTimeMillis() + (long) (cfg("bodyguard-minutes", 60) * 60_000L)));
         plugin.log(p.getUniqueId(), "Hired a bodyguard for " + price);
         p.playSound(p.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, 1f, 0.8f);
@@ -99,7 +99,12 @@ final class Security implements Listener {
             if (p == null || now > g.until) { dismiss(g.client, p == null ? null : "Your bodyguard's shift is over. \"Stay safe out there.\""); continue; }
             if (!g.w.valid() || g.w.at().getWorld() != p.getWorld() || g.w.at().distanceSquared(p.getLocation()) > 32 * 32) {
                 // keep up: across portals, chunk edges, long sprints
-                if (g.w.valid()) g.w.teleport(behind(p)); else { dismiss(g.client, "Your bodyguard got lost. \"Sorry, boss.\""); continue; }
+                if (g.w.valid()) g.w.teleport(behind(p));
+                else if (g.w.sentinel()) {
+                    p.playSound(p.getLocation(), Sound.ENTITY_IRON_GOLEM_DEATH, 0.7f, 1.3f);
+                    dismiss(g.client, "Your bodyguard has fallen. \"Tell the Director... I want overtime.\""); continue;
+                }
+                else { dismiss(g.client, "Your bodyguard got lost. \"Sorry, boss.\""); continue; }
             }
             g.ticks++;
             g.w.tick(p.getLocation());
@@ -191,6 +196,19 @@ final class Security implements Listener {
         }, 60L);
     }
 
+    /** Whoever the client hits, the bodyguard goes for too (players included, where fighting is allowed). */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onClientHits(EntityDamageByEntityEvent e) {
+        Entity by = e.getDamager();
+        if (by instanceof Projectile pr && pr.getShooter() instanceof Entity s) by = s;
+        if (!(by instanceof Player p) || !(e.getEntity() instanceof LivingEntity victim) || victim.equals(p)) return;
+        Guard g = guards.get(p.getUniqueId());
+        if (g == null || !g.w.sentinel() || g.w.owns(victim)) return;
+        if (victim instanceof Player && !plugin.getConfig().getBoolean("security.bodyguard-fights-players", true)) return;
+        if (Walker.isPart(victim) && !Walker.fighter(victim)) return;
+        g.w.target(victim.getUniqueId());
+    }
+
     // ---------------------------------------------------------------- no fighting near Security
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -198,8 +216,13 @@ final class Security implements Listener {
         if (!(e.getEntity() instanceof Player victim)) return;
         Entity by = e.getDamager();
         if (by instanceof Projectile pr && pr.getShooter() instanceof Entity s) by = s;
-        if (!(by instanceof Player attacker) || attacker.equals(victim)) return;
         double r = cfg("peace-radius", 16);
+        if (Walker.fighter(by)) {     // a bodyguard going for a player: not inside the Bureau's peace
+            if (r > 0) for (LivingEntity m : victim.getWorld().getEntitiesByClass(Mannequin.class))
+                if (plugin.lizards().role(m) == Lizards.Role.SECURITY && m.getLocation().distanceSquared(victim.getLocation()) <= r * r) { e.setCancelled(true); return; }
+            return;
+        }
+        if (!(by instanceof Player attacker) || attacker.equals(victim)) return;
         if (r <= 0) return;
         for (LivingEntity m : victim.getWorld().getEntitiesByClass(Mannequin.class)) {
             if (plugin.lizards().role(m) != Lizards.Role.SECURITY || m.getLocation().distanceSquared(victim.getLocation()) > r * r) continue;
