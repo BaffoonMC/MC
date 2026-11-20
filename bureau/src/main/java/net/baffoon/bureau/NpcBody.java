@@ -55,6 +55,11 @@ final class NpcBody {
         nav.getLocalParameters().speedModifier((float) (speed * mul));
     }
 
+    void walkTo(Location to, double mul) {
+        npc.getNavigator().setTarget(to);
+        npc.getNavigator().getLocalParameters().speedModifier((float) (speed * mul));
+    }
+
     void stop() { if (npc.getNavigator().isNavigating()) npc.getNavigator().cancelNavigation(); }
     void teleport(Location l) { npc.teleport(l, PlayerTeleportEvent.TeleportCause.PLUGIN); }
     void face(Location l) { if (!npc.getNavigator().isNavigating()) npc.faceLocation(l); }

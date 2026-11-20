@@ -196,7 +196,7 @@ final class Lizards implements Listener {
         if (role(e.getEntity()) != null) e.setCancelled(true);
     }
 
-    private void say(Player p, Entity lizard, Role r, String key) {
+    void say(Player p, Entity lizard, Role r, String key) {
         List<String> lines = plugin.getConfig().getStringList("dialogue." + key);
         if (lines.isEmpty()) lines = plugin.getConfig().getStringList("lines." + key);
         if (lines.isEmpty()) return;

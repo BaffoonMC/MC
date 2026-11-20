@@ -97,6 +97,12 @@ final class Walker {
         driver.getPathfinder().moveTo(target, speedMul);
     }
 
+    void walkTo(Location to, double speedMul) {
+        if (age < frozenUntil) return;
+        if (npc != null) { npc.walkTo(to, speedMul); return; }
+        driver.getPathfinder().moveTo(to, speedMul);
+    }
+
     void stop() { if (npc != null) npc.stop(); else driver.getPathfinder().stopPathfinding(); }
 
     /** Stagger: stand still for ticks. */

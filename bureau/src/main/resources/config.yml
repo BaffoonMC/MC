@@ -158,6 +158,10 @@ companies:
 walkers:
   use-citizens: true
 
+# Wandering staff: /bureau roam <role> [radius] [name], /bureau roam remove.
+roamers:
+  speed: 0.2
+
 # Stock tickers: /bureau ticker place [width] while looking at a wall, /bureau ticker remove.
 ticker:
   scale: 2.0        # text size: 2.0 is half a block tall
@@ -228,6 +232,13 @@ dialogue:
     - "You OWE us. Did you think we forgot? We NEVER forget."
     - "!PAY YOUR TAXES, YOU WARM-BLOODED FREELOADER!"
     - "Your file is on my desk. It's THICK. Type /tax pay."
+  roaming:
+    - "Can't stop. Meeting. There's ALWAYS a meeting."
+    - "Have you seen my stapler? Someone has my stapler."
+    - "Walk on the LEFT. This is a place of business."
+    - "I'm not lost. I'm doing a lap. It's called exercise."
+    - "!OUT OF MY WAY, I HAVE FORMS!"
+    - "Don't tell anyone, but I've been carrying this same folder around all day."
   rage:
     - "!WHAT. DO. YOU. WANT."
     - "!STOP CLICKING ME. I AM A PROFESSIONAL."
