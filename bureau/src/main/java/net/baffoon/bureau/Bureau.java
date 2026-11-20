@@ -111,6 +111,7 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
             try { new BureauPlaceholders(this).register(); getLogger().info("PlaceholderAPI found: %bureau_...% placeholders registered."); }
             catch (Throwable t) { getLogger().warning("Couldn't register placeholders: " + t); }
         }
+        if (citizens()) try { NpcBody.prepareSkins(this, false); } catch (Throwable t) { getLogger().warning("Couldn't prepare lizard skins: " + t); }
         if (!Money.available()) getLogger().warning("Essentials' money isn't available, so the Exchange can't buy or sell.");
     }
 
@@ -309,6 +310,12 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
                 if (a.length > 2) try { width = Integer.parseInt(a[2]); } catch (NumberFormatException ignored) {}
                 s.sendMessage(ok(ticker.place(p, width)));
             }
+            case "skins" -> {
+                if (!citizens()) { s.sendMessage(bad("Citizens isn't installed (or walkers.use-citizens is false).")); break; }
+                if (a.length > 1 && a[1].equalsIgnoreCase("redo")) { NpcBody.prepareSkins(this, true); s.sendMessage(ok("Uploading the lizard skins again. Check /bureau skins in half a minute.")); break; }
+                NpcBody.prepareSkins(this, false);
+                s.sendMessage(ok(NpcBody.skinStatus()));
+            }
             case "roam" -> {
                 if (!(s instanceof Player p)) { s.sendMessage("Players only."); break; }
                 if (a.length < 2) { s.sendMessage(bad("Usage: /bureau roam <clerk|security|director|...> [radius] [name] | remove   (" + roamers.count() + " wandering)")); break; }
@@ -432,7 +439,7 @@ public final class Bureau extends JavaPlugin implements TabExecutor {
         if (cmd.getName().equalsIgnoreCase("cash")) return List.of();
         if (!admin(s)) return a.length == 1 ? List.of("hire", "party") : List.of();
         List<String> opts = switch (a.length) {
-            case 1 -> List.of("exchange", "give", "item", "vault", "price", "event", "npc", "lift", "ticker", "chart", "roam", "tax", "fire", "unfire", "hire", "party", "reload", "help");
+            case 1 -> List.of("exchange", "give", "item", "vault", "price", "event", "npc", "lift", "ticker", "chart", "roam", "skins", "tax", "fire", "unfire", "hire", "party", "reload", "help");
             case 2 -> switch (a[0].toLowerCase(Locale.ROOT)) {
                 case "event" -> List.of("boom", "crash", "calm");
                 case "npc" -> List.of("teller", "receptionist", "director", "security", "clerk", "taxman", "votes", "remove", "reskin");

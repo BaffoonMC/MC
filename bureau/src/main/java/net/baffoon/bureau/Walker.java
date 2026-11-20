@@ -115,7 +115,7 @@ final class Walker {
     void tick(Location lookAt) {
         age++;
         if (age < frozenUntil) stop();
-        if (npc != null) { if (lookAt != null && age % 5 == 0 && lookAt.getWorld() == npc.at().getWorld()) npc.face(lookAt); return; }
+        if (npc != null) { if (npc.sentinel) return; if (lookAt != null && age % 5 == 0 && lookAt.getWorld() == npc.at().getWorld()) npc.face(lookAt); return; }
         Location l = driver.getLocation();
         if (lookAt != null && lookAt.getWorld() == l.getWorld()) {
             double dx = lookAt.getX() - l.getX(), dz = lookAt.getZ() - l.getZ();
