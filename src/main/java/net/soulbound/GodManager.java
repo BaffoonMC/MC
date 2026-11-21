@@ -676,7 +676,7 @@ final class GodManager implements Listener {
 
     private Component choice(String label, String id) {
         return Component.text("[" + label + "]", NamedTextColor.GOLD)
-                .clickEvent(ClickEvent.runCommand("/god " + id))
+                .clickEvent(ClickEvent.runCommand("/soulbound:god " + id))
                 .hoverEvent(HoverEvent.showText(Component.text("Say it to God", NamedTextColor.GRAY)));
     }
 
