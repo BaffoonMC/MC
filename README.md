@@ -11,6 +11,7 @@ Brings back **Beta 1.7.3 lighting**, the base that Better Than Adventure builds 
 | Torch light | warm orange, flickers | plain white/grey, steady |
 | Night | blue tint | neutral grey |
 | Darkest light level | 0.0 (pitch black) | 0.05, like Beta (Nether 0.1) |
+| Shadows and nights | | deeper by default (adjustable; set contrast 1.0 / night 11 for exact Beta) |
 | Sky + torch light | blended in colour | `max(sky, torch)`, like Beta |
 | Sunrise / sunset | smooth fade | steps down one light level at a time, like Beta |
 
@@ -20,8 +21,11 @@ It doesn't change gameplay: mob spawning, crop growth and so on still use normal
 
 - **L** toggles it on/off so you can compare with vanilla (rebind it under Controls).
 - **Mods → Old School Lighting → Config** has the settings (also in `config/oldschoollighting.cfg`):
+  - `contrast` (**Shadow strength**): 1.0 = exact Beta (subtle), **1.6 = default**, 2.0+ = very dark and moody
+  - `nightDarkening` (**Night darkness**): 11 = exact Beta, **13 = default**, 15 = pitch-black nights
+  - `brightnessSliderStrength`: how much the vanilla Brightness slider can wash things out (default 0.5)
   - `steppedDaylight`: Beta-style stepped sunsets (default on), or a smooth fade
-  - `useBrightnessSlider`: lets the vanilla Brightness slider still work (default on). Turn it off and set Brightness to *Moody* for the purest Beta look.
+  - `useBrightnessSlider`: turn off to ignore the Brightness slider completely
   - `skyAmbient` / `netherAmbient` / `endAmbient`: how bright the darkest areas are
   - `dimensionBlacklist`: dimension IDs that keep vanilla lighting
 

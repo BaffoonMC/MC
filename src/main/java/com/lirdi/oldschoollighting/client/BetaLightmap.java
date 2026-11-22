@@ -41,9 +41,10 @@ public final class BetaLightmap {
      * @param celestialAngle world.getCelestialAngle(partialTicks)
      * @param rain           world.getRainStrength(partialTicks), 0..1
      * @param thunder        world.getWeightedThunderStrength(partialTicks), 0..1
-     * @return how many sky light levels to remove, 0 (noon) .. 11 (night)
+     * @param maxDarkening   light levels removed at full night (Beta = 11, 15 = pitch-black nights)
+     * @return how many sky light levels to remove, 0 (noon) .. maxDarkening (night)
      */
-    public static float skyDarkening(float celestialAngle, float rain, float thunder) {
+    public static float skyDarkening(float celestialAngle, float rain, float thunder, float maxDarkening) {
         float f = 1.0F - ((float) Math.cos(celestialAngle * (float) Math.PI * 2.0F) * 2.0F + 0.5F);
         if (f < 0.0F) f = 0.0F;
         if (f > 1.0F) f = 1.0F;
@@ -51,7 +52,7 @@ public final class BetaLightmap {
         f = (float) (f * (1.0D - rain * 5.0F / 16.0D));
         f = (float) (f * (1.0D - thunder * 5.0F / 16.0D));
         f = 1.0F - f;
-        return f * MAX_SKY_DARKENING;
+        return f * maxDarkening;
     }
 
     /**
@@ -62,14 +63,22 @@ public final class BetaLightmap {
      * @param skyDarkening value from {@link #skyDarkening}; pass a whole number for Beta-style steps
      * @param ambient      brightness of light level 0
      * @param gamma        the vanilla Brightness slider (0 = Moody, 1 = Bright); pass 0 to ignore it
+     * @param contrast     1 = exact Beta. Higher values darken the mid-tones (deeper shadows, shorter torch
+     *                     glow) while keeping full light and the darkest level unchanged.
      * @param nightVision  night vision strength, 0..1 (Beta had none, but the potion should still work)
      */
-    public static void fill(int[] out, boolean hasSky, float skyDarkening, float ambient, float gamma,
-        float nightVision) {
+    public static void fill(int[] out, boolean hasSky, float skyDarkening, float ambient, float contrast,
+        float gamma, float nightVision) {
         for (int sky = 0; sky < 16; sky++) {
             float skyLevel = hasSky ? Math.max(0.0F, sky - skyDarkening) : 0.0F;
             for (int block = 0; block < 16; block++) {
                 float v = brightness(Math.max(skyLevel, block), ambient);
+
+                // Contrast: bend the curve between the darkest level and full light.
+                if (contrast != 1.0F && ambient < 1.0F) {
+                    float t = (v - ambient) / (1.0F - ambient);
+                    v = (float) Math.pow(Math.max(0.0F, t), contrast) * (1.0F - ambient) + ambient;
+                }
 
                 // Night vision: vanilla scales every channel towards full brightness.
                 if (nightVision > 0.0F) {

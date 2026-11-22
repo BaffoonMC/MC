@@ -76,7 +76,8 @@ public final class LightmapHandler {
                 darkening = BetaLightmap.skyDarkening(
                     world.getCelestialAngle(partialTicks),
                     world.getRainStrength(partialTicks),
-                    world.getWeightedThunderStrength(partialTicks));
+                    world.getWeightedThunderStrength(partialTicks),
+                    LightingConfig.nightDarkening);
                 if (LightingConfig.steppedDaylight) {
                     darkening = (int) darkening;
                 }
@@ -91,9 +92,18 @@ public final class LightmapHandler {
                 ambient = LightingConfig.skyAmbient;
             }
 
-            float gamma = LightingConfig.useBrightnessSlider ? mc.gameSettings.gammaSetting : 0.0F;
+            float gamma = LightingConfig.useBrightnessSlider
+                ? mc.gameSettings.gammaSetting * LightingConfig.brightnessSliderStrength
+                : 0.0F;
 
-            BetaLightmap.fill(scratch, hasSky, darkening, ambient, gamma, nightVision(player, partialTicks));
+            BetaLightmap.fill(
+                scratch,
+                hasSky,
+                darkening,
+                ambient,
+                LightingConfig.contrast,
+                gamma,
+                nightVision(player, partialTicks));
 
             DynamicTexture texture = (DynamicTexture) lightmapTexture.get(renderer);
             int[] data = texture.getTextureData();

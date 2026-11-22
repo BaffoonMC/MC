@@ -9,3 +9,6 @@ oldschoollighting.config.skyAmbient=Darkest brightness (Overworld)
 oldschoollighting.config.netherAmbient=Darkest brightness (Nether)
 oldschoollighting.config.endAmbient=Darkest brightness (End)
 oldschoollighting.config.dimensionBlacklist=Dimensions with vanilla lighting
+oldschoollighting.config.contrast=Shadow strength (1.0 = exact Beta)
+oldschoollighting.config.nightDarkening=Night darkness (11 = exact Beta)
+oldschoollighting.config.brightnessSliderStrength=Brightness slider strength

@@ -16,6 +16,9 @@ public final class LightingConfig {
     public static float skyAmbient = 0.05F;
     public static float netherAmbient = 0.10F;
     public static float endAmbient = 0.22F;
+    public static float contrast = 1.6F;
+    public static float nightDarkening = 13.0F;
+    public static float brightnessSliderStrength = 0.5F;
     public static int[] dimensionBlacklist = new int[0];
 
     private static final String CAT = Configuration.CATEGORY_GENERAL;
@@ -43,22 +46,52 @@ public final class LightingConfig {
         useBrightnessSlider = bool(
             "useBrightnessSlider",
             true,
-            "true = the vanilla Brightness slider (Moody..Bright) still works.\n"
-                + "false = pure Beta 1.7.3, which ignores the slider (set it to Moody for the authentic look).");
+            "true = the vanilla Brightness slider (Moody..Bright) still works (see brightnessSliderStrength).\n"
+                + "false = pure Beta 1.7.3, which ignores the slider.");
+
+        brightnessSliderStrength = number(
+            "brightnessSliderStrength",
+            0.5,
+            0.0,
+            1.0,
+            "How much the Brightness slider can brighten things. 1 = like vanilla (washes out the old-school look),\n"
+                + "0.5 = half (default), 0 = ignored.");
+
+        contrast = number(
+            "contrast",
+            1.6,
+            0.5,
+            3.0,
+            "How strong the old-school shadows are. 1.0 = exact Beta 1.7.3 (subtle). 1.6 = default, deeper shadows\n"
+                + "and shorter torch glow. 2.0+ = very dark and moody. Below 1 = brighter, flatter.");
+
+        nightDarkening = number(
+            "nightDarkening",
+            13.0,
+            0.0,
+            15.0,
+            "How many sky light levels night removes. 11 = exact Beta 1.7.3, 13 = default (darker nights),\n"
+                + "15 = pitch-black nights where only torches help.");
 
         skyAmbient = number(
             "skyAmbient",
             0.05,
+            0.0,
+            1.0,
             "Brightness of a light level 0 block in dimensions with a sky. Beta 1.7.3 = 0.05, vanilla 1.7.10 = 0.0.");
 
         netherAmbient = number(
             "netherAmbient",
             0.10,
+            0.0,
+            1.0,
             "Brightness of a light level 0 block in skyless dimensions such as the Nether. Beta 1.7.3 = 0.1.");
 
         endAmbient = number(
             "endAmbient",
             0.22,
+            0.0,
+            1.0,
             "Brightness of a light level 0 block in the End (Beta had no End; 0.22 roughly matches vanilla).");
 
         Property p = config.get(
@@ -94,14 +127,14 @@ public final class LightingConfig {
         return p.getBoolean(def);
     }
 
-    private static float number(String name, double def, String comment) {
-        Property p = config.get(CAT, name, def, comment + "\n[range: 0.0 ~ 1.0, default: " + def + "]");
+    private static float number(String name, double def, double min, double max, String comment) {
+        Property p = config.get(CAT, name, def, comment + "\n[range: " + min + " ~ " + max + ", default: " + def + "]");
         p.setLanguageKey(LANG + name);
-        p.setMinValue(0.0D);
-        p.setMaxValue(1.0D);
+        p.setMinValue(min);
+        p.setMaxValue(max);
         double v = p.getDouble(def);
-        if (v < 0.0D) v = 0.0D;
-        if (v > 1.0D) v = 1.0D;
+        if (v < min) v = min;
+        if (v > max) v = max;
         return (float) v;
     }
 }
