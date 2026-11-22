@@ -5,6 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,7 +25,22 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Build
         run: ./gradlew --no-daemon build
+      - name: List jars
+        run: ls -la build/libs
       - uses: actions/upload-artifact@v4
         with:
           name: OldSchoolLighting
           path: build/libs/*.jar
+      - name: Publish the jar as a download (pre-release, so it never becomes the repo's "latest release")
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          JAR=$(ls build/libs/*.jar | grep -v -- '-dev' | grep -v -- '-sources' | grep -v -- '-api' | head -1)
+          cp "$JAR" OldSchoolLighting-1.7.10.jar
+          TAG="old-school-lighting-build"
+          gh release delete "$TAG" --yes --cleanup-tag || true
+          gh release create "$TAG" OldSchoolLighting-1.7.10.jar \
+            --target "$GITHUB_SHA" --prerelease \
+            --title "Old School Lighting for 1.7.10 (latest build)" \
+            --notes "Beta 1.7.3-style lighting for Minecraft Forge 1.7.10. Put the jar in .minecraft/mods. Press L in-game to toggle."
