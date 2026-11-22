@@ -1,0 +1,11 @@
+key.categories.oldschoollighting=Old School Lighting
+key.oldschoollighting.toggle=Toggle Beta Lighting
+oldschoollighting.message.on=Old School Lighting: §aON§r (Beta 1.7.3 lighting)
+oldschoollighting.message.off=Old School Lighting: §cOFF§r (vanilla 1.7.10 lighting)
+oldschoollighting.config.enabled=Enabled
+oldschoollighting.config.steppedDaylight=Stepped sunrise/sunset (Beta)
+oldschoollighting.config.useBrightnessSlider=Use Brightness slider
+oldschoollighting.config.skyAmbient=Darkest brightness (Overworld)
+oldschoollighting.config.netherAmbient=Darkest brightness (Nether)
+oldschoollighting.config.endAmbient=Darkest brightness (End)
+oldschoollighting.config.dimensionBlacklist=Dimensions with vanilla lighting

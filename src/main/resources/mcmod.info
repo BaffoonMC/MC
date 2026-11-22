@@ -1,0 +1,21 @@
+{
+	"modListVersion": 2,
+	"modList": [{
+		"modid": "${modId}",
+		"name": "${modName}",
+		"description": "Brings back Minecraft Beta 1.7.3 lighting, the look Better Than Adventure is built on: plain grey light with no orange torch tint, no blue nights and no flicker, darker shadows and step-by-step sunsets. Client-side only. Press L to compare with vanilla.",
+		"version": "${modVersion}",
+		"mcversion": "${minecraftVersion}",
+		"url": "",
+		"updateUrl": "",
+		"authorList": ["Lirdi Ramku"],
+		"credits": "Lighting maths from Minecraft Beta 1.7.3. Build setup from the GTNH ExampleMod template.",
+		"logoFile": "",
+		"screenshots": [],
+		"parent": "",
+		"requiredMods": [],
+		"dependencies": [],
+		"dependants": [],
+		"useDependencyInformation": false
+	}]
+}
