@@ -29,8 +29,12 @@ jobs:
           find ~/.gradle .gradle -name '*.jar' 2>/dev/null | grep -i 'minecraft\|halplibe' | xargs ls -la
           echo "=====CLASSLIST"
           unzip -Z1 "$JAR" | grep '\.class$' | grep -v '\$' | sed 's/\.class$//' | grep -E "$(sed -n 1p apidump.txt)" || true
+          echo "=====RESOURCES"
+          unzip -Z1 "$JAR" | grep -v '\.class$' | grep -iE "$(sed -n 2p apidump.txt)" | head -300 || true
+          echo "=====FILES"
+          for r in $(sed -n 3p apidump.txt); do echo "#### $r"; unzip -p "$JAR" "$r" | head -c 6000; echo; done
           echo "=====JAVAP"
-          for c in $(sed -n '2,$p' apidump.txt); do echo "#### $c"; javap -protected -cp "$JAR" "$c" 2>&1 | head -400; done
+          for e in $(sed -n '4,$p' apidump.txt); do c="${e%%|*}"; g="${e#*|}"; [ "$g" = "$e" ] && g="."; echo "#### $c"; javap -protected -cp "$JAR" "$c" 2>&1 | grep -E "$g" | head -500; done
       - name: Publish to the bta-villagers-latest release
         if: github.ref == 'refs/heads/main' && hashFiles('bta-villagers/apidump.txt') == ''
         env:
