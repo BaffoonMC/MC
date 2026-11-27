@@ -32,9 +32,13 @@ jobs:
           echo "=====RESOURCES"
           unzip -Z1 "$JAR" | grep -v '\.class$' | grep -iE "$(sed -n 2p apidump.txt)" | head -300 || true
           echo "=====FILES"
-          for r in $(sed -n 3p apidump.txt); do echo "#### $r"; unzip -p "$JAR" "$r" | head -c 6000; echo; done
+          for r in $(sed -n 3p apidump.txt); do echo "#### $r"; unzip -p "$JAR" "$r" | tr -d ' \n\t\r' | head -c 7000; echo; done
           echo "=====JAVAP"
-          for e in $(sed -n '4,$p' apidump.txt); do c="${e%%|*}"; g="${e#*|}"; [ "$g" = "$e" ] && g="."; echo "#### $c"; javap -protected -cp "$JAR" "$c" 2>&1 | grep -E "$g" | head -500; done
+          for e in $(sed -n '4,$p' apidump.txt); do c="${e%%|*}"; g="${e#*|}"; [ "$g" = "$e" ] && g="."; echo "#### $c"
+            if [ "${c#@}" != "$c" ]; then javap -c -p -constants -cp "$JAR" "${c#@}" 2>&1 | grep -E "$g" | cut -c1-260 | head -260
+            else javap -protected -cp "$JAR" "$c" 2>&1 | grep -E "$g" | head -500; fi; done
+          echo "=====GREPSTR"
+          mkdir -p /tmp/x && cd /tmp/x && unzip -q -o "$JAR" 'org/useless/dragonfly/*' 'net/minecraft/client/render/EntityRendererDispatcher*' 'net/minecraft/core/entity/Mob.class' && grep -rl "models.json\|variants.json\|geo.json" . | head -20
       - name: Publish to the bta-villagers-latest release
         if: github.ref == 'refs/heads/main' && hashFiles('bta-villagers/apidump.txt') == ''
         env:
