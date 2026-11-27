@@ -1,6 +1,4 @@
-net/minecraft/client/sound
-sounds?/|\.ogg|sound.*\.json
-assets/minecraft/textures/entity/zombie/variants.json
-net.minecraft.client.sound.SoundRepository
-@net.minecraft.client.sound.SoundRepository|ldc|public|static|invoke.*(Sound|getResource|list|walk|File)
-net.minecraft.core.world.World|playSound
+xxxxnothing
+xxxxnothing
+assets/minecraft/sounds/sounds.json assets/minecraft/sounds/mojangSounds.json
+@net.minecraft.client.sound.NamedSoundRepository|ldc|public
