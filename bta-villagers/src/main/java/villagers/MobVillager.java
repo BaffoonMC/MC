@@ -29,10 +29,27 @@ public class MobVillager extends MobPathfinder {
 	@Override protected boolean canDespawn() { return false; }
 	@Override public String getLivingSound() { return null; }
 
+	// who it is dealing with: it stands still and faces them until they walk off
+	private Player customer;
+	private int customerTicks;
+
+	@Override
+	protected boolean isMovementCeased() { return customer != null; }
+
+	/** Wandering as usual, plus what makes it feel alive: it turns its head, a little each tick, to watch whoever is near. */
+	@Override
+	protected void updateAI() {
+		super.updateAI();
+		if (customer != null && (--customerTicks <= 0 || !customer.isAlive() || this.distanceToSqr(customer) > 6 * 6)) customer = null;
+		Player watch = customer != null ? customer : (this.hasPath() ? null : this.world.getClosestPlayerToEntity(this, 6.0));
+		if (watch != null) this.lookAt(watch, 8.0F, 20.0F);
+	}
+
 	@Override
 	public boolean interact(Player player) {
 		if (this.world.isClientSide) return true;
-		this.lookAt(player, 30.0F, 30.0F);
+		customer = player;
+		customerTicks = 20 * 30;
 		if (Inhuman.is(player) && !Inhuman.headCovered(player)) {
 			player.sendStatusMessage("The villager shrinks from you. Cover your face and they may still deal.");
 			return true;
