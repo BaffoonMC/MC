@@ -3,6 +3,9 @@ package villagers;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.core.entity.EntityDispatcher;
 import net.minecraft.core.item.Item;
+import net.minecraft.core.item.Items;
+import turniplabs.halplibe.helper.creativeInventory.CreativeInventoryPlacement;
+import turniplabs.halplibe.helper.creativeInventory.CreativeInventoryRegistry;
 import net.minecraft.core.util.collection.NamespaceID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,5 +44,8 @@ public class Villagers implements ModInitializer {
 		eggs[0] = new ItemVillagerEgg(MOD_ID + ".egg_villager", MOD_ID + ":item/egg_villager", id, -1);
 		for (int i = 0; i < PROFESSIONS.length; i++)
 			eggs[1 + i] = new ItemVillagerEgg(MOD_ID + ".egg_" + PROFESSIONS[i], MOD_ID + ":item/egg_" + PROFESSIONS[i], id + 1 + i, i);
+		// creative menu: all six eggs after the chicken egg, in order
+		for (int i = eggs.length - 1; i >= 0; i--)
+			CreativeInventoryRegistry.INSTANCE.register(eggs[i], new CreativeInventoryPlacement.After(() -> Items.EGG_CHICKEN));
 	}
 }

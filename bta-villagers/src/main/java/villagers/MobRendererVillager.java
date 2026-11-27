@@ -27,12 +27,13 @@ public class MobRendererVillager extends MobRenderer<MobVillager> {
 		float headPitch = this.getHeadPitch(mob, partialTick);
 		float swing = this.getLimbSwing(mob, partialTick);
 		float amount = this.getLimbYaw(mob, partialTick);
+		// same units as the game's own four-legged renderer: the head takes the angles as they come
 		if (head != null) {
-			head.rotY = Math.toRadians(headYaw - bodyYaw);
-			head.rotX = Math.toRadians(headPitch);
+			head.rotY = headYaw - bodyYaw;
+			head.rotX = headPitch;
 		}
-		if (right != null) right.rotX = MathHelper.cos(swing * 0.6662F) * 1.4F * amount * 0.5F;
-		if (left != null) left.rotX = MathHelper.cos(swing * 0.6662F + 3.1415927F) * 1.4F * amount * 0.5F;
+		if (right != null) right.rotX = MathHelper.cos(swing * 0.6662F) * 1.4F * amount;
+		if (left != null) left.rotX = MathHelper.cos(swing * 0.6662F + 3.1415927F) * 1.4F * amount;
 		return model;
 	}
 }
