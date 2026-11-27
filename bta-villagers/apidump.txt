@@ -1,8 +1,0 @@
-net/minecraft/client/render/(texture|Texture|ImageParser|dynamictexture)
-xxxxnothing
-assets/minecraft/textures/entity/zombie/variants.json
-net.minecraft.client.render.TextureManager
-net.minecraft.client.render.texture.Texture
-@net.minecraft.client.render.entity.MobRenderer|loadEntityTexture|invoke.*(exture|Skin)|ldc.*String
-@net.minecraft.client.render.entity.EntityRenderer|bindTexture|bindDownloadableTexture|invoke.*(exture|URL|Thread)|ldc.*String
-net.minecraft.client.Minecraft|public static|getMinecraft|textureManager|renderEngine|getMinecraftDir|gameDir

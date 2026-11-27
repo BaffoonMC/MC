@@ -9,6 +9,7 @@ import turniplabs.halplibe.util.dependency.Key;
 public class VillagersClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
+		VanillaTextures.findInBackground();
 		ClientEvents.ENTITY_RENDERER_RELOAD.listen(Key.of(Villagers.MOD_ID), d -> d.assignRenderer(MobVillager.class, new MobRendererVillager()));
 		ClientEvents.ITEM_MODEL_RELOAD.listen(Key.of(Villagers.MOD_ID), d -> {
 			for (Item egg : Villagers.eggs) if (egg != null) d.addDispatch(new ItemModelStandard(egg));

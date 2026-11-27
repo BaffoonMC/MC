@@ -3,13 +3,39 @@ package villagers;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.entity.MobRenderer;
+import net.minecraft.client.render.texture.TextureBuffered;
 import net.minecraft.core.util.helper.MathHelper;
+
+import java.awt.image.BufferedImage;
 import org.useless.dragonfly.models.entity.BoneTransform;
 import org.useless.dragonfly.models.entity.StaticEntityModel;
 
 /** Draws the villager: the head turns to look, the legs walk, the arms stay folded (that pose is in the model itself). */
 @Environment(EnvType.CLIENT)
 public class MobRendererVillager extends MobRenderer<MobVillager> {
+	// the classic textures from the player's own game, when they were found (see VanillaTextures)
+	private TextureBuffered[] classic;
+
+	@Override
+	public void loadEntityTexture(MobVillager mob) {
+		BufferedImage[] images = VanillaTextures.images;
+		if (images != null) {
+			try {
+				if (classic == null) {
+					TextureBuffered[] made = new TextureBuffered[images.length];
+					for (int i = 0; i < images.length; i++) made[i] = this.renderDispatcher.textureManager.loadBufferedTexture(images[i]);
+					classic = made;
+				}
+				this.renderDispatcher.textureManager.bindTexture(classic[mob.profession()]);
+				return;
+			} catch (Throwable t) {
+				VanillaTextures.images = null;      // fall back to the mod's own textures for good
+				Villagers.LOG.warn("Villagers: couldn't use the classic textures: {}", t.toString());
+			}
+		}
+		super.loadEntityTexture(mob);
+	}
+
 	public MobRendererVillager() {
 		super(0.5F);
 		this.setModel("main", "geometry.btavillagers.villager", 0.0D);
