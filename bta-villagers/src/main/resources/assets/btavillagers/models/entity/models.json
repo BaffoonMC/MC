@@ -1,0 +1,6 @@
+{
+  "model_paths": ["/assets/btavillagers/models/entity/villager.geo.json"],
+  "renderers": {
+    "btavillagers:villager": { "main": "geometry.btavillagers.villager" }
+  }
+}

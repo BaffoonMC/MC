@@ -1,33 +1,23 @@
 {
-	"schemaVersion": 1,
-	"id": "examplemod",
-	"version": "${version}",
-	"name": "Example Mod",
-	"description": "This mod aims to help new BTA modders.",
-	"authors": [
-		"Turnip Labs"
-	],
-	"contact": {
-		"homepage": "",
-		"sources": ""
-	},
-	"icon": "icon.png",
-	"license": "CC0-1.0",
-	"environment": "*",
-	"entrypoints": {
-		"main": [
-			"turniplabs.examplemod.ExampleMod"
-		]
-	},
-	"mixins": [
-		"examplemod.mixins.json"
-	],
-	"depends": {
-		"fabricloader": ">=${fabricloader}",
-		"minecraft": "*",
-		"java": ">=${java}"
-	},
-	"suggests": {
-		"modmenu": ">=${modmenu}"
-	}
+  "schemaVersion": 1,
+  "id": "btavillagers",
+  "version": "${version}",
+  "name": "Villagers",
+  "description": "Villagers for Better than Adventure: five professions, bartering, and spawn eggs.",
+  "authors": ["BaffoonMC"],
+  "icon": "icon.png",
+  "contact": { "homepage": "", "sources": "" },
+  "environment": "*",
+  "entrypoints": {
+    "main": ["villagers.Villagers"],
+    "client": ["villagers.VillagersClient"]
+  },
+  "mixins": ["btavillagers.mixins.json"],
+  "depends": {
+    "fabricloader": ">=${fabricloader}",
+    "halplibe": ">=${halplibe}",
+    "minecraft": "*",
+    "java": ">=${java}"
+  },
+  "suggests": { "modmenu": ">=${modmenu}" }
 }

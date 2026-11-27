@@ -1,0 +1,13 @@
+entity.btavillagers.villager.name=Villager
+item.btavillagers.egg_villager.name=Villager Spawn Egg
+item.btavillagers.egg_villager.desc=Hatches a villager with a random trade.
+item.btavillagers.egg_farmer.name=Farmer Spawn Egg
+item.btavillagers.egg_farmer.desc=Hatches a farmer.
+item.btavillagers.egg_librarian.name=Librarian Spawn Egg
+item.btavillagers.egg_librarian.desc=Hatches a librarian.
+item.btavillagers.egg_priest.name=Priest Spawn Egg
+item.btavillagers.egg_priest.desc=Hatches a priest.
+item.btavillagers.egg_smith.name=Smith Spawn Egg
+item.btavillagers.egg_smith.desc=Hatches a smith.
+item.btavillagers.egg_butcher.name=Butcher Spawn Egg
+item.btavillagers.egg_butcher.desc=Hatches a butcher.

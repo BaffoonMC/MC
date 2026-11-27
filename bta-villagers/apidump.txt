@@ -1,12 +1,6 @@
 xxxxnothing
 xxxxnothing
 assets/minecraft/textures/entity/zombie/variants.json
-org.useless.dragonfly.models.entity.BoneTransform
-org.useless.dragonfly.data.entity.mojang.EntityGeometryMojangData
-org.useless.dragonfly.data.entity.mojang.EntityGeometryMojangData$Cache
-@org.useless.dragonfly.data.entity.mojang.EntityGeometryMojangData$Cache|ldc|invoke|private|public|static
-@net.minecraft.client.render.entity.EntityRenderer|setModel|getModel|ldc|invoke.*(dragonfly|Cache|Registr|NamespaceID|EntityDispatcher)
-net.minecraft.core.entity.SkinVariantList
-net.minecraft.core.util.helper.DamageType
-net.minecraft.core.world.data.SynchedEntityData
-net.minecraft.core.entity.monster.MobHuman
+@net.minecraft.client.render.entity.MobRendererQuadruped|.
+net.minecraft.core.entity.Entity|spawnInit|isSneaking|bbWidth|bbHeight|setSize|heightOffset|getHeadHeight
+net.minecraft.core.item.Items|EGG|WAND|LABEL
