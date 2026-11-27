@@ -1,0 +1,7 @@
+net/minecraft/(core/entity|core/item|client/render/entity|client/render/model|core/player|client/gui|core/world/World$|core/net/packet|core/util/helper|core/block/Blocks$|core/data/registry|client/entity)
+net.minecraft.core.entity.Entity
+net.minecraft.core.entity.Mob
+net.minecraft.core.entity.MobPathfinder
+net.minecraft.core.entity.EntityDispatcher
+net.minecraft.core.entity.animal.MobAnimal
+net.minecraft.core.entity.animal.MobPig

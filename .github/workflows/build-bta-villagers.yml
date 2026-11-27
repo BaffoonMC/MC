@@ -1,0 +1,43 @@
+name: Build BTA Villagers
+on:
+  push:
+    paths: ['bta-villagers/**', '.github/workflows/build-bta-villagers.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bta-villagers
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew && ./gradlew build --no-daemon
+      - name: API listing (class names and signatures, for writing the mod against)
+        if: hashFiles('bta-villagers/apidump.txt') != ''
+        run: |
+          JAR=$(find ~/.gradle .gradle -name '*.jar' 2>/dev/null | grep -i 'minecraft' | xargs ls -S | head -1)
+          echo "JAR=$JAR"
+          find ~/.gradle .gradle -name '*.jar' 2>/dev/null | grep -i 'minecraft\|halplibe' | xargs ls -la
+          echo "=====CLASSLIST"
+          unzip -Z1 "$JAR" | grep '\.class$' | grep -v '\$' | sed 's/\.class$//' | grep -E "$(sed -n 1p apidump.txt)" || true
+          echo "=====JAVAP"
+          for c in $(sed -n '2,$p' apidump.txt); do echo "#### $c"; javap -protected -cp "$JAR" "$c" 2>&1 | head -400; done
+      - name: Publish to the bta-villagers-latest release
+        if: github.ref == 'refs/heads/main' && hashFiles('bta-villagers/apidump.txt') == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view bta-villagers-latest >/dev/null 2>&1 || gh release create bta-villagers-latest --title "BTA Villagers (latest)" --notes "Villagers mod for Better than Adventure." --latest=false
+          rm -f build/libs/*-sources.jar
+          gh release upload bta-villagers-latest build/libs/*.jar --clobber
+          new=$(basename build/libs/*.jar)
+          for old in $(gh release view bta-villagers-latest --json assets -q '.assets[].name'); do [ "$old" != "$new" ] && gh release delete-asset bta-villagers-latest "$old" -y || true; done
