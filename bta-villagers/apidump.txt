@@ -1,4 +1,0 @@
-xxxxnothing
-xxxxnothing
-assets/minecraft/sounds/sounds.json assets/minecraft/sounds/mojangSounds.json
-@net.minecraft.client.sound.NamedSoundRepository|ldc|public

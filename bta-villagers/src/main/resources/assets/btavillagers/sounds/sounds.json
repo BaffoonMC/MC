@@ -1,0 +1,4 @@
+{
+  "heartbeat": { "sounds": ["heartbeat.ogg"] },
+  "heart_stop": { "sounds": ["heart_stop.ogg"] }
+}

@@ -39,8 +39,41 @@ public final class Inhuman {
 		if (EnvironmentHelper.isMultiplayerServer() && NetworkHandler.canReceiveNativePackets(p)) NetworkHandler.sendToPlayer(p, new InhumanSyncMsg(is(p)));
 	}
 
+	// players who died inhuman and haven't come back yet (by name): the new body is inhuman too
+	private static final java.util.Set<String> DEAD = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+	public static void rememberDead(Player p) { if (p.username != null) DEAD.add(p.username); }
+
+	/** Eating the heart: the change plays out over the next few seconds (see rite). */
+	public static void begin(Player p) {
+		set(p, true);
+		if (p instanceof InhumanHolder) ((InhumanHolder) p).vil$setRite(0);
+	}
+
+	private static void beat(Player p, float volume, float pitch) { p.world.playSoundAtEntity(null, p, "btavillagers:heartbeat", volume, pitch); }
+	private static void whisper(Player p, String line) { p.sendMessage("\u00a74\u00a7oThe Priest whispers: \u00a7c\u00a7o" + line); }
+
+	/** Three heartbeats, each slower and fainter than the last; then it stops. The same order as on the server. */
+	private static void rite(Player p, InhumanHolder h) {
+		int t = h.vil$rite();
+		switch (t) {
+			case 0: beat(p, 1.2F, 1.0F); break;
+			case 10: whisper(p, "Shh. Let it stop. Let it all stop."); break;
+			case 14: beat(p, 1.0F, 0.8F); break;
+			case 34: beat(p, 0.8F, 0.6F); break;
+			case 44: p.sendMessage("\u00a72\u00a7oYour heart swells with bile and poison. You've never felt so full."); p.heal(EXTRA_HEALTH); break;
+			case 60: p.world.playSoundAtEntity(null, p, "btavillagers:heart_stop", 1.0F, 1.0F); break;
+			case 80: whisper(p, "Welcome home, brother."); break;
+			case 90: p.sendMessage("\u00a74You are no longer human. Monsters know you now; the living don't."); break;
+			default: break;
+		}
+		h.vil$setRite(t >= 90 ? -1 : t + 1);
+	}
+
 	/** Server side, every tick of every player. */
 	public static void tick(Player p) {
+		if (!is(p) && p.username != null && p.isAlive() && DEAD.remove(p.username)) set(p, true);
+		if (p instanceof InhumanHolder && ((InhumanHolder) p).vil$rite() >= 0) rite(p, (InhumanHolder) p);
 		if (p.tickCount % 40 == 0) sync(p);
 		if (!is(p) || p.tickCount % 20 != 0 || !p.isAlive()) return;
 		// the sun burns a bare head: daylight, open sky above, not in water or rain, nothing worn on the head

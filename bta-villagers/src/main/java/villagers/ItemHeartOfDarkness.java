@@ -16,15 +16,11 @@ public class ItemHeartOfDarkness extends Item {
 	public ItemStack onUse(ItemStack stack, World world, Player player) {
 		if (world.isClientSide) return stack;
 		if (Inhuman.is(player)) {
-			player.sendStatusMessage("It beats in time with your own. There is nothing left for it to take.");
+			player.sendStatusMessage("There's nothing left in you to lose.");
 			return stack;
 		}
 		stack.consumeItem(player);
-		Inhuman.set(player, true);
-		player.heal(Inhuman.EXTRA_HEALTH);
-		world.playSoundAtEntity(null, player, "mob.ghast.moan", 0.7F, 0.5F);
-		player.sendMessage("§4You are no longer human.");
-		player.sendMessage("§7Monsters will leave you be. The sun, and the living, will not.");
+		Inhuman.begin(player);
 		return stack;
 	}
 }

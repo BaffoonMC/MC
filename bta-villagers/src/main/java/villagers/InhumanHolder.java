@@ -4,4 +4,7 @@ package villagers;
 public interface InhumanHolder {
 	boolean vil$inhuman();
 	void vil$setInhuman(boolean inhuman);
+	/** Ticks since the heart was eaten while the change plays out, or -1. */
+	int vil$rite();
+	void vil$setRite(int ticks);
 }

@@ -15,14 +15,24 @@ import villagers.InhumanHolder;
 @Mixin(Player.class)
 public abstract class PlayerMixin implements InhumanHolder {
 	@Unique private boolean vil$isInhuman;
+	@Unique private int vil$riteTicks = -1;
 
 	@Override public boolean vil$inhuman() { return vil$isInhuman; }
 	@Override public void vil$setInhuman(boolean inhuman) { vil$isInhuman = inhuman; }
+	@Override public int vil$rite() { return vil$riteTicks; }
+	@Override public void vil$setRite(int ticks) { vil$riteTicks = ticks; }
 
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void vil$tick(CallbackInfo ci) {
 		Player p = (Player) (Object) this;
 		if (p.world != null && !p.world.isClientSide) Inhuman.tick(p);
+	}
+
+	/** Dying doesn't free you: remember it for the body you come back in. */
+	@Inject(method = "onDeath", at = @At("HEAD"))
+	private void vil$death(net.minecraft.core.entity.Entity killer, CallbackInfo ci) {
+		Player p = (Player) (Object) this;
+		if (vil$isInhuman && p.world != null && !p.world.isClientSide) Inhuman.rememberDead(p);
 	}
 
 	@Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
