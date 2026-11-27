@@ -1,0 +1,10 @@
+net/minecraft/(client/gui/hud|core/entity/animal|client/entity/player|server/entity/player)
+xxxxnothing
+assets/minecraft/textures/entity/zombie/variants.json
+net.minecraft.core.entity.MobPathfinder
+net.minecraft.core.entity.animal.MobAnimal
+@net.minecraft.core.entity.player.Player|getMaxHealth|bonusHealth
+@net.minecraft.core.entity.Mob|bonusHealth|heal\(|hurt\(|getMaxHealth|setHealthRaw|getHealth
+@net.minecraft.client.gui.hud.component.HudComponentHealthBar|public|protected|getMaxHealth|bonusHealth|getHealth|invoke.*(Player|Mob)
+@net.minecraft.client.entity.player.PlayerLocal|getMaxHealth|bonusHealth
+@net.minecraft.core.entity.MobPathfinder|protected|public|putfield|getfield.*(target|Target)
