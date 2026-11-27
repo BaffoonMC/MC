@@ -3,6 +3,6 @@
   "package": "villagers.mixin",
   "compatibilityLevel": "JAVA_${java}",
   "injectors": { "defaultRequire": 0 },
-  "mixins": ["PlayerMixin", "MobMonsterMixin", "ItemFoodMixin"],
-  "client": []
+  "mixins": ["PlayerMixin", "MobMonsterMixin", "ItemFoodMixin", "MobAnimalMixin"],
+  "client": ["client.HudComponentHealthBarMixin"]
 }

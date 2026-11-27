@@ -12,7 +12,8 @@ import turniplabs.halplibe.helper.network.NetworkHandler;
 /**
  * The Heart of Darkness and what eating it makes you: no longer human.
  *
- * Monsters leave you be (unless you strike them) and you carry three more hearts. Raw meat and raw fish feed you
+ * Monsters leave you be (unless you strike them) and you carry three more hearts, but farm animals and wolves
+ * attack you on sight. Raw meat and raw fish feed you
  * better than they feed anyone else; cooked meat hurts; every other food turns to ash in your mouth. But the sun
  * burns a bare head, you can't sleep, and villagers won't deal with you unless you cover your face with something on
  * your head - and then they charge half as much again. A golden apple makes you human again.

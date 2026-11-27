@@ -1,6 +1,0 @@
-xxxxnothing
-xxxxnothing
-assets/minecraft/textures/entity/zombie/variants.json
-@net.minecraft.client.gui.hud.component.HudComponentHealthBar|.
-@net.minecraft.core.entity.player.Player|hurt
-@net.minecraft.core.entity.animal.MobAnimal|protected|public|invoke
