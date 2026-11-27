@@ -127,7 +127,7 @@ public class ScreenVillagerTrade extends Screen {
 		}
 		if (overGoods) {
 			String tip = can ? "Click to trade" : "You need " + o.wantCount + " " + o.wanted().getDisplayName();
-			int tw = fontRenderer.getStringWidth(tip);
+			int tw = tip.length() * 6;      // near enough for a tooltip box
 			drawRect(mx + 8, my - 14, mx + 14 + tw, my - 1, 0xF0100010);
 			drawStringShadow(fontRenderer, tip, mx + 11, my - 11, can ? 0xFFFFFF : 0xFF8080);
 		}
