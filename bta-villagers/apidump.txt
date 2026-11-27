@@ -1,0 +1,6 @@
+xxxxnothing
+xxxxnothing
+assets/minecraft/textures/entity/zombie/variants.json
+net.minecraft.client.render.entity.MobRenderer
+@net.minecraft.client.render.entity.MobRendererCreeper|protected|public|invoke.*(scale|Scale|translate)
+@net.minecraft.client.render.entity.MobRendererSlime|protected|public|invoke.*(scale|Scale|translate)
