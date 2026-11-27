@@ -35,7 +35,7 @@ jobs:
           for r in $(sed -n 3p apidump.txt); do echo "#### $r"; unzip -p "$JAR" "$r" | tr -d ' \n\t\r' | head -c 7000; echo; done
           echo "=====JAVAP"
           for e in $(sed -n '4,$p' apidump.txt); do c="${e%%|*}"; g="${e#*|}"; [ "$g" = "$e" ] && g="."; echo "#### $c"
-            if [ "${c#@}" != "$c" ]; then javap -c -p -constants -cp "$JAR" "${c#@}" 2>&1 | grep -E "$g" | cut -c1-200 | head -520
+            if [ "${c#@}" != "$c" ]; then javap -c -p -constants -cp "$JAR" "${c#@}" 2>&1 | grep -E "$g" | cut -c1-200 | head -900
             else javap -p -cp "$JAR" "$c" 2>&1 | grep -E "$g" | head -500; fi; done
           echo "=====RECIPES"
           javap -v -p -cp "$JAR" net.minecraft.client.gui.hud.component.HudComponentHealthBar 2>&1 | grep -E "REF_invokeStatic|String minecraft|Gamemode|u0001|= String|Utf8 .*heart" | cut -c1-200 | head -80

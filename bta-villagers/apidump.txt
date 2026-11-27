@@ -1,7 +1,5 @@
-net/minecraft/.*([Cc]reative)
-reative
+net/minecraft/core/item/block/ItemBlock$
+xxxxnothing
 assets/minecraft/textures/entity/zombie/variants.json
-net.minecraft.client.gui.container.ScreenInventoryCreative
-net.minecraft.core.player.inventory.menu.MenuInventoryCreative
-net.minecraft.client.gui.container.ScreenContainerAbstract
-net.minecraft.client.gui.container.ScreenInventory
+@net.minecraft.core.player.inventory.menu.MenuInventoryCreative|.
+@net.minecraft.client.gui.container.ScreenInventoryCreative|public|protected|private|ldc|bipush|sipush|invoke|putfield|getfield
