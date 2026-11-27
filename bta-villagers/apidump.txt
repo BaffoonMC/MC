@@ -1,0 +1,5 @@
+xxxxnothing
+xxxxnothing
+assets/minecraft/textures/entity/zombie/variants.json
+net.minecraft.core.player.gamemode.Gamemode
+@net.minecraft.core.entity.player.Player|onDeath|public void onDeath
