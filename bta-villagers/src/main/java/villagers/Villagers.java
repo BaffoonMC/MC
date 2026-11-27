@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import turniplabs.halplibe.HalpLibe;
 import turniplabs.halplibe.event.defs.CommonEvents;
+import turniplabs.halplibe.helper.network.NetworkHandler;
 import turniplabs.halplibe.util.TomlConfigHandler;
 import turniplabs.halplibe.util.dependency.Key;
 import turniplabs.halplibe.util.toml.Toml;
@@ -35,6 +36,8 @@ public class Villagers implements ModInitializer {
 
 		EntityDispatcher.getInstance().addMapping(MobVillager.class, new NamespaceID(MOD_ID, "villager"), MobVillager::new,
 			"entity.btavillagers.villager.name");
+		NetworkHandler.registerNetworkMessage(OpenTradeMsg::new);
+		NetworkHandler.registerNetworkMessage(DoTradeMsg::new);
 		CommonEvents.BEFORE_GAME_START.listen(Key.of(MOD_ID), this::items);
 		LOG.info("Villagers loaded.");
 	}
