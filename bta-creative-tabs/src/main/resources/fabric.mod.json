@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "creativetabs",
+  "version": "${version}",
+  "name": "Creative Tabs",
+  "description": "Category tabs for the creative inventory: building, natural, functional, tools, combat, food and materials.",
+  "authors": ["BaffoonMC"],
+  "icon": "icon.png",
+  "contact": { "homepage": "", "sources": "" },
+  "environment": "*",
+  "entrypoints": { "main": ["creativetabs.CreativeTabs"] },
+  "mixins": ["creativetabs.mixins.json"],
+  "depends": {
+    "fabricloader": ">=${fabricloader}",
+    "halplibe": ">=${halplibe}",
+    "minecraft": "*",
+    "java": ">=${java}"
+  }
+}

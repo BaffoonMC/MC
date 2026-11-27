@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "package": "creativetabs.mixin",
+  "compatibilityLevel": "JAVA_${java}",
+  "injectors": { "defaultRequire": 0 },
+  "mixins": ["MenuInventoryCreativeMixin"],
+  "client": ["client.ScreenInventoryCreativeMixin"]
+}
