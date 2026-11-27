@@ -1,5 +1,6 @@
-xxxxnothing
-xxxxnothing
+net/minecraft/client/sound
+sounds?/|\.ogg|sound.*\.json
 assets/minecraft/textures/entity/zombie/variants.json
-net.minecraft.core.player.gamemode.Gamemode
-@net.minecraft.core.entity.player.Player|onDeath|public void onDeath
+net.minecraft.client.sound.SoundRepository
+@net.minecraft.client.sound.SoundRepository|ldc|public|static|invoke.*(Sound|getResource|list|walk|File)
+net.minecraft.core.world.World|playSound
