@@ -1,0 +1,7 @@
+net/minecraft/.*([Cc]reative)
+reative
+assets/minecraft/textures/entity/zombie/variants.json
+net.minecraft.client.gui.container.ScreenInventoryCreative
+net.minecraft.core.player.inventory.menu.MenuInventoryCreative
+net.minecraft.client.gui.container.ScreenContainerAbstract
+net.minecraft.client.gui.container.ScreenInventory
