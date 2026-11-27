@@ -3,6 +3,7 @@ package villagers;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.entity.MobRenderer;
+import net.minecraft.client.render.renderer.GLRenderer;
 import net.minecraft.client.render.texture.TextureBuffered;
 import net.minecraft.core.util.helper.MathHelper;
 
@@ -39,6 +40,13 @@ public class MobRendererVillager extends MobRenderer<MobVillager> {
 	public MobRendererVillager() {
 		super(0.5F);
 		this.setModel("main", "geometry.btavillagers.villager", 0.0D);
+	}
+
+	/** The classic villager is drawn at 15/16 size, which makes it just under two blocks tall. */
+	@Override
+	protected void preRenderTransform(MobVillager mob, double x, double y, double z, float yaw, float partialTick) {
+		super.preRenderTransform(mob, x, y, z, yaw, partialTick);
+		GLRenderer.modelM4f().scale(0.9375F);
 	}
 
 	@Override

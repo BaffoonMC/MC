@@ -15,6 +15,7 @@ public class MobVillager extends MobPathfinder {
 	public MobVillager(World world) {
 		super(world);
 		this.setTextureIdentifier(Villagers.MOD_ID, "villager");
+		this.setSize(0.6F, 1.95F);
 	}
 
 	public int profession() { return Math.floorMod(this.getSkinVariant(), Villagers.PROFESSIONS.length); }
