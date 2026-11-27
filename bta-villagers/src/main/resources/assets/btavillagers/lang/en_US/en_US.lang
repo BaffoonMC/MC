@@ -11,3 +11,5 @@ item.btavillagers.egg_smith.name=Smith Spawn Egg
 item.btavillagers.egg_smith.desc=Hatches a smith.
 item.btavillagers.egg_butcher.name=Butcher Spawn Egg
 item.btavillagers.egg_butcher.desc=Hatches a butcher.
+item.btavillagers.heart_of_darkness.name=Heart of Darkness
+item.btavillagers.heart_of_darkness.desc=Still beating. Eat it, and stop being human.

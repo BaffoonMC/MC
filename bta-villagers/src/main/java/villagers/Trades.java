@@ -12,6 +12,9 @@ public final class Trades {
 		public final Item want; public final int wantCount;
 		public final Item give; public final int giveCount;
 		Offer(Item want, int wantCount, Item give, int giveCount) { this.want = want; this.wantCount = wantCount; this.give = give; this.giveCount = giveCount; }
+		/** The price at this percentage of normal (150 for the inhuman with a covered face), never over one stack. */
+		public int price(int percent) { return Math.min(64, (wantCount * percent + 99) / 100); }
+		public ItemStack wanted(int percent) { return new ItemStack(want, price(percent)); }
 		public ItemStack wanted() { return new ItemStack(want, wantCount); }
 		public ItemStack given() { return new ItemStack(give, giveCount); }
 	}
@@ -30,7 +33,7 @@ public final class Trades {
 				// librarian
 				{ o(Items.PAPER, 24, coin, 1), o(Items.BOOK, 10, coin, 1), o(coin, 1, Items.BOOK, 2), o(coin, 4, Items.TOOL_COMPASS, 1), o(coin, 4, Items.TOOL_CLOCK, 1) },
 				// priest
-				{ o(Items.INGOT_GOLD, 8, coin, 1), o(Items.DUST_SUGAR, 20, coin, 1), o(coin, 6, Items.FOOD_APPLE_GOLD, 1), o(coin, 2, Items.STRING, 6) },
+				{ o(Items.INGOT_GOLD, 8, coin, 1), o(Items.DUST_SUGAR, 20, coin, 1), o(coin, 6, Items.FOOD_APPLE_GOLD, 1), o(coin, 2, Items.STRING, 6), o(coin, 32, Villagers.heart, 1) },
 				// smith
 				{ o(Items.COAL, 16, coin, 1), o(Items.INGOT_IRON, 8, coin, 1), o(coin, 3, Items.TOOL_PICKAXE_IRON, 1), o(coin, 2, Items.TOOL_SWORD_IRON, 1), o(coin, 5, Items.ARMOR_CHESTPLATE_IRON, 1), o(coin, 8, Items.DIAMOND, 1) },
 				// butcher

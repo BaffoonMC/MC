@@ -9,9 +9,14 @@ import net.minecraft.client.Minecraft;
 public final class ClientHooks {
 	private ClientHooks() {}
 
-	public static void openTrade(int entityId, int profession) {
+	public static void openTrade(int entityId, int profession, int pricePercent) {
 		Minecraft mc = Minecraft.getMinecraft();
 		if (mc == null || mc.thePlayer == null) return;
-		mc.displayScreen(new ScreenVillagerTrade(entityId, profession));
+		mc.displayScreen(new ScreenVillagerTrade(entityId, profession, pricePercent));
+	}
+
+	public static void setInhuman(boolean inhuman) {
+		Minecraft mc = Minecraft.getMinecraft();
+		if (mc != null && mc.thePlayer instanceof InhumanHolder) ((InhumanHolder) mc.thePlayer).vil$setInhuman(inhuman);
 	}
 }

@@ -13,6 +13,7 @@ public class VillagersClient implements ClientModInitializer {
 		ClientEvents.ENTITY_RENDERER_RELOAD.listen(Key.of(Villagers.MOD_ID), d -> d.assignRenderer(MobVillager.class, new MobRendererVillager()));
 		ClientEvents.ITEM_MODEL_RELOAD.listen(Key.of(Villagers.MOD_ID), d -> {
 			for (Item egg : Villagers.eggs) if (egg != null) d.addDispatch(new ItemModelStandard(egg));
+			if (Villagers.heart != null) d.addDispatch(new ItemModelStandard(Villagers.heart));
 		});
 	}
 }

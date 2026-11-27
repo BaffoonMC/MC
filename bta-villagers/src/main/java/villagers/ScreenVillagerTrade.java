@@ -20,16 +20,17 @@ import turniplabs.halplibe.helper.network.NetworkHandler;
 public class ScreenVillagerTrade extends Screen {
 	private static final int W = 176, H = 166;
 	private static final int PRICE_X = 36, GOODS_X = 120, OFFER_Y = 24, TRADE_Y = 53;
-	private final int entityId, profession;
+	private final int entityId, profession, pricePercent;
 	private final Trades.Offer[] offers;
 	private ItemElement items;
 	private static final int NAV_W = 12, NAV_H = 19, PREV_X = 17, NEXT_X = 147, NAV_Y = 23;
 	private int left, top, shown;
 
-	public ScreenVillagerTrade(int entityId, int profession) {
+	public ScreenVillagerTrade(int entityId, int profession, int pricePercent) {
 		super();
 		this.entityId = entityId;
 		this.profession = profession;
+		this.pricePercent = pricePercent;
 		this.offers = Trades.of(profession);
 	}
 
@@ -94,7 +95,7 @@ public class ScreenVillagerTrade extends Screen {
 		renderBackground();
 		shown = Math.floorMod(shown, offers.length);
 		Trades.Offer o = offers[shown];
-		boolean can = carried(o.want) >= o.wantCount;
+		boolean can = carried(o.want) >= o.price(pricePercent);
 
 		// the panel, with the usual light top-left and dark bottom-right edges
 		drawRect(left - 1, top - 1, left + W + 1, top + H + 1, 0xFF000000);
@@ -123,7 +124,7 @@ public class ScreenVillagerTrade extends Screen {
 
 		super.render(mx, my, partialTick);
 
-		items.render(o.wanted(), left + PRICE_X + 1, top + OFFER_Y + 1);
+		items.render(o.wanted(pricePercent), left + PRICE_X + 1, top + OFFER_Y + 1);
 		items.render(o.given(), left + GOODS_X + 1, top + OFFER_Y + 1);
 		int have = carried(o.want);
 		if (have > 0) items.render(new ItemStack(o.want, Math.min(have, 64)), left + PRICE_X + 1, top + TRADE_Y + 1);
@@ -137,7 +138,7 @@ public class ScreenVillagerTrade extends Screen {
 			}
 		}
 		if (overGoods) {
-			String tip = can ? "Click to trade" : "You need " + o.wantCount + " " + o.wanted().getDisplayName();
+			String tip = can ? "Click to trade" : "You need " + o.price(pricePercent) + " " + o.wanted().getDisplayName();
 			int tw = tip.length() * 6;      // near enough for a tooltip box
 			drawRect(mx + 8, my - 14, mx + 14 + tw, my - 1, 0xF0100010);
 			drawStringShadow(fontRenderer, tip, mx + 11, my - 11, can ? 0xFFFFFF : 0xFF8080);
@@ -152,7 +153,7 @@ public class ScreenVillagerTrade extends Screen {
 		if (over(mx, my, NEXT_X, NAV_Y, NAV_W, NAV_H) && shown < offers.length - 1) { shown++; mc.sndManager.playSound("random.click", SoundCategory.GUI_SOUNDS, 1.0F, 1.0F); return; }
 		boolean overGoods = mx >= left + GOODS_X - 4 && mx < left + GOODS_X + 22 && my >= top + TRADE_Y - 4 && my < top + TRADE_Y + 22;
 		Trades.Offer o = offers[Math.floorMod(shown, offers.length)];
-		if (overGoods && carried(o.want) >= o.wantCount) {
+		if (overGoods && carried(o.want) >= o.price(pricePercent)) {
 			mc.sndManager.playSound("random.click", SoundCategory.GUI_SOUNDS, 1.0F, 1.0F);
 			NetworkHandler.sendToServer(new DoTradeMsg(entityId, shown));
 		}

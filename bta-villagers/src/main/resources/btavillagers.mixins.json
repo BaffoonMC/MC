@@ -2,7 +2,7 @@
   "required": true,
   "package": "villagers.mixin",
   "compatibilityLevel": "JAVA_${java}",
-  "injectors": { "defaultRequire": 1 },
-  "mixins": [],
+  "injectors": { "defaultRequire": 0 },
+  "mixins": ["PlayerMixin", "MobMonsterMixin", "ItemFoodMixin"],
   "client": []
 }

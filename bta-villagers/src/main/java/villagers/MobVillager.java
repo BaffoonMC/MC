@@ -33,20 +33,28 @@ public class MobVillager extends MobPathfinder {
 	public boolean interact(Player player) {
 		if (this.world.isClientSide) return true;
 		this.lookAt(player, 30.0F, 30.0F);
-		NetworkHandler.sendToPlayer(player, new OpenTradeMsg(this.id, profession()));
+		if (Inhuman.is(player) && !Inhuman.headCovered(player)) {
+			player.sendStatusMessage("The villager shrinks from you. Cover your face and they may still deal.");
+			return true;
+		}
+		NetworkHandler.sendToPlayer(player, new OpenTradeMsg(this.id, profession(), pricePercent(player)));
 		return true;
 	}
+
+	private static int pricePercent(Player player) { return Inhuman.is(player) ? Inhuman.COVERED_PRICE_PERCENT : 100; }
 
 	/** Server side: do offer number `index` for this player, if they really carry the price. */
 	public void trade(Player player, int index) {
 		Trades.Offer[] offers = Trades.of(profession());
 		if (index < 0 || index >= offers.length) return;
 		Trades.Offer o = offers[index];
+		if (Inhuman.is(player) && !Inhuman.headCovered(player)) return;
+		int price = o.price(pricePercent(player));
 		ItemStack[] inv = player.inventory.mainInventory;
 		int have = 0;
 		for (ItemStack s : inv) if (s != null && s.getItem() == o.want) have += s.stackSize;
-		if (have < o.wantCount) return;
-		int owed = o.wantCount;
+		if (have < price) return;
+		int owed = price;
 		for (int i = 0; i < inv.length && owed > 0; i++) {
 			ItemStack s = inv[i];
 			if (s == null || s.getItem() != o.want) continue;
