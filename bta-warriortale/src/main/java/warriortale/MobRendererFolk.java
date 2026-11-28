@@ -26,8 +26,11 @@ public class MobRendererFolk extends MobRenderer<MobFolk> {
 			// lay the whole model down: lower face-up, upper face-down over her,
 			// both heads toward the same end of the bed
 			GLRenderer.modelM4f().translate(0.0F, 0.14F, 0.0F);
+			// upper: half-turn about the vertical FIRST, then the same lay-down
+			// rotation as the lower - that puts both heads at the same end,
+			// with the upper face-down over the lower
 			if (lie == 2) GLRenderer.modelM4f().rotateY((float) Math.PI);
-			GLRenderer.modelM4f().rotateX(lie == 1 ? (float) (Math.PI / 2) : (float) (-Math.PI / 2));
+			GLRenderer.modelM4f().rotateX((float) (Math.PI / 2));
 			// recentre the body on the bed: the model pivots at the feet,
 			// so shift it half its length back along its own axis
 			GLRenderer.modelM4f().translate(0.0F, -0.85F, 0.0F);

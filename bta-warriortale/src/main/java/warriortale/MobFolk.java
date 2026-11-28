@@ -171,7 +171,9 @@ public class MobFolk extends MobPathfinder {
 			bedCX = bed.x + 0.5 + toHead.offsetX() * ((isHead ? -0.5 : 0.5) - 0.22);
 			bedCZ = bed.z + 0.5 + toHead.offsetZ() * ((isHead ? -0.5 : 0.5) - 0.22);
 			bedCY = bed.y + 0.62;
-			bedYaw = (float) Math.toDegrees(Math.atan2(-toHead.offsetX(), toHead.offsetZ()));
+			// the engine renders mobs with a hidden half-turn, so add 180
+			// to make the lying head point at the pillow, not the foot
+			bedYaw = (float) Math.toDegrees(Math.atan2(-toHead.offsetX(), toHead.offsetZ())) + 180F;
 			creak(pitchFor(this)); partner.creak(pitchFor(partner));   // climbing in
 			ceremony = 600;
 		}
