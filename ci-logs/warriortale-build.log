@@ -25,30 +25,266 @@ Daemon will be stopped at the end of the build
 Fabric Loom: 1.17.21
 Previous process has disowned the lock due to abrupt termination.
 Found existing cache lock file (ACQUIRED_PREVIOUS_OWNER_DISOWNED), rebuilding loom cache. This may have been caused by a failed or canceled build.
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1795866381114.json
+
+> Task :compileJava
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:9: error: cannot find symbol
+import net.minecraft.resources.ResourceLocation;
+                              ^
+  symbol:   class ResourceLocation
+  location: package net.minecraft.resources
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:19: error: cannot find symbol
+    public static ResourceLocation id(String path) {
+                  ^
+  symbol:   class ResourceLocation
+  location: class WarriorTale
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java:4: error: cannot find symbol
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+                                                  ^
+  symbol:   class EntityModelLayerRegistry
+  location: package net.fabricmc.fabric.api.client.rendering.v1
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:8: error: cannot find symbol
+import net.minecraft.resources.ResourceLocation;
+                              ^
+  symbol:   class ResourceLocation
+  location: package net.minecraft.resources
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:24: error: cannot find symbol
+    private static final ResourceLocation[] FOLK_SKINS = {
+                         ^
+  symbol:   class ResourceLocation
+  location: class FolkRenderer
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:30: error: cannot find symbol
+    private static final ResourceLocation GHARR_SKIN =
+                         ^
+  symbol:   class ResourceLocation
+  location: class FolkRenderer
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:53: error: cannot find symbol
+    public ResourceLocation getTextureLocation(FolkRenderState state) {
+           ^
+  symbol:   class ResourceLocation
+  location: class FolkRenderer
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:20: error: cannot find symbol
+        return ResourceLocation.fromNamespaceAndPath(MODID, path);
+               ^
+  symbol:   variable ResourceLocation
+  location: class WarriorTale
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:86: error: isClientSide has private access in Level
+        if (!this.level().isClientSide) {
+                         ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:102: error: isClientSide has private access in Level
+            if (!this.level().isClientSide) {
+                             ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:145: error: no suitable method found for create(ServerLevel)
+        FolkEntity child = type.create(level);
+                               ^
+    method EntityType.create(ServerLevel,@org.jspecify.annotations.Nullable PostSpawnProcessor<CAP#1>,BlockPos,EntitySpawnReason,boolean,boolean) is not applicable
+      (actual and formal argument lists differ in length)
+    method EntityType.create(Level,EntitySpawnReason) is not applicable
+      (actual and formal argument lists differ in length)
+    method EntityType.create(Level,EntitySpawnRequest) is not applicable
+      (actual and formal argument lists differ in length)
+    method EntityType.create(ValueInput,Level,EntitySpawnRequest) is not applicable
+      (actual and formal argument lists differ in length)
+    method EntityType.create(EntityType<?>,ValueInput,Level,EntitySpawnReason) is not applicable
+      (actual and formal argument lists differ in length)
+  where CAP#1 is a fresh type-variable:
+    CAP#1 extends FolkEntity from capture of ? extends FolkEntity
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:161: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:163: error: incompatible types: CompoundTag cannot be converted to ValueOutput
+        super.addAdditionalSaveData(tag);
+                                    ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:169: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:171: error: incompatible types: CompoundTag cannot be converted to ValueInput
+        super.readAdditionalSaveData(tag);
+                                     ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:173: error: incompatible types: Optional<Integer> cannot be converted to int
+        unionCooldown = tag.getInt("wt_cooldown");
+                                  ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:57: error: incompatible types: Optional<CompoundTag> cannot be converted to CompoundTag
+        CompoundTag t = tag.getCompound("wt_genes");
+                                       ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:59: error: incompatible types: Optional<Integer> cannot be converted to int
+        g.vigor = t.getInt("vigor"); g.twitch = t.getInt("twitch");
+                          ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:59: error: incompatible types: Optional<Integer> cannot be converted to int
+        g.vigor = t.getInt("vigor"); g.twitch = t.getInt("twitch");
+                                                        ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:60: error: incompatible types: Optional<Integer> cannot be converted to int
+        g.knit = t.getInt("knit");   g.hide = t.getInt("hide");
+                         ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:60: error: incompatible types: Optional<Integer> cannot be converted to int
+        g.knit = t.getInt("knit");   g.hide = t.getInt("hide");
+                                                      ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:61: error: incompatible types: Optional<Integer> cannot be converted to int
+        g.tone = t.getInt("tone");   g.variant = t.getInt("variant");
+                         ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:61: error: incompatible types: Optional<Integer> cannot be converted to int
+        g.tone = t.getInt("tone");   g.variant = t.getInt("variant");
+                                                         ^
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java:22: error: cannot find symbol
+        EntityModelLayerRegistry.registerModelLayer(FOLK_LAYER,
+        ^
+  symbol:   variable EntityModelLayerRegistry
+  location: class WarriorTaleClient
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java:25: error: cannot find symbol
+        EntityModelLayerRegistry.registerModelLayer(GHARR_LAYER, TallFolkModel::createLayer);
+        ^
+  symbol:   variable EntityModelLayerRegistry
+  location: class WarriorTaleClient
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:30: error: cannot find symbol
+            && folk.level().isNight()
+                           ^
+  symbol:   method isNight()
+  location: class Level
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:85: error: cannot find symbol
+                    child.moveTo(folk.getX(), folk.getY(), folk.getZ(), 0, 0);
+                         ^
+  symbol:   method moveTo(double,double,double,int,int)
+  location: variable child of type FolkEntity
+Note: /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+27 errors
+
+> Task :compileJava FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1795866443885.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/MC/MC/warriortale/build/reports/problems/problems-report.html
 
 FAILURE: Build failed with an exception.
 
 * What went wrong:
-A problem occurred configuring root project 'warriortale'.
-> Could not resolve all files for configuration ':mainRuntimeDependencyResolve'.
-   > Could not find net.fabricmc.fabric-api:fabric-api:0.136.0+26.3.
-     Searched in the following locations:
-       - file:/home/runner/work/MC/MC/warriortale/.gradle/loom-cache/remapped_mods/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
-       - file:/home/runner/.gradle/caches/fabric-loom/minecraftMaven/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
-       - file:/home/runner/work/MC/MC/warriortale/.gradle/loom-cache/minecraftMaven/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
-       - https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
-       - https://libraries.minecraft.net/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
-       - https://libraries.minecraft.net/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.jar
-       - https://repo.maven.apache.org/maven2/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
-     Required by:
-         root project 'warriortale'
+Execution failed for task ':compileJava' (registered by plugin class 'org.gradle.api.plugins.JavaBasePlugin').
+> Compilation failed; see the compiler output below.
+  Note: /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java uses or overrides a deprecated API.
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:145: error: no suitable method found for create(ServerLevel)
+          FolkEntity child = type.create(level);
+                                 ^
+      method EntityType.create(ServerLevel,@org.jspecify.annotations.Nullable PostSpawnProcessor<CAP#1>,BlockPos,EntitySpawnReason,boolean,boolean) is not applicable
+        (actual and formal argument lists differ in length)
+      method EntityType.create(Level,EntitySpawnReason) is not applicable
+        (actual and formal argument lists differ in length)
+      method EntityType.create(Level,EntitySpawnRequest) is not applicable
+        (actual and formal argument lists differ in length)
+      method EntityType.create(ValueInput,Level,EntitySpawnRequest) is not applicable
+        (actual and formal argument lists differ in length)
+      method EntityType.create(EntityType<?>,ValueInput,Level,EntitySpawnReason) is not applicable
+        (actual and formal argument lists differ in length)
+    where CAP#1 is a fresh type-variable:
+      CAP#1 extends FolkEntity from capture of ? extends FolkEntity
+  Note: Recompile with -Xlint:deprecation for details.
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:163: error: incompatible types: CompoundTag cannot be converted to ValueOutput
+          super.addAdditionalSaveData(tag);
+                                      ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:171: error: incompatible types: CompoundTag cannot be converted to ValueInput
+          super.readAdditionalSaveData(tag);
+                                       ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:173: error: incompatible types: Optional<Integer> cannot be converted to int
+          unionCooldown = tag.getInt("wt_cooldown");
+                                    ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:57: error: incompatible types: Optional<CompoundTag> cannot be converted to CompoundTag
+          CompoundTag t = tag.getCompound("wt_genes");
+                                         ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:59: error: incompatible types: Optional<Integer> cannot be converted to int
+          g.vigor = t.getInt("vigor"); g.twitch = t.getInt("twitch");
+                            ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:59: error: incompatible types: Optional<Integer> cannot be converted to int
+          g.vigor = t.getInt("vigor"); g.twitch = t.getInt("twitch");
+                                                          ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:60: error: incompatible types: Optional<Integer> cannot be converted to int
+          g.knit = t.getInt("knit");   g.hide = t.getInt("hide");
+                           ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:60: error: incompatible types: Optional<Integer> cannot be converted to int
+          g.knit = t.getInt("knit");   g.hide = t.getInt("hide");
+                                                        ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:61: error: incompatible types: Optional<Integer> cannot be converted to int
+          g.tone = t.getInt("tone");   g.variant = t.getInt("variant");
+                           ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:61: error: incompatible types: Optional<Integer> cannot be converted to int
+          g.tone = t.getInt("tone");   g.variant = t.getInt("variant");
+                                                           ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:9: error: cannot find symbol
+  import net.minecraft.resources.ResourceLocation;
+                                ^
+    symbol:   class ResourceLocation
+    location: package net.minecraft.resources
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:19: error: cannot find symbol
+      public static ResourceLocation id(String path) {
+                    ^
+    symbol:   class ResourceLocation
+    location: class WarriorTale
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java:4: error: cannot find symbol
+  import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+                                                    ^
+    symbol:   class EntityModelLayerRegistry
+    location: package net.fabricmc.fabric.api.client.rendering.v1
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:8: error: cannot find symbol
+  import net.minecraft.resources.ResourceLocation;
+                                ^
+    symbol:   class ResourceLocation
+    location: package net.minecraft.resources
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:24: error: cannot find symbol
+      private static final ResourceLocation[] FOLK_SKINS = {
+                           ^
+    symbol:   class ResourceLocation
+    location: class FolkRenderer
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:30: error: cannot find symbol
+      private static final ResourceLocation GHARR_SKIN =
+                           ^
+    symbol:   class ResourceLocation
+    location: class FolkRenderer
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:53: error: cannot find symbol
+      public ResourceLocation getTextureLocation(FolkRenderState state) {
+             ^
+    symbol:   class ResourceLocation
+    location: class FolkRenderer
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:20: error: cannot find symbol
+          return ResourceLocation.fromNamespaceAndPath(MODID, path);
+                 ^
+    symbol:   variable ResourceLocation
+    location: class WarriorTale
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java:22: error: cannot find symbol
+          EntityModelLayerRegistry.registerModelLayer(FOLK_LAYER,
+          ^
+    symbol:   variable EntityModelLayerRegistry
+    location: class WarriorTaleClient
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java:25: error: cannot find symbol
+          EntityModelLayerRegistry.registerModelLayer(GHARR_LAYER, TallFolkModel::createLayer);
+          ^
+    symbol:   variable EntityModelLayerRegistry
+    location: class WarriorTaleClient
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:86: error: isClientSide has private access in Level
+          if (!this.level().isClientSide) {
+                           ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:102: error: isClientSide has private access in Level
+              if (!this.level().isClientSide) {
+                               ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:161: error: method does not override or implement a method from a supertype
+      @Override
+      ^
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:169: error: method does not override or implement a method from a supertype
+      @Override
+      ^
+  Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:30: error: cannot find symbol
+              && folk.level().isNight()
+                             ^
+    symbol:   method isNight()
+    location: class Level
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:85: error: cannot find symbol
+                      child.moveTo(folk.getX(), folk.getY(), folk.getZ(), 0, 0);
+                           ^
+    symbol:   method moveTo(double,double,double,int,int)
+    location: variable child of type FolkEntity
+  27 errors
 
 * Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
+> Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
-> Get more help at https://help.gradle.org.
 
-BUILD FAILED in 15s
-Sat Nov 28 11:46:31 UTC 2026
+BUILD FAILED in 19s
+1 actionable task: 1 executed
+Sat Nov 28 11:47:40 UTC 2026
