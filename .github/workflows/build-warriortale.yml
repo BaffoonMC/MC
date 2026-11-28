@@ -53,6 +53,10 @@ jobs:
           if [ -n "$MJ" ]; then
             unzip -l "$MJ" | grep -oE "net/minecraft/[A-Za-z/]*((ResourceLocation|Identifier|ValueInput|ValueOutput|SpawnReason|EntitySpawnReason)[A-Za-z]*)\.class" | sort -u | head -30
             CP="$MJ"
+            for C in net.minecraft.resources.Identifier net.minecraft.world.entity.AgeableMob net.minecraft.sounds.SoundEvent net.minecraft.client.renderer.entity.HumanoidMobRenderer net.minecraft.client.model.geom.builders.LayerDefinition net.minecraft.world.entity.Mob; do
+              echo "---- $C ----"
+              javap -cp "$CP" "$C" 2>/dev/null | grep -iE "of\(|fromNamespace|parse|create|interact|bakeRoot|getBreedOffspring|variableRange" | head -10
+            done
             for C in net.minecraft.world.level.Level net.minecraft.world.entity.Entity net.minecraft.world.entity.EntityType net.minecraft.nbt.CompoundTag; do
               echo "---- $C ----"
               javap -cp "$CP" "$C" 2>/dev/null | grep -iE "night|clientside|client\(|create|moveTo|snapTo|setPos|getInt|getCompound" | head -12

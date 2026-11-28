@@ -22,12 +22,17 @@ public class UnionGoal extends MoveToBlockGoal {
         this.folk = folk;
     }
 
+    private boolean isNightTime() {
+        long t = folk.level().getDayTime() % 24000L;
+        return t >= 12542 && t <= 23459;   // vanilla bed-usable window
+    }
+
     @Override
     public boolean canUse() {
         return folk.promisedPartner() != null
             && folk.unionCooldown == 0
             && !folk.isBaby()
-            && folk.level().isNight()
+            && isNightTime()
             && super.canUse();
     }
 
@@ -82,7 +87,7 @@ public class UnionGoal extends MoveToBlockGoal {
                 partner.stopSleeping();
                 FolkEntity child = folk.makeChild(sl, partner);
                 if (child != null) {
-                    child.moveTo(folk.getX(), folk.getY(), folk.getZ(), 0, 0);
+                    child.snapTo(folk.getX(), folk.getY(), folk.getZ(), 0, 0);
                     sl.addFreshEntity(child);
                     FolkEntity.spawnHearts(sl, child, 7);
                 }

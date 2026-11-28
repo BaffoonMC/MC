@@ -1,11 +1,10 @@
 package net.warriortale.mod.client;
 
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.warriortale.mod.WarriorTale;
 import net.warriortale.mod.entity.FolkEntity;
 
@@ -21,19 +20,19 @@ public class FolkRenderer extends HumanoidMobRenderer<FolkEntity, FolkRenderer.F
         public boolean gharr = false;
     }
 
-    private static final ResourceLocation[] FOLK_SKINS = {
+    private static final Identifier[] FOLK_SKINS = {
         WarriorTale.id("textures/entity/folk_0.png"),
         WarriorTale.id("textures/entity/folk_1.png"),
         WarriorTale.id("textures/entity/folk_2.png"),
         WarriorTale.id("textures/entity/folk_3.png"),
     };
-    private static final ResourceLocation GHARR_SKIN =
+    private static final Identifier GHARR_SKIN =
         WarriorTale.id("textures/entity/gharr_0.png");
 
     private final boolean gharr;
 
-    public FolkRenderer(EntityRendererProvider.Context ctx, ModelLayerLocation layer, boolean gharr) {
-        super(ctx, new HumanoidModel<>(ctx.bakeLayer(layer)), 0.5f);
+    public FolkRenderer(EntityRendererProvider.Context ctx, HumanoidModel<FolkRenderState> model, boolean gharr) {
+        super(ctx, model, 0.5f);
         this.gharr = gharr;
     }
 
@@ -50,7 +49,7 @@ public class FolkRenderer extends HumanoidMobRenderer<FolkEntity, FolkRenderer.F
     }
 
     @Override
-    public ResourceLocation getTextureLocation(FolkRenderState state) {
+    public Identifier getTextureLocation(FolkRenderState state) {
         return (gharr || state.gharr) ? GHARR_SKIN
             : FOLK_SKINS[Math.floorMod(state.variant, FOLK_SKINS.length)];
     }

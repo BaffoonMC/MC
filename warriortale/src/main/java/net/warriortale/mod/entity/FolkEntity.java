@@ -1,6 +1,8 @@
 package net.warriortale.mod.entity;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.core.BlockPos;
@@ -83,7 +85,7 @@ public class FolkEntity extends AgeableMob {
     @Override
     public void tick() {
         super.tick();
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             ensureGenes();
             if (unionCooldown > 0) unionCooldown--;
             // knit: slow regen out of combat, scaled by the gene
@@ -99,7 +101,7 @@ public class FolkEntity extends AgeableMob {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (stack.is(Items.BREAD) && !this.isBaby()) {
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 FolkEntity partner = findPromiseCandidate();
                 if (partner != null) {
                     this.promisedTo = partner.getId();
@@ -142,7 +144,7 @@ public class FolkEntity extends AgeableMob {
     public FolkEntity makeChild(ServerLevel level, FolkEntity other) {
         boolean gharrChild = (this.isGharr() || other.isGharr()) && this.random.nextBoolean();
         EntityType<? extends FolkEntity> type = gharrChild ? WarriorTale.GHARR : WarriorTale.FOLK;
-        FolkEntity child = type.create(level);
+        FolkEntity child = type.create(level, EntitySpawnReason.BREEDING);
         if (child == null) return null;
         child.ensureGenes();
         child.genes = Genes.child(this.genes, other.genes, this.random);
@@ -159,18 +161,18 @@ public class FolkEntity extends AgeableMob {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(ValueOutput out) {
+        super.addAdditionalSaveData(out);
         ensureGenes();
-        genes.save(tag);
-        tag.putInt("wt_cooldown", unionCooldown);
+        genes.save(out);
+        out.putInt("wt_cooldown", unionCooldown);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        genes = Genes.load(tag, this.random, isGharr());
-        unionCooldown = tag.getInt("wt_cooldown");
+    public void readAdditionalSaveData(ValueInput in) {
+        super.readAdditionalSaveData(in);
+        genes = Genes.load(in, this.random, isGharr());
+        unionCooldown = in.getIntOr("wt_cooldown", 0);
         applyGenes();
     }
 }

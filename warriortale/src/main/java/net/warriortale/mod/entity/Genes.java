@@ -1,6 +1,7 @@
 package net.warriortale.mod.entity;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.util.RandomSource;
 
 /**
@@ -44,21 +45,20 @@ public final class Genes {
     }
     private static int clamp(int v) { return Math.max(0, Math.min(100, v)); }
 
-    public void save(CompoundTag tag) {
-        CompoundTag t = new CompoundTag();
+    public void save(ValueOutput out) {
+        ValueOutput t = out.child("wt_genes");
         t.putInt("vigor", vigor); t.putInt("twitch", twitch);
         t.putInt("knit", knit);   t.putInt("hide", hide);
         t.putInt("tone", tone);   t.putInt("variant", variant);
-        tag.put("wt_genes", t);
     }
 
-    public static Genes load(CompoundTag tag, RandomSource r, boolean gharr) {
-        if (!tag.contains("wt_genes")) return roll(r, gharr);
-        CompoundTag t = tag.getCompound("wt_genes");
+    public static Genes load(ValueInput in, RandomSource r, boolean gharr) {
+        ValueInput t = in.childOrEmpty("wt_genes");
+        if (t.getInt("vigor").isEmpty()) return roll(r, gharr);
         Genes g = new Genes();
-        g.vigor = t.getInt("vigor"); g.twitch = t.getInt("twitch");
-        g.knit = t.getInt("knit");   g.hide = t.getInt("hide");
-        g.tone = t.getInt("tone");   g.variant = t.getInt("variant");
+        g.vigor = t.getIntOr("vigor", 50); g.twitch = t.getIntOr("twitch", 50);
+        g.knit = t.getIntOr("knit", 50);   g.hide = t.getIntOr("hide", 50);
+        g.tone = t.getIntOr("tone", 50);   g.variant = t.getIntOr("variant", 0);
         return g;
     }
 }
