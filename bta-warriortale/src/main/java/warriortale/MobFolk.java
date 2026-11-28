@@ -30,6 +30,10 @@ public class MobFolk extends MobPathfinder {
 	private TilePos bed = null;
 	private int scanTick = 0;
 
+	/** every living folk, tracked by the mod itself - the engine's
+	 *  chunk-based entity query proved unreliable for this. */
+	private static final java.util.List<MobFolk> LIVING = new java.util.ArrayList<>();
+
 	private static final String[] NAMES_F = {"Drita", "Teuta", "Besa", "Mirela", "Anja", "Vera"};
 	private static final String[] NAMES_M = {"Besnik", "Agron", "Ilir", "Dren", "Luan", "Petrit"};
 
@@ -76,6 +80,8 @@ public class MobFolk extends MobPathfinder {
 	protected void updateAI() {
 		super.updateAI();
 		if (this.world.isClientSide) return;
+		if (!LIVING.contains(this)) LIVING.add(this);
+		if (this.world.getWorldTime() % 100 == 0) LIVING.removeIf(f -> !f.isAlive());
 		if (cooldown > 0) cooldown--;
 		if (growth < GROWN) {
 			growth++;
@@ -160,9 +166,9 @@ public class MobFolk extends MobPathfinder {
 
 	public MobFolk partner() {
 		if (promisedTo < 0) return null;
-		// NOTE: the engine's radius argument is the radius SQUARED (JOML intersectsSphere)
-		List<MobFolk> near = this.world.getEntitiesWithinRadius(MobFolk.class, this.x, this.y, this.z, 1024.0);
-		for (MobFolk f : near) if (f.id == promisedTo && f.isAlive()) return f;
+		for (MobFolk f : LIVING)
+			if (f.id == promisedTo && f.isAlive() && f.world == this.world && f.distanceTo(this) < 48F)
+				return f;
 		return null;
 	}
 
@@ -171,11 +177,9 @@ public class MobFolk extends MobPathfinder {
 		if (this.world.isClientSide) return true;
 		ItemStack held = player.inventory.getCurrentItem();
 		if (held != null && held.getItem() == Items.FOOD_BREAD && isGrown() && cooldown == 0 && promisedTo < 0) {
-			// radius squared: 64.0 = 8 blocks
-			List<MobFolk> near = this.world.getEntitiesWithinRadius(MobFolk.class, this.x, this.y, this.z, 64.0);
 			int seen = 0;
-			for (MobFolk f : near) {
-				if (f == this) continue;
+			for (MobFolk f : LIVING) {
+				if (f == this || !f.isAlive() || f.world != this.world || f.distanceTo(this) > 8F) continue;
 				seen++;
 				if (!f.isGrown() || f.promisedTo >= 0 || f.cooldown > 0) continue;
 				this.promisedTo = f.id;
