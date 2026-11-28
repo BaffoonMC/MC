@@ -1,5 +1,5 @@
 ==== API PROBE ====
-MC JAR: /home/runner/.gradle/caches/fabric-loom/26.3/minecraft-merged.jar
+MC JAR: /home/runner/.gradle/caches/fabric-loom/26.3/minecraft-client.jar
 net/minecraft/IdentifierException.class
 net/minecraft/client/searchtree/IdentifierSearchTree.class
 net/minecraft/commands/arguments/IdentifierArgument.class
@@ -14,6 +14,31 @@ net/minecraft/world/level/storage/TagValueOutput.class
 net/minecraft/world/level/storage/ValueInput.class
 net/minecraft/world/level/storage/ValueInputContextHelper.class
 net/minecraft/world/level/storage/ValueOutput.class
+---- net.minecraft.resources.Identifier ----
+  public static net.minecraft.resources.Identifier fromNamespaceAndPath(java.lang.String, java.lang.String);
+  public static net.minecraft.resources.Identifier parse(java.lang.String);
+  public static net.minecraft.resources.Identifier tryParse(java.lang.String);
+---- net.minecraft.world.entity.AgeableMob ----
+  public abstract net.minecraft.world.entity.AgeableMob getBreedOffspring(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.AgeableMob);
+  protected net.minecraft.world.InteractionResult mobInteract(net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand);
+---- net.minecraft.sounds.SoundEvent ----
+  public static net.minecraft.sounds.SoundEvent createVariableRangeEvent(net.minecraft.resources.Identifier);
+  public static net.minecraft.sounds.SoundEvent createFixedRangeEvent(net.minecraft.resources.Identifier, float);
+---- net.minecraft.client.renderer.entity.HumanoidMobRenderer ----
+---- net.minecraft.client.model.geom.builders.LayerDefinition ----
+  public net.minecraft.client.model.geom.ModelPart bakeRoot();
+  public static net.minecraft.client.model.geom.builders.LayerDefinition create(net.minecraft.client.model.geom.builders.MeshDefinition, int, int);
+---- net.minecraft.world.entity.Mob ----
+  public static net.minecraft.world.entity.ai.attributes.AttributeSupplier$Builder createMobAttributes();
+  protected net.minecraft.world.entity.ai.navigation.PathNavigation createNavigation(net.minecraft.world.level.Level);
+  protected net.minecraft.world.entity.ai.control.BodyRotationControl createBodyControl();
+  protected boolean attemptToShearEquipment(net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand, net.minecraft.world.item.ItemStack);
+  protected void shearItem(net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand, net.minecraft.world.item.ItemStack, net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack);
+  public net.minecraft.world.Container createEquipmentSlotContainer(net.minecraft.world.entity.EquipmentSlot);
+  public net.minecraft.world.InteractionResult interact(net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand, net.minecraft.world.phys.Vec3);
+  protected net.minecraft.world.InteractionResult mobInteract(net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand);
+  protected void usePlayerItem(net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand, net.minecraft.world.item.ItemStack);
+  public void swingForAttack(net.minecraft.world.InteractionHand);
 ---- net.minecraft.world.level.Level ----
   public boolean isClientSide();
   public void createFireworks(double, double, double, double, double, double, java.util.List<net.minecraft.world.item.component.FireworkExplosion>, boolean);
@@ -107,76 +132,55 @@ public class net.minecraft.world.level.storage.TagValueInput implements net.mine
   public java.util.Optional<int[]> getIntArray(java.lang.String);
   public net.minecraft.core.HolderLookup$Provider lookup();
 ==== FABRIC API JARS ====
--- /home/runner/.gradle/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-object-builder-api-v1/24.1.14+e2f63d3e5d/29e5d116c233baa45ca2e028ab056d0796197f13/fabric-object-builder-api-v1-24.1.14+e2f63d3e5d.jar
-net/fabricmc/fabric/api/object/builder/v1/entity/FabricDefaultAttributeRegistry.class
 -- /home/runner/.gradle/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-rendering-v1/27.3.2+28694c565d/e2cab7dc87c505cae40b7dd1400a935128405c90/fabric-rendering-v1-27.3.2+28694c565d.jar
 net/fabricmc/fabric/api/client/rendering/v1/BlockEntityRendererRegistry.class
 net/fabricmc/fabric/api/client/rendering/v1/EntityRendererRegistry.class
+-- /home/runner/.gradle/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-object-builder-api-v1/24.1.14+e2f63d3e5d/29e5d116c233baa45ca2e028ab056d0796197f13/fabric-object-builder-api-v1-24.1.14+e2f63d3e5d.jar
+net/fabricmc/fabric/api/object/builder/v1/entity/FabricDefaultAttributeRegistry.class
 ==== END PROBE ====
-        super.addAdditionalSaveData(tag);
-                                    ^
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:169: error: method does not override or implement a method from a supertype
-    @Override
-    ^
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:171: error: incompatible types: CompoundTag cannot be converted to ValueInput
-        super.readAdditionalSaveData(tag);
-                                     ^
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:173: error: incompatible types: Optional<Integer> cannot be converted to int
-        unionCooldown = tag.getInt("wt_cooldown");
-                                  ^
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:57: error: incompatible types: Optional<CompoundTag> cannot be converted to CompoundTag
-        CompoundTag t = tag.getCompound("wt_genes");
-                                       ^
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:59: error: incompatible types: Optional<Integer> cannot be converted to int
-        g.vigor = t.getInt("vigor"); g.twitch = t.getInt("twitch");
-                          ^
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:59: error: incompatible types: Optional<Integer> cannot be converted to int
-        g.vigor = t.getInt("vigor"); g.twitch = t.getInt("twitch");
-                                                        ^
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:60: error: incompatible types: Optional<Integer> cannot be converted to int
-        g.knit = t.getInt("knit");   g.hide = t.getInt("hide");
-                         ^
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:60: error: incompatible types: Optional<Integer> cannot be converted to int
-        g.knit = t.getInt("knit");   g.hide = t.getInt("hide");
-                                                      ^
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:61: error: incompatible types: Optional<Integer> cannot be converted to int
-        g.tone = t.getInt("tone");   g.variant = t.getInt("variant");
-                         ^
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:61: error: incompatible types: Optional<Integer> cannot be converted to int
-        g.tone = t.getInt("tone");   g.variant = t.getInt("variant");
-                                                         ^
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java:22: error: cannot find symbol
-        EntityModelLayerRegistry.registerModelLayer(FOLK_LAYER,
-        ^
-  symbol:   variable EntityModelLayerRegistry
-  location: class WarriorTaleClient
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java:25: error: cannot find symbol
-        EntityModelLayerRegistry.registerModelLayer(GHARR_LAYER, TallFolkModel::createLayer);
-        ^
-  symbol:   variable EntityModelLayerRegistry
-  location: class WarriorTaleClient
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:30: error: cannot find symbol
-            && folk.level().isNight()
-                           ^
-  symbol:   method isNight()
-  location: class Level
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:85: error: cannot find symbol
-                    child.moveTo(folk.getX(), folk.getY(), folk.getZ(), 0, 0);
-                         ^
-  symbol:   method moveTo(double,double,double,int,int)
-  location: variable child of type FolkEntity
+<version>0.165.0+26.3</version>
+<version>0.165.2+26.3</version>
+<version>0.166.0+26.3</version>
+<version>0.166.2+26.3</version>
+<version>0.167.0+26.3</version>
+<latest>0.20.1</latest>
+LATEST: {'release': '26.3', 'snapshot': '26.4-pre-2'}
+26.4-pre-2 snapshot
+26.4-pre-1 snapshot
+26.4-snapshot-10 snapshot
+26.4-snapshot-9 snapshot
+26.4-snapshot-8 snapshot
+26.4-snapshot-7 snapshot
+26.4-snapshot-6 snapshot
+26.4-snapshot-5 snapshot
+26.4-snapshot-4 snapshot
+26.4-snapshot-3 snapshot
+26.4-snapshot-2 snapshot
+26.4-snapshot-1 snapshot
+26.3 downloads: ['client', 'server']
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+Fabric Loom: 1.17.21
+
+> Task :compileJava
 /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:20: error: cannot find symbol
-        return ResourceLocation.fromNamespaceAndPath(MODID, path);
-               ^
-  symbol:   variable ResourceLocation
-  location: class WarriorTale
+        return Identifier.of(MODID, path);
+                         ^
+  symbol:   method of(String,String)
+  location: class Identifier
+/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:26: error: cannot find symbol
+        long t = folk.level().getDayTime() % 24000L;
+                             ^
+  symbol:   method getDayTime()
+  location: class Level
 Note: /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
-Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
-27 errors
+2 errors
 
 > Task :compileJava FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1795866571972.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1795866725463.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/MC/MC/warriortale/build/reports/problems/problems-report.html
 
@@ -186,131 +190,23 @@ FAILURE: Build failed with an exception.
 Execution failed for task ':compileJava' (registered by plugin class 'org.gradle.api.plugins.JavaBasePlugin').
 > Compilation failed; see the compiler output below.
   Note: /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java uses or overrides a deprecated API.
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:145: error: no suitable method found for create(ServerLevel)
-          FolkEntity child = type.create(level);
-                                 ^
-      method EntityType.create(ServerLevel,@org.jspecify.annotations.Nullable PostSpawnProcessor<CAP#1>,BlockPos,EntitySpawnReason,boolean,boolean) is not applicable
-        (actual and formal argument lists differ in length)
-      method EntityType.create(Level,EntitySpawnReason) is not applicable
-        (actual and formal argument lists differ in length)
-      method EntityType.create(Level,EntitySpawnRequest) is not applicable
-        (actual and formal argument lists differ in length)
-      method EntityType.create(ValueInput,Level,EntitySpawnRequest) is not applicable
-        (actual and formal argument lists differ in length)
-      method EntityType.create(EntityType<?>,ValueInput,Level,EntitySpawnReason) is not applicable
-        (actual and formal argument lists differ in length)
-    where CAP#1 is a fresh type-variable:
-      CAP#1 extends FolkEntity from capture of ? extends FolkEntity
   Note: Recompile with -Xlint:deprecation for details.
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:163: error: incompatible types: CompoundTag cannot be converted to ValueOutput
-          super.addAdditionalSaveData(tag);
-                                      ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:171: error: incompatible types: CompoundTag cannot be converted to ValueInput
-          super.readAdditionalSaveData(tag);
-                                       ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:173: error: incompatible types: Optional<Integer> cannot be converted to int
-          unionCooldown = tag.getInt("wt_cooldown");
-                                    ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:57: error: incompatible types: Optional<CompoundTag> cannot be converted to CompoundTag
-          CompoundTag t = tag.getCompound("wt_genes");
-                                         ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:59: error: incompatible types: Optional<Integer> cannot be converted to int
-          g.vigor = t.getInt("vigor"); g.twitch = t.getInt("twitch");
-                            ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:59: error: incompatible types: Optional<Integer> cannot be converted to int
-          g.vigor = t.getInt("vigor"); g.twitch = t.getInt("twitch");
-                                                          ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:60: error: incompatible types: Optional<Integer> cannot be converted to int
-          g.knit = t.getInt("knit");   g.hide = t.getInt("hide");
-                           ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:60: error: incompatible types: Optional<Integer> cannot be converted to int
-          g.knit = t.getInt("knit");   g.hide = t.getInt("hide");
-                                                        ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:61: error: incompatible types: Optional<Integer> cannot be converted to int
-          g.tone = t.getInt("tone");   g.variant = t.getInt("variant");
-                           ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/Genes.java:61: error: incompatible types: Optional<Integer> cannot be converted to int
-          g.tone = t.getInt("tone");   g.variant = t.getInt("variant");
-                                                           ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:8: error: cannot find symbol
-  import net.minecraft.resources.ResourceLocation;
-                                ^
-    symbol:   class ResourceLocation
-    location: package net.minecraft.resources
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:24: error: cannot find symbol
-      private static final ResourceLocation[] FOLK_SKINS = {
-                           ^
-    symbol:   class ResourceLocation
-    location: class FolkRenderer
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:30: error: cannot find symbol
-      private static final ResourceLocation GHARR_SKIN =
-                           ^
-    symbol:   class ResourceLocation
-    location: class FolkRenderer
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/FolkRenderer.java:53: error: cannot find symbol
-      public ResourceLocation getTextureLocation(FolkRenderState state) {
-             ^
-    symbol:   class ResourceLocation
-    location: class FolkRenderer
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java:4: error: cannot find symbol
-  import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
-                                                    ^
-    symbol:   class EntityModelLayerRegistry
-    location: package net.fabricmc.fabric.api.client.rendering.v1
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:9: error: cannot find symbol
-  import net.minecraft.resources.ResourceLocation;
-                                ^
-    symbol:   class ResourceLocation
-    location: package net.minecraft.resources
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:19: error: cannot find symbol
-      public static ResourceLocation id(String path) {
-                    ^
-    symbol:   class ResourceLocation
-    location: class WarriorTale
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java:22: error: cannot find symbol
-          EntityModelLayerRegistry.registerModelLayer(FOLK_LAYER,
-          ^
-    symbol:   variable EntityModelLayerRegistry
-    location: class WarriorTaleClient
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java:25: error: cannot find symbol
-          EntityModelLayerRegistry.registerModelLayer(GHARR_LAYER, TallFolkModel::createLayer);
-          ^
-    symbol:   variable EntityModelLayerRegistry
-    location: class WarriorTaleClient
   /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:20: error: cannot find symbol
-          return ResourceLocation.fromNamespaceAndPath(MODID, path);
-                 ^
-    symbol:   variable ResourceLocation
-    location: class WarriorTale
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:86: error: isClientSide has private access in Level
-          if (!this.level().isClientSide) {
+          return Identifier.of(MODID, path);
                            ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:102: error: isClientSide has private access in Level
-              if (!this.level().isClientSide) {
+    symbol:   method of(String,String)
+    location: class Identifier
+  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:26: error: cannot find symbol
+          long t = folk.level().getDayTime() % 24000L;
                                ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:161: error: method does not override or implement a method from a supertype
-      @Override
-      ^
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/FolkEntity.java:169: error: method does not override or implement a method from a supertype
-      @Override
-      ^
-  Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:30: error: cannot find symbol
-              && folk.level().isNight()
-                             ^
-    symbol:   method isNight()
+    symbol:   method getDayTime()
     location: class Level
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:85: error: cannot find symbol
-                      child.moveTo(folk.getX(), folk.getY(), folk.getZ(), 0, 0);
-                           ^
-    symbol:   method moveTo(double,double,double,int,int)
-    location: variable child of type FolkEntity
-  27 errors
+  2 errors
 
 * Try:
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 10s
+BUILD FAILED in 15s
 1 actionable task: 1 executed
-Sat Nov 28 11:49:42 UTC 2026
+Sat Nov 28 11:52:24 UTC 2026
