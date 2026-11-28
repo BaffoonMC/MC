@@ -1,0 +1,33 @@
+{
+ "format_version": "1.12.0",
+ "geometry.warriortale.quilt": {
+  "texturewidth": 256,
+  "textureheight": 128,
+  "visible_bounds_width": 5,
+  "visible_bounds_height": 3,
+  "visible_bounds_offset": [0, 0.5, 0],
+  "bones": [
+   {
+    "name": "quilt",
+    "pivot": [0, 0, 0],
+    "cubes": [
+     { "origin": [-16.5, 0, -16],    "size": [33, 3, 26],     "uv": [0, 0] },
+     { "origin": [-11, 3, -10],      "size": [22, 4, 18],     "uv": [0, 32] },
+     { "origin": [-8, 7, -4],        "size": [16, 3, 12],     "uv": [82, 32] },
+     { "origin": [-18, -8, -16],     "size": [1.6, 11, 26],   "uv": [122, 0] },
+     { "origin": [16.4, -8, -16],    "size": [1.6, 11, 26],   "uv": [122, 0] },
+     { "origin": [-18, -8, -17.7],   "size": [36, 11, 1.7],   "uv": [0, 56] }
+    ]
+   },
+   {
+    "name": "fold",
+    "parent": "quilt",
+    "pivot": [0, 0, 0],
+    "cubes": [
+     { "origin": [-16.6, 2.2, 6.4],  "size": [33.2, 2.6, 4.2], "uv": [0, 72] },
+     { "origin": [-9, 9.0, 5.8],     "size": [18, 2.4, 3.6],   "uv": [0, 82] }
+    ]
+   }
+  ]
+ }
+}

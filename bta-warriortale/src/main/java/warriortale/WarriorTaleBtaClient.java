@@ -15,6 +15,7 @@ public class WarriorTaleBtaClient implements ClientModInitializer {
 		ClientEvents.ENTITY_RENDERER_RELOAD.listen(Key.of(WarriorTaleBta.MOD_ID), d -> {
 			d.assignRenderer(MobFolk.class, new MobRendererFolk("geometry.warriortale.folk"));
 			d.assignRenderer(MobGharr.class, new MobRendererFolk("geometry.warriortale.gharr"));
+			d.assignRenderer(MobQuilt.class, new MobRendererQuilt("geometry.warriortale.quilt"));
 		});
 		ClientEvents.BLOCK_MODEL_RELOAD.listen(Key.of(WarriorTaleBta.MOD_ID), d -> {
 			if (WarriorTaleBta.kingBed != null)

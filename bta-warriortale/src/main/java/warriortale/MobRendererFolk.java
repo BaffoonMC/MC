@@ -30,7 +30,7 @@ public class MobRendererFolk extends MobRenderer<MobFolk> {
 			// the upper half-round BEFORE laying him down (same head end,
 			// face down over her), rotateX must be CALLED first
 			GLRenderer.modelM4f().rotateX((float) (Math.PI / 2));
-			if (lie == 2) GLRenderer.modelM4f().rotateY((float) Math.PI);
+			if (lie == 2 || lie == 4) GLRenderer.modelM4f().rotateY((float) Math.PI);
 			// recentre the body on the bed: the model pivots at the feet,
 			// so shift it half its length back along its own axis
 			GLRenderer.modelM4f().translate(0.0F, -0.85F, 0.0F);
@@ -54,10 +54,12 @@ public class MobRendererFolk extends MobRenderer<MobFolk> {
 		BoneTransform blanket = model.getTransform("blanket");
 		int lie = mob.lie();
 		if (lie > 0) {
-			// in the bed: no walking, the blanket shows on the lower one,
-			// her chin tips up, his head bends back to meet her eyes
-			if (blanket != null) blanket.visible = (lie == 2);   // draped over the top of the pair
-			if (head != null) head.rotX = (lie == 1 ? -24 : -34);
+			// in the bed: no walking, her chin tips up, his head bends back
+			// to meet her eyes. On an ordinary bed (lie 1/2) the top one
+			// wears the little blanket; under the King Bed's quilt (lie 3/4)
+			// the quilt entity covers the pair, so no mob blanket at all
+			if (blanket != null) blanket.visible = (lie == 2);
+			if (head != null) head.rotX = (lie == 1 || lie == 3 ? -24 : -34);
 			if (rArm != null) rArm.rotZ = -8;
 			if (lArm != null) lArm.rotZ = 8;
 			return model;

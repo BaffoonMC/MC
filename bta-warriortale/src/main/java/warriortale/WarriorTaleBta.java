@@ -46,6 +46,8 @@ public class WarriorTaleBta implements ModInitializer {
 			"entity.warriortale.folk.name");
 		EntityDispatcher.getInstance().addMapping(MobGharr.class, new NamespaceID(MOD_ID, "gharr"), MobGharr::new,
 			"entity.warriortale.gharr.name");
+		EntityDispatcher.getInstance().addMapping(MobQuilt.class, new NamespaceID(MOD_ID, "quilt"), MobQuilt::new,
+			"entity.warriortale.quilt.name");
 		CommonEvents.BEFORE_GAME_START.listen(Key.of(MOD_ID), this::items);
 		CommonEvents.RECIPES_READY.listen(Key.of(MOD_ID), this::recipes);
 		LOG.info("Warrior Tale loaded. The Tide turns.");

@@ -34,6 +34,7 @@ public class MobFolk extends MobPathfinder {
 	private int ceremony = 0;
 	private TilePos bed = null;
 	private boolean bedKing = false;
+	private MobQuilt quilt = null;           // the King Bed's ceremony cover
 	private int scanTick = 0;
 	// the bed's true centre and axis, fixed when the ceremony starts
 	private double bedCX, bedCY, bedCZ;
@@ -115,7 +116,7 @@ public class MobFolk extends MobPathfinder {
 		if (partner != null && partner.id < this.id) return;
 		if (ceremony > 0) {
 			ceremony--;
-			if (partner == null) { ceremony = 0; setLie(0); return; }
+			if (partner == null) { ceremony = 0; setLie(0); foldQuilt(); return; }
 			// hold them on the bed: centred on it, lying along its axis,
 			// heads toward the pillow, body yaw pinned. In a mixed pair
 			// the Gharr takes the top; the blanket drapes over the top one.
@@ -125,12 +126,16 @@ public class MobFolk extends MobPathfinder {
 			bottom.setPos(bedCX, bedCY, bedCZ);
 			top.setPos(bedCX, bedCY + (top.isGharr() ? 0.4 : 0.33), bedCZ);
 			pinPose(this); pinPose(partner);
-			if (bottom.lie() != 1) { bottom.setLie(1); top.setLie(2); }
+			// under the King Bed's quilt (lie 3/4) the mobs wear no blanket
+			// of their own - the quilt entity covers the pair
+			int wantBottom = bedKing ? 3 : 1;
+			if (bottom.lie() != wantBottom) { bottom.setLie(wantBottom); top.setLie(bedKing ? 4 : 2); }
 			if (ceremony == 560) creak(0.65F);                        // the settle
 			if (ceremony == 400 || ceremony == 220) creak(0.8F);      // turning over
 			if (ceremony % 30 == 0) hearts(2);
 			if (ceremony == 0) {
 				setLie(0); partner.setLie(0);
+				foldQuilt();
 				MobFolk child = makeChild(partner);
 				if (child != null) {
 					child.setPos(this.x, this.y, this.z);
@@ -164,13 +169,21 @@ public class MobFolk extends MobPathfinder {
 		if (partner.distanceTo(this) < 3F) {
 			if (bedKing) {
 				// the 2x2 King Size Bed: its centre is the seam of the four
-				// quarters; pillows span the north pair
+				// quarters; pillows span the north pair. The pair lies a
+				// touch lower here - the quilt hides their bodies, so only
+				// the heads need to clear the covers at the pillows.
 				bedCX = bed.x + 1.0;
 				bedCZ = bed.z + 1.0 + 0.12;
-				bedCY = bed.y + 0.72;
+				bedCY = bed.y + 0.62;
 				bedYaw = 0F;
 				creak(pitchFor(this)); partner.creak(pitchFor(partner));
 				ceremony = 600;
+				// one quilt over both of them, breathing until the morning
+				MobQuilt q = new MobQuilt(this.world);
+				q.setPos(bed.x + 1.0, bed.y + 0.7, bed.z + 1.0);
+				q.spawnInit();
+				this.world.entityJoinedWorld(q);
+				quilt = q;
 				return;
 			}
 			// an ordinary bed: read its direction, heads at the pillow
@@ -189,6 +202,11 @@ public class MobFolk extends MobPathfinder {
 			creak(pitchFor(this)); partner.creak(pitchFor(partner));   // climbing in
 			ceremony = 600;
 		}
+	}
+
+	/** the ceremony is over: the quilt folds itself away */
+	private void foldQuilt() {
+		if (quilt != null) { if (quilt.isAlive()) quilt.remove(); quilt = null; }
 	}
 
 	private void pinPose(MobFolk m) {
