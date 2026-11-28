@@ -4,9 +4,9 @@
  "textures": {
   "frame": "warriortale:block/king_bed_frame",
   "side": "warriortale:block/king_bed_side",
-  "top": "warriortale:block/king_bed_top",
-  "particle": "warriortale:block/king_bed_top",
-  "all": "warriortale:block/king_bed_top",
+  "top": "warriortale:block/king_bed_top_0",
+  "particle": "warriortale:block/king_bed_top_0",
+  "all": "warriortale:block/king_bed_top_0",
   "down": "#all",
   "up": "#all",
   "north": "#all",

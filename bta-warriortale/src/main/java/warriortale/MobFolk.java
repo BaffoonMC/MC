@@ -163,9 +163,10 @@ public class MobFolk extends MobPathfinder {
 		}
 		if (partner.distanceTo(this) < 3F) {
 			if (bedKing) {
-				// the King Size Bed: fixed anchors, pillows at its north edge
-				bedCX = bed.x + 0.5;
-				bedCZ = bed.z + 0.5 + 0.1;
+				// the 2x2 King Size Bed: its centre is the seam of the four
+				// quarters; pillows span the north pair
+				bedCX = bed.x + 1.0;
+				bedCZ = bed.z + 1.0 + 0.12;
 				bedCY = bed.y + 0.72;
 				bedYaw = 0F;
 				creak(pitchFor(this)); partner.creak(pitchFor(partner));
@@ -215,7 +216,8 @@ public class MobFolk extends MobPathfinder {
 				for (int dy = -3; dy <= 3; dy++) {
 					p.x = cx + dx; p.y = cy + dy; p.z = cz + dz;
 					var type = this.world.getBlockType(p);
-					boolean king = (WarriorTaleBta.kingBed != null && type == WarriorTaleBta.kingBed);
+					boolean king = (WarriorTaleBta.kingBed != null && type == WarriorTaleBta.kingBed
+						&& this.world.getBlockData(p) == 0);   // anchor on the NW quarter only
 					if (king || type == Blocks.BED) {
 						double d = dx * dx + dy * dy + dz * dz;
 						// a king bed always beats an ordinary bed
