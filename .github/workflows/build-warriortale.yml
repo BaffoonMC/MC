@@ -103,3 +103,15 @@ jobs:
         with:
           name: WarriorTale-jar
           path: warriortale/build/libs/*.jar
+      - name: Publish release jar
+        if: success()
+        shell: bash
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          JAR=$(ls warriortale/build/libs/warriortale-*.jar | grep -v sources | head -1)
+          gh release create warriortale-latest --title "WarriorTale (latest build)" \
+            --notes "Auto-built from the newest warriortale/ commit. Needs Fabric Loader 0.20.1+ and Fabric API 0.167.0+26.3 for Minecraft 26.3." \
+            2>/dev/null || true
+          gh release upload warriortale-latest "$JAR" --clobber
