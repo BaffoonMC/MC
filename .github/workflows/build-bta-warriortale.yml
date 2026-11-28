@@ -1,0 +1,53 @@
+name: Build BTA WarriorTale
+on:
+  push:
+    paths: ['bta-warriortale/**', '.github/workflows/build-bta-warriortale.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bta-warriortale
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew && ./gradlew build --no-daemon
+      - name: API listing (class names and signatures, for writing the mod against)
+        if: hashFiles('bta-warriortale/apidump.txt') != ''
+        run: |
+          JAR=$(find ~/.gradle .gradle -name '*.jar' 2>/dev/null | grep -i 'minecraft' | xargs ls -S | head -1)
+          echo "JAR=$JAR"
+          find ~/.gradle .gradle -name '*.jar' 2>/dev/null | grep -i 'minecraft\|halplibe' | xargs ls -la
+          echo "=====CLASSLIST"
+          unzip -Z1 "$JAR" | grep '\.class$' | grep -v '\$' | sed 's/\.class$//' | grep -E "$(sed -n 1p apidump.txt)" || true
+          echo "=====RESOURCES"
+          unzip -Z1 "$JAR" | grep -v '\.class$' | grep -iE "$(sed -n 2p apidump.txt)" | head -300 || true
+          echo "=====FILES"
+          for r in $(sed -n 3p apidump.txt); do echo "#### $r"; unzip -p "$JAR" "$r" | tr -d ' \n\t\r' | head -c 7000; echo; done
+          echo "=====JAVAP"
+          for e in $(sed -n '4,$p' apidump.txt); do c="${e%%|*}"; g="${e#*|}"; [ "$g" = "$e" ] && g="."; echo "#### $c"
+            if [ "${c#@}" != "$c" ]; then javap -c -p -constants -cp "$JAR" "${c#@}" 2>&1 | grep -E "$g" | cut -c1-200 | head -900
+            else javap -p -cp "$JAR" "$c" 2>&1 | grep -E "$g" | head -500; fi; done
+          echo "=====RECIPES"
+          javap -v -p -cp "$JAR" net.minecraft.client.gui.hud.component.HudComponentHealthBar 2>&1 | grep -E "REF_invokeStatic|String minecraft|Gamemode|u0001|= String|Utf8 .*heart" | cut -c1-200 | head -80
+          echo "=====GREPSTR"
+          mkdir -p /tmp/x && cd /tmp/x && unzip -q -o "$JAR" '*.class' && grep -rl "models.json\|model_paths\|models/entity" . | head -20
+      - name: Publish to the bta-warriortale-latest release
+        if: github.ref == 'refs/heads/main' && hashFiles('bta-warriortale/apidump.txt') == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view bta-warriortale-latest >/dev/null 2>&1 || gh release create bta-warriortale-latest --title "BTA WarriorTale (latest)" --notes "Warrior Tale folk mod for Better than Adventure." --latest=false
+          rm -f build/libs/*-sources.jar
+          gh release upload bta-warriortale-latest build/libs/*.jar --clobber
+          new=$(basename build/libs/*.jar)
+          for old in $(gh release view bta-warriortale-latest --json assets -q '.assets[].name'); do [ "$old" != "$new" ] && gh release delete-asset bta-warriortale-latest "$old" -y || true; done

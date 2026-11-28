@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "warriortale",
+  "version": "${version}",
+  "name": "Warrior Tale: The Folk",
+  "description": "Village folk and the tall Gharr raid-folk for Better than Adventure: genes, courtship with bread, the bed union, and blended children.",
+  "authors": ["BaffoonMC"],
+  "icon": "icon.png",
+  "contact": { "homepage": "", "sources": "" },
+  "environment": "*",
+  "entrypoints": {
+    "main": ["warriortale.WarriorTaleBta"],
+    "client": ["warriortale.WarriorTaleBtaClient"]
+  },
+  "depends": {
+    "fabricloader": ">=${fabricloader}",
+    "halplibe": ">=${halplibe}",
+    "minecraft": "*",
+    "java": ">=${java}"
+  },
+  "suggests": { "modmenu": ">=${modmenu}" }
+}

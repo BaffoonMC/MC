@@ -1,0 +1,14 @@
+{
+ "model_paths": [
+  "/assets/warriortale/models/entity/folk.geo.json",
+  "/assets/warriortale/models/entity/gharr.geo.json"
+ ],
+ "renderers": {
+  "warriortale:folk": {
+   "main": "geometry.warriortale.folk"
+  },
+  "warriortale:gharr": {
+   "main": "geometry.warriortale.gharr"
+  }
+ }
+}
