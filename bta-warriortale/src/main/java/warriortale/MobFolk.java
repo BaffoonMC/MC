@@ -160,7 +160,8 @@ public class MobFolk extends MobPathfinder {
 
 	public MobFolk partner() {
 		if (promisedTo < 0) return null;
-		List<MobFolk> near = this.world.getEntitiesWithinRadius(MobFolk.class, this.x, this.y, this.z, 32.0);
+		// NOTE: the engine's radius argument is the radius SQUARED (JOML intersectsSphere)
+		List<MobFolk> near = this.world.getEntitiesWithinRadius(MobFolk.class, this.x, this.y, this.z, 1024.0);
 		for (MobFolk f : near) if (f.id == promisedTo && f.isAlive()) return f;
 		return null;
 	}
@@ -170,16 +171,25 @@ public class MobFolk extends MobPathfinder {
 		if (this.world.isClientSide) return true;
 		ItemStack held = player.inventory.getCurrentItem();
 		if (held != null && held.getItem() == Items.FOOD_BREAD && isGrown() && cooldown == 0 && promisedTo < 0) {
-			List<MobFolk> near = this.world.getEntitiesWithinRadius(MobFolk.class, this.x, this.y, this.z, 8.0);
+			// radius squared: 64.0 = 8 blocks
+			List<MobFolk> near = this.world.getEntitiesWithinRadius(MobFolk.class, this.x, this.y, this.z, 64.0);
+			int seen = 0;
 			for (MobFolk f : near) {
-				if (f == this || !f.isGrown() || f.promisedTo >= 0 || f.cooldown > 0) continue;
+				if (f == this) continue;
+				seen++;
+				if (!f.isGrown() || f.promisedTo >= 0 || f.cooldown > 0) continue;
 				this.promisedTo = f.id;
 				f.promisedTo = this.id;
 				held.consumeItem(player);
 				hearts(5); f.hearts(5);
+				String a = this.nickname != null ? this.nickname : "This one";
+				String b = f.nickname != null ? f.nickname : "another";
+				player.sendStatusMessage(a + " and " + b + " are promised. They will seek a bed at night.");
 				return true;
 			}
-			player.sendStatusMessage("No one near is free to be promised.");
+			player.sendStatusMessage(seen == 0
+				? "No other folk within eight blocks."
+				: "No one near is free to be promised.");
 			return true;
 		}
 		return super.interact(player);
