@@ -2,6 +2,8 @@ package warriortale;
 
 import com.mojang.nbt.tags.CompoundTag;
 import net.minecraft.core.block.Blocks;
+import net.minecraft.core.block.BlockLogicBed;
+import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.entity.MobPathfinder;
 import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.item.ItemStack;
@@ -32,6 +34,9 @@ public class MobFolk extends MobPathfinder {
 	private int ceremony = 0;
 	private TilePos bed = null;
 	private int scanTick = 0;
+	// the bed's true centre and axis, fixed when the ceremony starts
+	private double bedCX, bedCY, bedCZ;
+	private float bedYaw;
 
 	/** every living folk, tracked by the mod itself - the engine's
 	 *  chunk-based entity query proved unreliable for this. */
@@ -110,12 +115,11 @@ public class MobFolk extends MobPathfinder {
 		if (ceremony > 0) {
 			ceremony--;
 			if (partner == null) { ceremony = 0; setLie(0); return; }
-			// hold them on the bed, stacked, face to face, yaw pinned
-			if (bed != null) {
-				double bx = bed.x + 0.5, by = bed.y + 0.62, bz = bed.z + 0.5;
-				this.setPos(bx, by, bz); this.yRot = 0; this.xRot = 0;
-				partner.setPos(bx, by + 0.42, bz); partner.yRot = 0; partner.xRot = 0;
-			}
+			// hold them on the bed: centred on it, lying along its axis,
+			// heads toward the pillow, body yaw pinned so nothing spins
+			this.setPos(bedCX, bedCY, bedCZ);
+			partner.setPos(bedCX, bedCY + 0.42, bedCZ);
+			pinPose(this); pinPose(partner);
 			if (lie() != 1) { setLie(1); partner.setLie(2); }
 			if (ceremony == 130) creak(0.65F);                        // the settle
 			if (ceremony % 30 == 0) hearts(2);
@@ -152,9 +156,24 @@ public class MobFolk extends MobPathfinder {
 			return;
 		}
 		if (partner.distanceTo(this) < 3F) {
+			// read the bed's direction so they lie along it, heads at the pillow
+			int meta = this.world.getBlockData(bed);
+			int dir = BlockLogicBed.DIRECTION.get(meta);
+			boolean isHead = BlockLogicBed.IS_HEAD.get(meta) != 0;
+			Side toHead = BlockLogicBed.footToHeadMap[Math.floorMod(dir, BlockLogicBed.footToHeadMap.length)];
+			bedCX = bed.x + 0.5 + toHead.offsetX() * (isHead ? -0.5 : 0.5);
+			bedCZ = bed.z + 0.5 + toHead.offsetZ() * (isHead ? -0.5 : 0.5);
+			bedCY = bed.y + 0.62;
+			bedYaw = (float) Math.toDegrees(Math.atan2(-toHead.offsetX(), toHead.offsetZ()));
 			creak(pitchFor(this)); partner.creak(pitchFor(partner));   // climbing in
 			ceremony = 200;
 		}
+	}
+
+	private void pinPose(MobFolk m) {
+		m.yRot = bedYaw; m.yRotO = bedYaw;
+		m.yBodyRot = bedYaw; m.yBodyRotO = bedYaw;
+		m.xRot = 0; m.xRotO = 0;
 	}
 
 	private static float pitchFor(MobFolk m) { return Math.max(0.55F, 1.35F - m.bbHeight * 0.3F); }

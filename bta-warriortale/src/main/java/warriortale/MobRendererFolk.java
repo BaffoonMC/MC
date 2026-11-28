@@ -28,6 +28,9 @@ public class MobRendererFolk extends MobRenderer<MobFolk> {
 			GLRenderer.modelM4f().translate(0.0F, 0.14F, 0.0F);
 			if (lie == 2) GLRenderer.modelM4f().rotateY((float) Math.PI);
 			GLRenderer.modelM4f().rotateX(lie == 1 ? (float) (Math.PI / 2) : (float) (-Math.PI / 2));
+			// recentre the body on the bed: the model pivots at the feet,
+			// so shift it half its length back along its own axis
+			GLRenderer.modelM4f().translate(0.0F, -0.85F, 0.0F);
 		}
 	}
 
