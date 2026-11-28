@@ -1,0 +1,138 @@
+{
+ "ambientocclusion": false,
+ "textures": {
+  "frame": "warriortale:block/king_bed_frame",
+  "side": "warriortale:block/king_bed_side",
+  "top": "warriortale:block/king_bed_top",
+  "particle": "warriortale:block/king_bed_top"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    3,
+    16
+   ],
+   "faces": {
+    "down": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#frame"
+    },
+    "up": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#frame"
+    },
+    "north": {
+     "uv": [
+      0,
+      13,
+      16,
+      16
+     ],
+     "texture": "#frame"
+    },
+    "south": {
+     "uv": [
+      0,
+      13,
+      16,
+      16
+     ],
+     "texture": "#frame"
+    },
+    "east": {
+     "uv": [
+      0,
+      13,
+      16,
+      16
+     ],
+     "texture": "#frame"
+    },
+    "west": {
+     "uv": [
+      0,
+      13,
+      16,
+      16
+     ],
+     "texture": "#frame"
+    }
+   }
+  },
+  {
+   "from": [
+    0,
+    3,
+    0
+   ],
+   "to": [
+    16,
+    9,
+    16
+   ],
+   "faces": {
+    "up": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#top"
+    },
+    "north": {
+     "uv": [
+      0,
+      5,
+      16,
+      11
+     ],
+     "texture": "#side"
+    },
+    "south": {
+     "uv": [
+      0,
+      5,
+      16,
+      11
+     ],
+     "texture": "#side"
+    },
+    "east": {
+     "uv": [
+      0,
+      5,
+      16,
+      11
+     ],
+     "texture": "#side"
+    },
+    "west": {
+     "uv": [
+      0,
+      5,
+      16,
+      11
+     ],
+     "texture": "#side"
+    }
+   }
+  }
+ ]
+}

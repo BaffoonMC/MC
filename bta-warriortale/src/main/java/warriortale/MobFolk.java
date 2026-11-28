@@ -33,6 +33,7 @@ public class MobFolk extends MobPathfinder {
 	public int cooldown = 0;
 	private int ceremony = 0;
 	private TilePos bed = null;
+	private boolean bedKing = false;
 	private int scanTick = 0;
 	// the bed's true centre and axis, fixed when the ceremony starts
 	private double bedCX, bedCY, bedCZ;
@@ -122,7 +123,7 @@ public class MobFolk extends MobPathfinder {
 			if (this.isGharr() && !partner.isGharr()) top = this;
 			MobFolk bottom = (top == this) ? partner : this;
 			bottom.setPos(bedCX, bedCY, bedCZ);
-			top.setPos(bedCX, bedCY + (top.isGharr() ? 0.5 : 0.42), bedCZ);
+			top.setPos(bedCX, bedCY + (top.isGharr() ? 0.4 : 0.33), bedCZ);
 			pinPose(this); pinPose(partner);
 			if (bottom.lie() != 1) { bottom.setLie(1); top.setLie(2); }
 			if (ceremony == 560) creak(0.65F);                        // the settle
@@ -161,7 +162,17 @@ public class MobFolk extends MobPathfinder {
 			return;
 		}
 		if (partner.distanceTo(this) < 3F) {
-			// read the bed's direction so they lie along it, heads at the pillow
+			if (bedKing) {
+				// the King Size Bed: fixed anchors, pillows at its north edge
+				bedCX = bed.x + 0.5;
+				bedCZ = bed.z + 0.5 + 0.1;
+				bedCY = bed.y + 0.72;
+				bedYaw = 0F;
+				creak(pitchFor(this)); partner.creak(pitchFor(partner));
+				ceremony = 600;
+				return;
+			}
+			// an ordinary bed: read its direction, heads at the pillow
 			int meta = this.world.getBlockData(bed);
 			int dir = BlockLogicBed.DIRECTION.get(meta);
 			boolean isHead = BlockLogicBed.IS_HEAD.get(meta) != 0;
@@ -183,6 +194,7 @@ public class MobFolk extends MobPathfinder {
 		m.yRot = bedYaw; m.yRotO = bedYaw;
 		m.yBodyRot = bedYaw; m.yBodyRotO = bedYaw;
 		m.xRot = 0; m.xRotO = 0;
+		m.xd = 0; m.yd = 0; m.zd = 0;   // no drift: the pair stays as one
 	}
 
 	private static float pitchFor(MobFolk m) { return Math.max(0.55F, 1.35F - m.bbHeight * 0.3F); }
@@ -197,19 +209,24 @@ public class MobFolk extends MobPathfinder {
 		TilePos p = new TilePos();
 		TilePos best = null;
 		double bestD = Double.MAX_VALUE;
+		boolean bestKing = false;
 		for (int dx = -12; dx <= 12; dx++)
 			for (int dz = -12; dz <= 12; dz++)
 				for (int dy = -3; dy <= 3; dy++) {
 					p.x = cx + dx; p.y = cy + dy; p.z = cz + dz;
-					if (this.world.getBlockType(p) == Blocks.BED) {
+					var type = this.world.getBlockType(p);
+					boolean king = (WarriorTaleBta.kingBed != null && type == WarriorTaleBta.kingBed);
+					if (king || type == Blocks.BED) {
 						double d = dx * dx + dy * dy + dz * dz;
-						if (d < bestD) {
-							bestD = d;
+						// a king bed always beats an ordinary bed
+						if ((king && !bestKing) || (king == bestKing && d < bestD)) {
+							bestD = d; bestKing = king;
 							best = new TilePos();
 							best.x = p.x; best.y = p.y; best.z = p.z;
 						}
 					}
 				}
+		bedKing = bestKing;
 		return best;
 	}
 

@@ -2,7 +2,12 @@ package warriortale;
 
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.core.entity.EntityDispatcher;
+import net.minecraft.core.block.Block;
+import net.minecraft.core.block.Blocks;
 import net.minecraft.core.item.Item;
+import net.minecraft.core.item.ItemStack;
+import turniplabs.halplibe.helper.BlockBuilder;
+import turniplabs.halplibe.helper.RecipeBuilder;
 import net.minecraft.core.item.Items;
 import net.minecraft.core.util.collection.NamespaceID;
 import org.slf4j.Logger;
@@ -28,11 +33,13 @@ public class WarriorTaleBta implements ModInitializer {
 	public static TomlConfigHandler cfg;
 	public static Item eggFolk;
 	public static Item eggGharr;
+	public static Block<BlockLogicKingBed> kingBed;
 
 	@Override
 	public void onInitialize() {
 		Toml def = new Toml("WarriorTale");
 		def.addEntry("egg_item_id", "first of 2 item ids in a row (folk egg, gharr egg). change if it clashes with another mod", 23620);
+		def.addEntry("king_bed_block_id", "the King Size Bed block. change if it clashes with another mod", 2470);
 		cfg = new TomlConfigHandler(MOD_ID, def);
 
 		EntityDispatcher.getInstance().addMapping(MobFolk.class, new NamespaceID(MOD_ID, "folk"), MobFolk::new,
@@ -40,6 +47,7 @@ public class WarriorTaleBta implements ModInitializer {
 		EntityDispatcher.getInstance().addMapping(MobGharr.class, new NamespaceID(MOD_ID, "gharr"), MobGharr::new,
 			"entity.warriortale.gharr.name");
 		CommonEvents.BEFORE_GAME_START.listen(Key.of(MOD_ID), this::items);
+		CommonEvents.RECIPES_READY.listen(Key.of(MOD_ID), this::recipes);
 		LOG.info("Warrior Tale loaded. The Tide turns.");
 	}
 
@@ -49,5 +57,14 @@ public class WarriorTaleBta implements ModInitializer {
 		eggGharr = new ItemFolkEgg(MOD_ID + ".egg_gharr", MOD_ID + ":item/egg_gharr", id + 1, true);
 		CreativeInventoryRegistry.INSTANCE.register(eggGharr, new CreativeInventoryPlacement.After(() -> Items.EGG_CHICKEN));
 		CreativeInventoryRegistry.INSTANCE.register(eggFolk, new CreativeInventoryPlacement.After(() -> Items.EGG_CHICKEN));
+		kingBed = new BlockBuilder(MOD_ID).setHardness(0.6F)
+			.build("king_bed", "king_bed", cfg.getInt("king_bed_block_id"), BlockLogicKingBed::new);
+	}
+
+	private void recipes() {
+		RecipeBuilder.Shapeless(MOD_ID)
+			.addInput(Blocks.BED).addInput(Items.INGOT_GOLD).addInput(Items.INGOT_GOLD)
+			.addInput(Blocks.PLANKS_OAK).addInput(Blocks.PLANKS_OAK)
+			.create("king_bed", new ItemStack(kingBed, 1));
 	}
 }

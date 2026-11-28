@@ -16,6 +16,10 @@ public class WarriorTaleBtaClient implements ClientModInitializer {
 			d.assignRenderer(MobFolk.class, new MobRendererFolk("geometry.warriortale.folk"));
 			d.assignRenderer(MobGharr.class, new MobRendererFolk("geometry.warriortale.gharr"));
 		});
+		ClientEvents.BLOCK_MODEL_RELOAD.listen(Key.of(WarriorTaleBta.MOD_ID), d -> {
+			if (WarriorTaleBta.kingBed != null)
+				d.addDispatch(new BlockModelKingBed(WarriorTaleBta.kingBed, WarriorTaleBta.MOD_ID + ":block/king_bed/"));
+		});
 		ClientEvents.ITEM_MODEL_RELOAD.listen(Key.of(WarriorTaleBta.MOD_ID), d -> {
 			if (WarriorTaleBta.eggFolk != null) d.addDispatch(new ItemModelStandard(WarriorTaleBta.eggFolk));
 			if (WarriorTaleBta.eggGharr != null) d.addDispatch(new ItemModelStandard(WarriorTaleBta.eggGharr));
