@@ -22,7 +22,7 @@ jobs:
         shell: bash
         run: |
           curl -sS https://piston-meta.mojang.com/mc/game/version_manifest_v2.json -o /tmp/vm.json
-          python3 - << 'PY'
+          python3 - << 'PY' | tee /tmp/probe.log
           import json
           d = json.load(open('/tmp/vm.json'))
           print('LATEST:', d['latest'])
@@ -48,7 +48,8 @@ jobs:
           git config user.name "ci-log"
           git config user.email "ci@users.noreply.github.com"
           mkdir -p ci-logs
-          tail -n 400 /tmp/build.log > ci-logs/warriortale-build.log
+          cat /tmp/probe.log /tmp/build.log 2>/dev/null | tail -n 400 > ci-logs/warriortale-build.log
+          date >> ci-logs/warriortale-build.log
           git add ci-logs
           git commit -m "ci: warriortale build log [skip ci]" || exit 0
           git pull --rebase origin main || true
