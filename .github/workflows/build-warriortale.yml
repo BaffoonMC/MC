@@ -42,15 +42,51 @@ jobs:
           chmod +x gradlew
           set -o pipefail
           ./gradlew build --no-daemon 2>&1 | tee /tmp/build.log
+      - name: API probe
+        if: always()
+        shell: bash
+        run: |
+          {
+          echo "==== API PROBE ===="
+          MJ=$(find /home/runner/.gradle /home/runner/work -name "*.jar" 2>/dev/null | grep -iE "minecraft.*(merged|client)" | grep -v sources | head -1)
+          echo "MC JAR: $MJ"
+          if [ -n "$MJ" ]; then
+            unzip -l "$MJ" | grep -oE "net/minecraft/[A-Za-z/]*((ResourceLocation|Identifier|ValueInput|ValueOutput|SpawnReason|EntitySpawnReason)[A-Za-z]*)\.class" | sort -u | head -30
+            CP="$MJ"
+            for C in net.minecraft.world.level.Level net.minecraft.world.entity.Entity net.minecraft.world.entity.EntityType net.minecraft.nbt.CompoundTag; do
+              echo "---- $C ----"
+              javap -cp "$CP" "$C" 2>/dev/null | grep -iE "night|clientside|client\(|create|moveTo|snapTo|setPos|getInt|getCompound" | head -12
+            done
+            for C in net.minecraft.client.renderer.entity.MobRenderer net.minecraft.client.renderer.entity.LivingEntityRenderer; do
+              echo "---- $C ----"
+              javap -cp "$CP" "$C" 2>/dev/null | grep -iE "texture|renderstate|extract" | head -8
+            done
+            VIO=$(unzip -l "$MJ" | grep -oE "net/minecraft/[A-Za-z/]*ValueOutput\.class" | head -1 | sed 's#/#.#g;s#\.class##')
+            VIN=$(unzip -l "$MJ" | grep -oE "net/minecraft/[A-Za-z/]*ValueInput\.class" | head -1 | sed 's#/#.#g;s#\.class##')
+            RL=$(unzip -l "$MJ" | grep -oE "net/minecraft/[A-Za-z/]*(ResourceLocation|Identifier)\.class" | head -3)
+            echo "VIO=$VIO VIN=$VIN RL=$RL"
+            for C in "$VIO" "$VIN"; do
+              [ -n "$C" ] && echo "---- $C ----" && javap -cp "$CP" "$C" 2>/dev/null | head -25
+            done
+          fi
+          echo "==== FABRIC API JARS ===="
+          for J in $(find /home/runner/.gradle -name "fabric-rendering-v1*.jar" -o -name "fabric-object-builder*.jar" 2>/dev/null | grep -v sources | head 2>/dev/null); do
+            echo "-- $J"
+            unzip -l "$J" | grep -oE "net/fabricmc/fabric/api/[A-Za-z0-9/]*\.class" | grep -iE "EntityModelLayer|EntityRenderer|AttributeRegistry" | head -8
+          done
+          echo "==== END PROBE ===="
+          } > /tmp/api.log 2>&1 || true
+          cat /tmp/api.log
       - name: Publish build log on failure
-        if: failure()
+        if: always()
         shell: bash
         working-directory: .
         run: |
           git config user.name "ci-log"
           git config user.email "ci@users.noreply.github.com"
           mkdir -p ci-logs
-          cat /tmp/probe.log /tmp/build.log 2>/dev/null | tail -n 400 > ci-logs/warriortale-build.log
+          cat /tmp/api.log > ci-logs/warriortale-build.log 2>/dev/null || true
+          cat /tmp/probe.log /tmp/build.log 2>/dev/null | tail -n 200 >> ci-logs/warriortale-build.log
           date >> ci-logs/warriortale-build.log
           git add ci-logs
           git commit -m "ci: warriortale build log [skip ci]" || exit 0
