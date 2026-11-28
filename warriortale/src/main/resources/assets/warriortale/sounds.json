@@ -1,0 +1,10 @@
+{
+  "bed_creak": {
+    "subtitle": "subtitles.warriortale.bed_creak",
+    "sounds": [
+      "warriortale:bed_creak1",
+      "warriortale:bed_creak2",
+      "warriortale:bed_creak3"
+    ]
+  }
+}
