@@ -24,6 +24,9 @@ public class MobFolk extends MobPathfinder {
 	public int growth;                       // 0..GROWN; below GROWN it is a child
 	public static final int GROWN = 6000;
 
+	/** synced to clients: 0 = standing, 1 = lying (lower, face up), 2 = lying (upper, face down) */
+	public static final int DATA_LIE = 25;
+
 	public int promisedTo = -1;              // entity id, runtime only
 	public int cooldown = 0;
 	private int ceremony = 0;
@@ -41,6 +44,7 @@ public class MobFolk extends MobPathfinder {
 		super(world);
 		this.setTextureIdentifier(WarriorTaleBta.MOD_ID, "folk");
 		this.setSize(0.6F, 1.8F);
+		this.entityData.define(DATA_LIE, Byte.valueOf((byte) 0), Byte.class);
 		rollGenes();
 		this.growth = GROWN;
 		this.moveSpeed = speedFromGenes();
@@ -68,7 +72,10 @@ public class MobFolk extends MobPathfinder {
 	@Override public int getMaxHealth() { return 14 + Math.max(0, vigor) * 16 / 100; }
 	@Override protected boolean canDespawn() { return false; }
 	@Override public String getLivingSound() { return null; }
-	@Override protected boolean isMovementCeased() { return ceremony > 0; }
+	@Override protected boolean isMovementCeased() { return ceremony > 0 || lie() != 0; }
+
+	public int lie() { return this.entityData.getByte(DATA_LIE); }
+	public void setLie(int v) { this.entityData.set(DATA_LIE, Byte.valueOf((byte) v)); }
 
 	/** the renderer reads this: child-small, growing to full size */
 	public float renderScale() {
@@ -98,13 +105,22 @@ public class MobFolk extends MobPathfinder {
 	// ---- the union: bed-gated, together, at night ----
 	private void union() {
 		MobFolk partner = partner();
+		// one of the pair orchestrates (the elder id); the other follows
+		if (partner != null && partner.id < this.id) return;
 		if (ceremony > 0) {
 			ceremony--;
-			if (partner == null) { ceremony = 0; return; }
-			this.lookAt(partner, 30F, 30F);
+			if (partner == null) { ceremony = 0; setLie(0); return; }
+			// hold them on the bed, stacked, face to face, yaw pinned
+			if (bed != null) {
+				double bx = bed.x + 0.5, by = bed.y + 0.62, bz = bed.z + 0.5;
+				this.setPos(bx, by, bz); this.yRot = 0; this.xRot = 0;
+				partner.setPos(bx, by + 0.42, bz); partner.yRot = 0; partner.xRot = 0;
+			}
+			if (lie() != 1) { setLie(1); partner.setLie(2); }
 			if (ceremony == 130) creak(0.65F);                        // the settle
 			if (ceremony % 30 == 0) hearts(2);
 			if (ceremony == 0) {
+				setLie(0); partner.setLie(0);
 				MobFolk child = makeChild(partner);
 				if (child != null) {
 					child.setPos(this.x, this.y, this.z);
@@ -136,7 +152,7 @@ public class MobFolk extends MobPathfinder {
 		}
 		if (partner.distanceTo(this) < 3F) {
 			creak(pitchFor(this)); partner.creak(pitchFor(partner));   // climbing in
-			ceremony = 160;
+			ceremony = 200;
 		}
 	}
 
