@@ -15,9 +15,13 @@ public class VillagersClient implements ClientModInitializer {
 			catch (Throwable t) { Villagers.LOG.warn("Villagers: couldn't load the mod's sounds: {}", t.toString()); }
 		});
 		ClientEvents.ENTITY_RENDERER_RELOAD.listen(Key.of(Villagers.MOD_ID), d -> d.assignRenderer(MobVillager.class, new MobRendererVillager()));
+		ClientEvents.BLOCK_MODEL_RELOAD.listen(Key.of(Villagers.MOD_ID), d -> {
+			if (Villagers.fermenter != null) d.addDispatch(new BlockModelFermenter(Villagers.fermenter, Villagers.MOD_ID + ":block/fermenter/"));
+		});
 		ClientEvents.ITEM_MODEL_RELOAD.listen(Key.of(Villagers.MOD_ID), d -> {
 			for (Item egg : Villagers.eggs) if (egg != null) d.addDispatch(new ItemModelStandard(egg));
 			if (Villagers.heart != null) d.addDispatch(new ItemModelStandard(Villagers.heart));
+			if (Villagers.rottenMeat != null) d.addDispatch(new ItemModelStandard(Villagers.rottenMeat));
 		});
 	}
 }
