@@ -116,12 +116,17 @@ public class MobFolk extends MobPathfinder {
 			ceremony--;
 			if (partner == null) { ceremony = 0; setLie(0); return; }
 			// hold them on the bed: centred on it, lying along its axis,
-			// heads toward the pillow, body yaw pinned so nothing spins
-			this.setPos(bedCX, bedCY, bedCZ);
-			partner.setPos(bedCX, bedCY + 0.42, bedCZ);
+			// heads toward the pillow, body yaw pinned. In a mixed pair
+			// the Gharr takes the top; the blanket drapes over the top one.
+			MobFolk top = partner;
+			if (this.isGharr() && !partner.isGharr()) top = this;
+			MobFolk bottom = (top == this) ? partner : this;
+			bottom.setPos(bedCX, bedCY, bedCZ);
+			top.setPos(bedCX, bedCY + (top.isGharr() ? 0.5 : 0.42), bedCZ);
 			pinPose(this); pinPose(partner);
-			if (lie() != 1) { setLie(1); partner.setLie(2); }
-			if (ceremony == 130) creak(0.65F);                        // the settle
+			if (bottom.lie() != 1) { bottom.setLie(1); top.setLie(2); }
+			if (ceremony == 560) creak(0.65F);                        // the settle
+			if (ceremony == 400 || ceremony == 220) creak(0.8F);      // turning over
 			if (ceremony % 30 == 0) hearts(2);
 			if (ceremony == 0) {
 				setLie(0); partner.setLie(0);
@@ -161,12 +166,14 @@ public class MobFolk extends MobPathfinder {
 			int dir = BlockLogicBed.DIRECTION.get(meta);
 			boolean isHead = BlockLogicBed.IS_HEAD.get(meta) != 0;
 			Side toHead = BlockLogicBed.footToHeadMap[Math.floorMod(dir, BlockLogicBed.footToHeadMap.length)];
-			bedCX = bed.x + 0.5 + toHead.offsetX() * (isHead ? -0.5 : 0.5);
-			bedCZ = bed.z + 0.5 + toHead.offsetZ() * (isHead ? -0.5 : 0.5);
+			// true centre of the two-block bed, then a nudge toward the foot
+			// so heads sit on the pillow instead of overhanging it
+			bedCX = bed.x + 0.5 + toHead.offsetX() * ((isHead ? -0.5 : 0.5) - 0.22);
+			bedCZ = bed.z + 0.5 + toHead.offsetZ() * ((isHead ? -0.5 : 0.5) - 0.22);
 			bedCY = bed.y + 0.62;
 			bedYaw = (float) Math.toDegrees(Math.atan2(-toHead.offsetX(), toHead.offsetZ()));
 			creak(pitchFor(this)); partner.creak(pitchFor(partner));   // climbing in
-			ceremony = 200;
+			ceremony = 600;
 		}
 	}
 

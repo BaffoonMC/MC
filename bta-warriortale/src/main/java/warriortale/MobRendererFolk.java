@@ -53,7 +53,7 @@ public class MobRendererFolk extends MobRenderer<MobFolk> {
 		if (lie > 0) {
 			// in the bed: no walking, the blanket shows on the lower one,
 			// her chin tips up, his head bends back to meet her eyes
-			if (blanket != null) blanket.visible = (lie == 1);
+			if (blanket != null) blanket.visible = (lie == 2);   // draped over the top of the pair
 			if (head != null) head.rotX = (lie == 1 ? -14 : -32);
 			if (rArm != null) rArm.rotZ = -8;
 			if (lArm != null) lArm.rotZ = 8;
