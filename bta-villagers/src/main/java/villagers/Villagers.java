@@ -54,8 +54,8 @@ public class Villagers implements ModInitializer {
 	}
 
 	private void recipes() {
-		RecipeBuilder.Shapeless(MOD_ID).addInput(Items.INGOT_IRON).addInput(Items.INGOT_IRON).addInput(Items.INGOT_IRON).addInput(Items.INGOT_IRON)
-			.addInput(Items.BUCKET).addInput(Blocks.GLASS).create("fermenter", new ItemStack(fermenter, 1));
+		RecipeBuilder.Shapeless(MOD_ID).addInput(Items.INGOT_STEEL).addInput(Items.INGOT_STEEL).addInput(Items.INGOT_STEEL).addInput(Items.INGOT_STEEL)
+			.addInput(Items.BUCKET_IRON).addInput(Blocks.GLASS).create("fermenter", new ItemStack(fermenter, 1));
 	}
 
 	private void items() {
