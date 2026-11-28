@@ -1,3 +1,17 @@
+LATEST: {'release': '26.3', 'snapshot': '26.4-pre-2'}
+26.4-pre-2 snapshot
+26.4-pre-1 snapshot
+26.4-snapshot-10 snapshot
+26.4-snapshot-9 snapshot
+26.4-snapshot-8 snapshot
+26.4-snapshot-7 snapshot
+26.4-snapshot-6 snapshot
+26.4-snapshot-5 snapshot
+26.4-snapshot-4 snapshot
+26.4-snapshot-3 snapshot
+26.4-snapshot-2 snapshot
+26.4-snapshot-1 snapshot
+26.3 downloads: ['client', 'server']
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 
@@ -5,7 +19,7 @@ Daemon will be stopped at the end of the build
 Fabric Loom: 1.17.21
 Previous process has disowned the lock due to abrupt termination.
 Found existing cache lock file (ACQUIRED_PREVIOUS_OWNER_DISOWNED), rebuilding loom cache. This may have been caused by a failed or canceled build.
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1795866176775.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1795866241409.json
 
 FAILURE: Build failed with an exception.
 
@@ -19,4 +33,5 @@ A problem occurred configuring root project 'warriortale'.
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 9s
+BUILD FAILED in 12s
+Sat Nov 28 11:44:09 UTC 2026
