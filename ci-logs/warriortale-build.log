@@ -14,6 +14,18 @@ net/minecraft/world/level/storage/TagValueOutput.class
 net/minecraft/world/level/storage/ValueInput.class
 net/minecraft/world/level/storage/ValueInputContextHelper.class
 net/minecraft/world/level/storage/ValueOutput.class
+---- Level time methods ----
+  public long getOverworldClockTime();
+  public long getDefaultClockTime();
+  public void setSkyFlashTime(int);
+  public long nextSubTickCount();
+net/minecraft/util/datafix/fixes/LevelDataGeneratorOptionsFix.class
+net/minecraft/world/level/storage/DerivedLevelData.class
+net/minecraft/world/level/storage/LevelData.class
+net/minecraft/world/level/storage/LevelDataAndDimensions.class
+net/minecraft/world/level/storage/PrimaryLevelData.class
+net/minecraft/world/level/storage/ServerLevelData.class
+net/minecraft/world/level/storage/WritableLevelData.class
 ---- net.minecraft.resources.Identifier ----
   public static net.minecraft.resources.Identifier fromNamespaceAndPath(java.lang.String, java.lang.String);
   public static net.minecraft.resources.Identifier parse(java.lang.String);
@@ -165,48 +177,32 @@ Daemon will be stopped at the end of the build
 Fabric Loom: 1.17.21
 
 > Task :compileJava
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:20: error: cannot find symbol
-        return Identifier.of(MODID, path);
-                         ^
-  symbol:   method of(String,String)
-  location: class Identifier
-/home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:26: error: cannot find symbol
-        long t = folk.level().getDayTime() % 24000L;
-                             ^
-  symbol:   method getDayTime()
-  location: class Level
 Note: /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
-2 errors
 
-> Task :compileJava FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1795866725463.json
+> Task :processResources
+> Task :classes
+> Task :processIncludeJars
+> Task :jar
+> Task :sourcesJar
+> Task :assemble
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :validateAccessWidener NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1795866835164.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/MC/MC/warriortale/build/reports/problems/problems-report.html
 
-FAILURE: Build failed with an exception.
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
 
-* What went wrong:
-Execution failed for task ':compileJava' (registered by plugin class 'org.gradle.api.plugins.JavaBasePlugin').
-> Compilation failed; see the compiler output below.
-  Note: /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/client/WarriorTaleClient.java uses or overrides a deprecated API.
-  Note: Recompile with -Xlint:deprecation for details.
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/WarriorTale.java:20: error: cannot find symbol
-          return Identifier.of(MODID, path);
-                           ^
-    symbol:   method of(String,String)
-    location: class Identifier
-  /home/runner/work/MC/MC/warriortale/src/main/java/net/warriortale/mod/entity/UnionGoal.java:26: error: cannot find symbol
-          long t = folk.level().getDayTime() % 24000L;
-                               ^
-    symbol:   method getDayTime()
-    location: class Level
-  2 errors
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
 
-* Try:
-> Check your code and dependencies to fix the compilation error(s)
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+For more on this, please refer to https://docs.gradle.org/9.6.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 15s
-1 actionable task: 1 executed
-Sat Nov 28 11:52:24 UTC 2026
+BUILD SUCCESSFUL in 26s
+5 actionable tasks: 5 executed
+Sat Nov 28 11:54:24 UTC 2026
