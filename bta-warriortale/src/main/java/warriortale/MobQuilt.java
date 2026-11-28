@@ -17,7 +17,9 @@ public class MobQuilt extends MobPathfinder {
 	public MobQuilt(World world) {
 		super(world);
 		this.setTextureIdentifier(WarriorTaleBta.MOD_ID, "quilt");
-		this.setSize(1.9F, 0.8F);
+		// a sliver of a collision box: the model is bed-sized, but the
+		// entity must never shoulder the couple off their own bed
+		this.setSize(0.2F, 0.2F);
 		this.moveSpeed = 0F;
 	}
 

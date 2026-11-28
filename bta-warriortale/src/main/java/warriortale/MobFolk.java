@@ -124,7 +124,9 @@ public class MobFolk extends MobPathfinder {
 			if (this.isGharr() && !partner.isGharr()) top = this;
 			MobFolk bottom = (top == this) ? partner : this;
 			bottom.setPos(bedCX, bedCY, bedCZ);
-			top.setPos(bedCX, bedCY + (top.isGharr() ? 0.4 : 0.33), bedCZ);
+			// under the king quilt the pair lies deep inside the mound,
+			// a tighter stack; on an open bed the old offsets stand
+			top.setPos(bedCX, bedCY + (bedKing ? 0.3 : (top.isGharr() ? 0.4 : 0.33)), bedCZ);
 			pinPose(this); pinPose(partner);
 			// under the King Bed's quilt (lie 3/4) the mobs wear no blanket
 			// of their own - the quilt entity covers the pair
@@ -173,8 +175,8 @@ public class MobFolk extends MobPathfinder {
 				// touch lower here - the quilt hides their bodies, so only
 				// the heads need to clear the covers at the pillows.
 				bedCX = bed.x + 1.0;
-				bedCZ = bed.z + 1.0 + 0.12;
-				bedCY = bed.y + 0.62;
+				bedCZ = bed.z + 1.0;
+				bedCY = bed.y + 0.45;
 				bedYaw = 0F;
 				creak(pitchFor(this)); partner.creak(pitchFor(partner));
 				ceremony = 600;
