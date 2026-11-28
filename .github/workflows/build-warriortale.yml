@@ -21,8 +21,10 @@ jobs:
       - name: Probe Mojang manifest
         shell: bash
         run: |
+          curl -sS https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o '<version>[^<]*26.3[^<]*</version>' | tail -5 | tee /tmp/probe.log
+          curl -sS https://maven.fabricmc.net/net/fabricmc/fabric-loader/maven-metadata.xml | grep -o '<latest>[^<]*</latest>' | tee -a /tmp/probe.log
           curl -sS https://piston-meta.mojang.com/mc/game/version_manifest_v2.json -o /tmp/vm.json
-          python3 - << 'PY' | tee /tmp/probe.log
+          python3 - << 'PY' | tee -a /tmp/probe.log
           import json
           d = json.load(open('/tmp/vm.json'))
           print('LATEST:', d['latest'])
