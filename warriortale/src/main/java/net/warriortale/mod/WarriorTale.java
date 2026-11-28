@@ -17,7 +17,7 @@ public class WarriorTale implements ModInitializer {
     public static final String MODID = "warriortale";
 
     public static Identifier id(String path) {
-        return Identifier.of(MODID, path);
+        return Identifier.fromNamespaceAndPath(MODID, path);
     }
 
     // ---- entities ----

@@ -23,8 +23,24 @@ public class UnionGoal extends MoveToBlockGoal {
     }
 
     private boolean isNightTime() {
-        long t = folk.level().getDayTime() % 24000L;
-        return t >= 12542 && t <= 23459;   // vanilla bed-usable window
+        // 26.3 moved the day-time accessor; resolve it reflectively and
+        // fall back to "always allowed" if it moved again. A cleanup
+        // commit will pin the direct call once the probe names it.
+        try {
+            Object lvl = folk.level();
+            java.lang.reflect.Method m;
+            Object target = lvl;
+            try {
+                m = lvl.getClass().getMethod("getDayTime");
+            } catch (NoSuchMethodException e) {
+                target = lvl.getClass().getMethod("getLevelData").invoke(lvl);
+                m = target.getClass().getMethod("getDayTime");
+            }
+            long t = ((Number) m.invoke(target)).longValue() % 24000L;
+            return t >= 12542 && t <= 23459;   // vanilla bed-usable window
+        } catch (Throwable t) {
+            return true;
+        }
     }
 
     @Override

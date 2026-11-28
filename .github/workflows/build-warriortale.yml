@@ -53,6 +53,9 @@ jobs:
           if [ -n "$MJ" ]; then
             unzip -l "$MJ" | grep -oE "net/minecraft/[A-Za-z/]*((ResourceLocation|Identifier|ValueInput|ValueOutput|SpawnReason|EntitySpawnReason)[A-Za-z]*)\.class" | sort -u | head -30
             CP="$MJ"
+            echo "---- Level time methods ----"
+            javap -cp "$CP" net.minecraft.world.level.Level 2>/dev/null | grep -iE "time|long " | head -12
+            unzip -l "$MJ" | grep -oE "net/minecraft/[A-Za-z/]*(LevelData|TimeAccess|GameTime)[A-Za-z]*\.class" | head -8
             for C in net.minecraft.resources.Identifier net.minecraft.world.entity.AgeableMob net.minecraft.sounds.SoundEvent net.minecraft.client.renderer.entity.HumanoidMobRenderer net.minecraft.client.model.geom.builders.LayerDefinition net.minecraft.world.entity.Mob; do
               echo "---- $C ----"
               javap -cp "$CP" "$C" 2>/dev/null | grep -iE "of\(|fromNamespace|parse|create|interact|bakeRoot|getBreedOffspring|variableRange" | head -10
