@@ -1,3 +1,9 @@
+<version>0.165.0+26.3</version>
+<version>0.165.2+26.3</version>
+<version>0.166.0+26.3</version>
+<version>0.166.2+26.3</version>
+<version>0.167.0+26.3</version>
+<latest>0.20.1</latest>
 LATEST: {'release': '26.3', 'snapshot': '26.4-pre-2'}
 26.4-pre-2 snapshot
 26.4-pre-1 snapshot
@@ -19,13 +25,24 @@ Daemon will be stopped at the end of the build
 Fabric Loom: 1.17.21
 Previous process has disowned the lock due to abrupt termination.
 Found existing cache lock file (ACQUIRED_PREVIOUS_OWNER_DISOWNED), rebuilding loom cache. This may have been caused by a failed or canceled build.
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1795866241409.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1795866381114.json
 
 FAILURE: Build failed with an exception.
 
 * What went wrong:
 A problem occurred configuring root project 'warriortale'.
-> Failed to setup Minecraft, java.lang.RuntimeException: Failed to find official mojang mappings for 26.3
+> Could not resolve all files for configuration ':mainRuntimeDependencyResolve'.
+   > Could not find net.fabricmc.fabric-api:fabric-api:0.136.0+26.3.
+     Searched in the following locations:
+       - file:/home/runner/work/MC/MC/warriortale/.gradle/loom-cache/remapped_mods/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
+       - file:/home/runner/.gradle/caches/fabric-loom/minecraftMaven/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
+       - file:/home/runner/work/MC/MC/warriortale/.gradle/loom-cache/minecraftMaven/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
+       - https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
+       - https://libraries.minecraft.net/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
+       - https://libraries.minecraft.net/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.jar
+       - https://repo.maven.apache.org/maven2/net/fabricmc/fabric-api/fabric-api/0.136.0+26.3/fabric-api-0.136.0+26.3.pom
+     Required by:
+         root project 'warriortale'
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
@@ -33,5 +50,5 @@ A problem occurred configuring root project 'warriortale'.
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 12s
-Sat Nov 28 11:44:09 UTC 2026
+BUILD FAILED in 15s
+Sat Nov 28 11:46:31 UTC 2026
