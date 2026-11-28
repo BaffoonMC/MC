@@ -59,6 +59,9 @@ public class WarriorTaleBta implements ModInitializer {
 		CreativeInventoryRegistry.INSTANCE.register(eggFolk, new CreativeInventoryPlacement.After(() -> Items.EGG_CHICKEN));
 		kingBed = new BlockBuilder(MOD_ID).setHardness(0.6F)
 			.build("king_bed", "king_bed", cfg.getInt("king_bed_block_id"), BlockLogicKingBed::new);
+		// show it in the creative menu, right after the ordinary bed
+		CreativeInventoryRegistry.INSTANCE.register(kingBed.asItem(),
+			new CreativeInventoryPlacement.After(() -> Blocks.BED.asItem()));
 	}
 
 	private void recipes() {
