@@ -139,6 +139,7 @@ public class MobFolk extends MobPathfinder {
 			if (--scanTick > 0) return;
 			scanTick = 40;
 			bed = findBed();
+			if (bed != null) { hearts(1); if (partner != null) partner.hearts(1); }  // bed found
 			return;
 		}
 		double d2 = this.distanceToSqr(bed.x + 0.5, bed.y + 0.5, bed.z + 0.5);
@@ -160,24 +161,28 @@ public class MobFolk extends MobPathfinder {
 
 	private boolean isNight() {
 		long t = this.world.getWorldTime() % 24000L;
-		return t >= 12542 && t <= 23459;
+		return t >= 12000 && t <= 23999;
 	}
 
 	private TilePos findBed() {
 		int cx = (int) Math.floor(this.x), cy = (int) Math.floor(this.y), cz = (int) Math.floor(this.z);
 		TilePos p = new TilePos();
-		for (int r = 1; r <= 12; r += 2)
-			for (int dx = -r; dx <= r; dx += 2)
-				for (int dz = -r; dz <= r; dz += 2)
-					for (int dy = -2; dy <= 2; dy++) {
-						p.x = cx + dx; p.y = cy + dy; p.z = cz + dz;
-						if (this.world.getBlockType(p) == Blocks.BED) {
-							TilePos found = new TilePos();
-							found.x = p.x; found.y = p.y; found.z = p.z;
-							return found;
+		TilePos best = null;
+		double bestD = Double.MAX_VALUE;
+		for (int dx = -12; dx <= 12; dx++)
+			for (int dz = -12; dz <= 12; dz++)
+				for (int dy = -3; dy <= 3; dy++) {
+					p.x = cx + dx; p.y = cy + dy; p.z = cz + dz;
+					if (this.world.getBlockType(p) == Blocks.BED) {
+						double d = dx * dx + dy * dy + dz * dz;
+						if (d < bestD) {
+							bestD = d;
+							best = new TilePos();
+							best.x = p.x; best.y = p.y; best.z = p.z;
 						}
 					}
-		return null;
+				}
+		return best;
 	}
 
 	public MobFolk partner() {
