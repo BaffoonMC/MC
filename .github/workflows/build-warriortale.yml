@@ -18,6 +18,22 @@ jobs:
           distribution: temurin
           java-version: '25'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Probe Mojang manifest
+        shell: bash
+        run: |
+          curl -sS https://piston-meta.mojang.com/mc/game/version_manifest_v2.json -o /tmp/vm.json
+          python3 - << 'PY'
+          import json
+          d = json.load(open('/tmp/vm.json'))
+          print('LATEST:', d['latest'])
+          for v in d['versions'][:12]:
+              print(v['id'], v['type'])
+          import urllib.request
+          for v in d['versions']:
+              if v['id'] in ('26.3','26.3.1','26.3.2'):
+                  j = json.load(urllib.request.urlopen(v['url']))
+                  print(v['id'], 'downloads:', sorted(j['downloads'].keys()))
+          PY
       - name: Build
         shell: bash
         run: |
