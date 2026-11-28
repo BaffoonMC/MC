@@ -59,12 +59,13 @@ public class WarriorTaleBta implements ModInitializer {
 		CreativeInventoryRegistry.INSTANCE.register(eggFolk, new CreativeInventoryPlacement.After(() -> Items.EGG_CHICKEN));
 		kingBed = new BlockBuilder(MOD_ID).setHardness(0.6F)
 			.build("king_bed", "king_bed", cfg.getInt("king_bed_block_id"), BlockLogicKingBed::new);
-		// show it in the creative menu, right after the ordinary bed
-		CreativeInventoryRegistry.INSTANCE.register(kingBed.asItem(),
-			new CreativeInventoryPlacement.After(() -> Blocks.BED.asItem()));
 	}
 
 	private void recipes() {
+		// block items exist by now (they do not yet at BEFORE_GAME_START,
+		// which is what crashed the eager asItem call)
+		CreativeInventoryRegistry.INSTANCE.register(kingBed.asItem(),
+			new CreativeInventoryPlacement.After(() -> Blocks.BED.asItem()));
 		RecipeBuilder.Shapeless(MOD_ID)
 			.addInput(Blocks.BED).addInput(Items.INGOT_GOLD).addInput(Items.INGOT_GOLD)
 			.addInput(Blocks.PLANKS_OAK).addInput(Blocks.PLANKS_OAK)
