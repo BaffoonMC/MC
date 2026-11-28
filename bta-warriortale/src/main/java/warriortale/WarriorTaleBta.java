@@ -64,8 +64,11 @@ public class WarriorTaleBta implements ModInitializer {
 	private void recipes() {
 		// block items exist by now (they do not yet at BEFORE_GAME_START,
 		// which is what crashed the eager asItem call)
+		// anchor on the chicken egg like the spawn eggs - the plain bed is
+		// not in the creative list on installs with coloured beds, so an
+		// After(bed) placement silently never inserts
 		CreativeInventoryRegistry.INSTANCE.register(kingBed.asItem(),
-			new CreativeInventoryPlacement.After(() -> Blocks.BED.asItem()));
+			new CreativeInventoryPlacement.After(() -> Items.EGG_CHICKEN));
 		RecipeBuilder.Shapeless(MOD_ID)
 			.addInput(Blocks.BED).addInput(Items.INGOT_GOLD).addInput(Items.INGOT_GOLD)
 			.addInput(Blocks.PLANKS_OAK).addInput(Blocks.PLANKS_OAK)
